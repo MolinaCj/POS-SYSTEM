@@ -355,7 +355,7 @@
             </div>
             <div class="button">
                 <button class="scan btn-default">SCAN</button>
-                <button class="payment">Payment</button>
+                <button class="payment">Proceed to Checkout</button>
                 <form action="{{ route('transactions.deleteAll') }}#sec2" method="POST">
                     {{ csrf_field() }}
                     {{ method_field('DELETE') }}
@@ -367,7 +367,7 @@
                     <div class="amount"><h1 class="sub">Net Amount</h1><p class="price">₱{{number_format($net_amount, 2)}}</p></div>
                     <div class="tax"><h1 class="tx">Tax</h1><p class="taxx">₱{{number_format($tax, 2)}}</p></div>
                 </div>
-                    <h1 class="total">Payable Amount:</h1>
+                    <h1 class="total">Amount Payable:</h1>
                     <h3 class="tot">₱{{number_format($amount_payable, 2)}}</h3>
             </div>
         </div>

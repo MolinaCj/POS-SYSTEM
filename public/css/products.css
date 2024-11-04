@@ -512,7 +512,8 @@ cont-3{
     margin-left: 50px;
     width: 300px;
     height: 30px;
-    background-color: olivedrab;
+    background-color: red;
+    color: white;
 }
 .clear:hover{
     background-color: #1a1c9b;
@@ -760,7 +761,7 @@ cont-3{
     margin-left: 50px;
     width: 300px;
     height: 30px;
-    background-color: olivedrab;
+    background-color: red;
 }
 .deleteAll:hover{
     background-color:  #15177a;
