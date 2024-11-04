@@ -13,12 +13,14 @@ class CreateProductsTable extends Migration
      */
     public function up()
     {
-        Schema::create('productslist', function (Blueprint $table) {
+        Schema::create('products', function (Blueprint $table) {
             $table->increments('id')->unique();
             $table->string('barcode', 12)->unique();
             $table->string('item_name');
-            $table->integer('quantity');
+            $table->integer('stocks');
+            $table->integer('quantity')->defualt(1);
             $table->float('price');
+            $table->string('category');
             $table->timestamps();
         });
     }
@@ -30,6 +32,6 @@ class CreateProductsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('productslist');
+        Schema::dropIfExists('products');
     }
 }

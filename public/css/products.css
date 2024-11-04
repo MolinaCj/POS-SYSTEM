@@ -3,8 +3,45 @@ body{
     margin: 0;
     padding: 0;
 }
+/*notif css*/
+.notification {
+    position: fixed; /* Ensures it doesn't affect other elements */
+    top: 20px;
+    right: 20px;
+    background-color: #007bff !important; /* Primary color */
+    color: rgb(107, 138, 67) !important;
+    padding: 15px 25px;
+    border-radius: 5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    opacity: 0; /* Start invisible for fade-in */
+    transform: translateY(-20px); /* Start slightly off-screen */
+    animation: slideInFadeOut 3s ease forwards;
+    z-index: 1; /* Stays on top of other elements */
+}
+
+@keyframes slideInFadeOut {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    10% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    80% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+
+
 .header{
-  z-index: 10;
+    z-index: 10;
     position: fixed;
     background-color: white;
     border: 1px solid black;
@@ -173,27 +210,9 @@ body{
     padding-left: 20px;
 }
 
-/*SECTION 1*/
-.section-1{
-    min-height: 100vh;
-    background-color:  rgb(209, 208, 208);
-    scroll-behavior: smooth;
-}
-.dashboard{
-    position: absolute;
-    z-index: 5;
-    top: 0;
-    height: 100vh;
-    width: 164.29vh;
-    margin-left: 350px;
-    background-color:   rgb(209, 208, 208);
-  }
-.dash{
-    margin-top: 100px;
-}
 
-  /*SECTION 2*/
-.section-2{
+  /*SECTION 1*/
+.section-1{
     min-height: 100vh;
     background-color: rgb(209, 208, 208);
     scroll-behavior: smooth;
@@ -216,7 +235,7 @@ body{
     font-size: 50px;
     font-family: Arial, Helvetica, sans-serif;
 }
-.srch{
+.srch-1{
     background-color: white;
     color: rgb(0, 0, 0);
     margin-right: 50px;
@@ -236,33 +255,34 @@ body{
     padding-left: 50px;
     height: 400px;
 }
-
+.tbl{
+    max-height: 619px;
+}
 table{
-    width: 940px;
+    width: 1000px;
     border-collapse: collapse;
     line-height: 30px;
     font-family: Arial, Helvetica, sans-serif;
-    max-height: 619px;
+    max-height: 850px;
 }
 th{
-    background-color: transparent;
     text-align: center;
 }
 td{
-    padding-top: 2px;
     border-bottom: 1px dashed gray;
     background-color: white;
     text-align: center;
+    max-height: 75px;
 } 
 tr:hover {
-    background-color: rgba(26, 28, 155, 0.1); /* Light background color on hover */
-    cursor: pointer; /* Change cursor to pointer */
+    background-color: rgba(26, 28, 155, 0.1);
+    cursor: pointer;
 }
 td:hover {
     background-color: rgba(26, 28, 155, 0.1); 
     cursor: pointer; 
 }
-tr:hover td:nth-child(-n+5) { 
+tr:hover td:nth-child(-n+6) { 
     background-color:#15177a;
     cursor: pointer; 
     color: white;
@@ -279,6 +299,9 @@ tr:hover td:nth-child(-n+5) {
 .edit:hover, .delete:hover {
     background-color: #15177a; 
 }
+.quantity{
+    border: none;
+}
 /* Add Product button styles */
 .add-product {
     background-color: #1a1c9b; 
@@ -291,7 +314,29 @@ tr:hover td:nth-child(-n+5) {
     transition: background-color 0.3s;
     margin-top: -20px;
 }
+/*Insert to sales button*/
+.insert-to-sales {
+    height: 40px;
+    background-color: #28a745; /* Green background */
+    color: white; /* White text */
+    font-size: 12px; /* Font size */
+    padding: 5px 10px; /* Padding for a button-like appearance */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    width: 100px;
+}
+.insert-to-sales:hover {
+    background-color: #218838; /* Slightly darker green on hover */
+    transform: scale(1.05); /* Slightly increase size */
+}
 
+.insert-to-sales:active {
+    background-color: #1e7e34; /* Darker green on click */
+    transform: scale(0.98); /* Slightly decrease size on click */
+}
 /* Button hover effect */
 .add-product:hover {
     background-color: #15177a;
@@ -432,16 +477,17 @@ cont-3{
     border: 1px solid black;
 }
 .scan{
+    background-color: #007bff;
+    color: white;
     cursor: pointer;
     border-radius: 15px;
     border: none;
     margin-left: 50px;
     width: 300px;
     height: 50px;
-    background-color: #bdbdbd;
 }
 .scan:hover{
-    background-color: #8f8f8f;
+    background-color:  #1a1c9b;
 }
 .payment{
     cursor: pointer;
@@ -455,7 +501,8 @@ cont-3{
     color: white;
 }
 .payment:hover{
-    background-color: #15177a;
+    background-color:olivedrab;
+    color: white;
 }
 .clear{
     cursor: pointer;
@@ -468,7 +515,8 @@ cont-3{
     background-color: olivedrab;
 }
 .clear:hover{
-    background-color: #8f8f8f;
+    background-color: #1a1c9b;
+    color: white;
 }
 .sub-tot{
     margin-right: 20px;
@@ -634,11 +682,30 @@ cont-3{
     text-decoration: none;
     cursor: pointer;
 }
+.dropdown-results-1 {
+    border: 1px solid #ccc;
+    display: none; /* Initially hidden */
+    position: absolute;
+    background: white;
+    z-index: 1000;
+    overflow: scroll;
+    width: 400px;
+    max-height: 300px;
+}
+
+.dropdown-results-1 .result-item-1 {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.dropdown-results-1 .result-item-1:hover {
+    background-color: #f0f0f0;
+}
 
 
 
-/*SECTION 3*/
-.section-3{
+/*SECTION 2*/
+.section-2{
     min-height: 100vh;
     background-color:  rgb(209, 208, 208);
     scroll-behavior: smooth;
@@ -649,19 +716,111 @@ cont-3{
     margin-left: 350px;
     background-color:  rgb(209, 208, 208);
   }
+  .srch-2{
+    background-color: white;
+    color: rgb(0, 0, 0);
+    margin-right: 50px;
+    padding-left: 10px;
+    margin-top: 40px;
+    width: 400px;
+    height: 50px;
+    border: 2px solid #000000;
+    border-radius: 15px;
+}
+.dropdown-results {
+    border: 1px solid #ccc;
+    display: none; /* Initially hidden */
+    position: absolute;
+    background: white;
+    z-index: 1000;
+    overflow: scroll;
+    width: 400px;
+    max-height: 300px;
+}
 
-/*SECTION 4*/
+.dropdown-results .result-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.dropdown-results .result-item:hover {
+    background-color: #f0f0f0;
+}
+.transac{
+    background-color: white;
+}
+
+/* CLEAR ALL TRANSACTION BUTTON */
+.deleteAll{
+    color: white;
+    cursor: pointer;
+    border-radius: 10px;
+    border: none;
+    margin-top: 10px;
+    margin-left: 50px;
+    width: 300px;
+    height: 30px;
+    background-color: olivedrab;
+}
+.deleteAll:hover{
+    background-color:  #15177a;
+}
+
+
+
+/*SECTION 3*/
+.section-3{
+    min-height: 100vh;
+    background-color:  rgb(209, 208, 208);
+    scroll-behavior: smooth;
+}
+.history{
+    padding-top: 100px;
+    top: 0;
+    height: 100vh;
+    margin-left: 350px;
+    background-color:  rgb(209, 208, 208);
+  }
+
+
+
+
+
+  /*SECTION 4*/
 .section-4{
     min-height: 100vh;
     background-color:  rgb(209, 208, 208);
     scroll-behavior: smooth;
 }
 .settings{
+    padding-top:5px;
     top: 0;
     height: 100vh;
+    width: 164.29vh;
     margin-left: 350px;
-    background-color:  rgb(209, 208, 208);
+    background-color:   rgb(209, 208, 208);
   }
+.dash{
+    margin-top: 100px;
+    color: blue;
+}
+.sec4-div{
+    
+}
+.div-1{
+    margin-left: 70px;
+    margin-top: 30px;
+    width: 1400px;
+    height: 320px;
+    background-color: white;
+}
+.div-2{
+    margin-left: 70px;
+    margin-top: 50px;
+    width: 1400px;
+    height: 320px;
+    background-color: black;
+}
 
 
 

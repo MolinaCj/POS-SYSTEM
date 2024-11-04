@@ -6,28 +6,20 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreProductRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
     public function authorize()
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
     public function rules()
     {
         return [
-            'barcode' => 'required|string',
-            'item_name' => 'required|string',
-            'quantity' => 'required|integer',
-            'price' => 'required|numeric',
+            'barcode' => 'required|string|unique:products,barcode,' . $this->product,
+            'item_name' => 'required|string|max:255',
+            'category' => 'required|string',
+            'stocks' => 'required|integer|min:0',
+            // 'price' => 'required|numeric',
+            'price' => ['required', 'regex:/^\d+(\.\d{1,2})?$/', 'min:0'],
         ];
     }
 }

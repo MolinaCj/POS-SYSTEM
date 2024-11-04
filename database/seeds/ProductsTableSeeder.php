@@ -15,16 +15,16 @@ class ProductsTableSeeder extends Seeder
      */
     public function run()
     {
-        $faker = Faker::create(100);
+        $faker = Faker::create();
 
-            $numberOfRecords = 100;
+            $numberOfRecords = 10;
 
             for($i = 0; $i<$numberOfRecords; $i++){
                 DB::table('products')->insert([
                     'barcode' => str_random(12),
-                    'item_name' => str_random(10),
+                    'item_name' => $faker->word(),
                     'quantity' => $faker->numberBetween(1, 500),
-                    'price' => $faker->numberBetween(1, 100),
+                    'price' => $faker->randomFloat(2, 1, 1000),
                     'created_at' => Carbon::now(), // Set created_at timestamp
                     'updated_at' => Carbon::now(),
                 ]);

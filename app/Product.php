@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    protected $fillable=['barcode', 'item_name', 'quantity', 'price'];
+    // app/Models/Product.php
+    protected $fillable = ['barcode', 'item_name', 'category', 'stocks', 'price'];
+
     protected $dates = ['created_at', 'updated_at'];
 }

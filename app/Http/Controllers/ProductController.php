@@ -3,17 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\TransactionRequest;
 use App\Product;
+use App\Transaction;
 use Illuminate\Http\Request; 
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-
     //  public function index(Request $request)
     //  {
     //      // Get the search query from the request
@@ -26,56 +22,38 @@ class ProductController extends Controller
      
     //      return view("products")->with('products', $products);
     //  }
-     
 
-    public function index()
+    //MAIN VIEW 
+    public function index(Request $request)
     {
+    
+         $products = Product::paginate(12);
+         $transactions = Transaction::all();
+         
         //Shows all the data in table form
-        $products = Product::paginate(8);
-
-        
-
-        return view("products")->with('products', $products);
+        return view('products', compact('products', 'transactions'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    //SHOWING ADD FOR FOR CREATE PRODUCT
     public function create()
     {
         //showing of add form
         return view('addform');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+    //STORES THE CREARED PRODUCTS
     public function store(StoreProductRequest $request)
     {
         //Proccess of adding a data to the database
-
-        
-        //Validating the incoming data request
         // Manually validate the incoming request
-        $incoming = $request->only(['barcode', 'item_name', 'quantity', 'price']);
+        $incoming = $request->only(['barcode', 'item_name', 'category', 'stocks', 'price']);
 
-        //$incoming = $request->validated();
-        // $incoming = $request->validate([
-        //     'barcode'=>'required',
-        //     'itemName'=>'required',
-        //     'quantity' => 'required',
-        //     'price' => 'required'
-        // ]);
 
         //retrieve the data from the request
         $barcode = $request->input('barcode');
         $itemName = $request->input('item_name');
-        $quantity = $request->input('quantity');
+        $category = $request->input('category');
+        $stocks = $request->input('stocks');
         $price = $request->input('price');
         
 
@@ -84,36 +62,26 @@ class ProductController extends Controller
         return redirect()->route('products.store')->with('products.store', 'New product added successfully');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    //FOR SHOWING OF THE PRODUCTS INSIDE THE PRODUCTS TABLE
     public function show($id)
     {
-        //
+        $product = Product::find($id);
+
+        if ($product) {
+            return response()->json(['success' => true, 'product' => $product]);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Product not found']);
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    //FOR THE EDIT FORM 
     public function edit($id)
     {
         $product = Product::findOrFail($id);
         return view('editform', compact('product'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    //UPDATES THE DATA IN THE TABLE BASED ON THE CHANGES IN EDIT FORM
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id); // Find the product by ID
@@ -122,35 +90,116 @@ class ProductController extends Controller
         $product->update([
             'barcode' => $request->input('barcode'),
             'item_name' => $request->input('item_name'),
-            'quantity' => $request->input('quantity'),
+            'category' => $request->input('category'),
+            'stocks' => $request->input('stocks'),
             'price' => $request->input('price'),
         ]);
 
-        return redirect()->route('products')->with('success', 'Product updated successfully'); // Redirect with a success message
+        return redirect()->route('products.index')->with('success', 'Product updated successfully'); // Redirect with a success message
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    //ADD TO TRANSACTION CONTROLLER
+    public function addToTransac(TransactionRequest $request)
+    {
+        // Check if the reference number is already set in the session
+        if (!session()->has('reference_no')) {
+            // Generate a new reference number
+            $datePart = date('ymdHi'); // Generates a 10-character string: YYMMDDHHMM
+            $randomPart = mt_rand(100, 999); // Generates a 3-digit random number
+            $referenceNo = $datePart . $randomPart; // Combine parts
+            $referenceNo = substr($referenceNo, 0, 13); // Ensure it's 13 digits
+    
+            // Store the reference number in the session
+            session(['reference_no' => $referenceNo]);
+        } else {
+            // Retrieve the reference number from the session
+            $referenceNo = session('reference_no');
+        }
+    
+        // Process the product ID from the request
+        $productId = $request->input('product_id');
+        $product = Product::find($productId);
+    
+        // Check if product exists
+        if (!$product) {
+            return redirect()->back()->with('error', 'Product not found.');
+        }
+    
+        // Check stock availability
+        if ($product->stocks < $request->input('quantity')) {
+            return redirect()->back()->with('error', 'Insufficient stock for the selected product.');
+        }
+    
+        // Update stock and save product
+        $product->stocks -= $request->input('quantity');
+        $product->save();
+    
+        // Create transaction
+        $transaction = new Transaction();
+        $transaction->product_id = $productId;
+        $transaction->item_name = $product->item_name;
+        $transaction->quantity = $request->input('quantity');
+        $transaction->unit_price = $product->price;
+        $transaction->total_price = $transaction->quantity * $transaction->unit_price;
+        $transaction->reference_no = $referenceNo; // Use the same reference number
+    
+        // Save transaction
+        $transaction->save();
+    
+        return redirect()->back()->with('success', 'Transaction added successfully');
+    }
 
-    //  public function search(Request $request)
-    //  {
-    //      $query = Product::query();
+    //FOR THE DELETION OF PRODUCTS IMPORTED TO TRANSACTION TABLE
+    public function deleteTransaction($transaction_id)
+        {
+            // Find the transaction by ID
+            $transaction = Transaction::findOrFail($transaction_id);
+        
+            //dd($transaction_id);
+            // Delete the transaction
+            $transaction->delete();
+        
+            // Redirect to products.index with a success message
+            return redirect()->route('products.index')->with('success', 'Transaction deleted successfully'); 
+            // Alternatively, if you want to return a JSON response for AJAX requests:
+            // return response()->json(['success' => true]);
+        }
+    
+    //FOR THE DELETION OF ALL PRODUCTS IMPORTED TO TRANSACTION TABLE
+    public function deleteAllTransactions()
+    {
+        // Use the delete() method to remove all records from the transactions table
+        Transaction::query()->delete();
+
+        // Redirect back to the products view with a success message
+        return redirect()->route('products.index')->with('success', 'All transactions deleted successfully!');
+    }
+
+
+    //FOR SEARCHING A PRODUCT
+     public function productsearch(Request $request){
+        $firstQuery = $request->get('firstQuery');
+
+        $products = Product::where('item_name', 'LIKE', "%$firstQuery%")->get(['id', 'item_name']);
+
+        return response()->json($products);
+     }
+     public function search(Request $request)
+     {
+        $query = $request->get('query');
+        
+        $products = Product::where('item_name', 'LIKE', "%$query%")->get(['id', 'item_name']);
+        
+        return response()->json($products);
+
+        // $query = $request->input('query');
+        //$products = Product::query()
+        //      ->where('item_name', 'LIKE', "%{$query}%")
+        //      ->orWhere('barcode', 'LIKE', "%{$query}%")
+        //      ->all();
  
-    //      // Check if there is a search term
-    //      if ($request->has('search') && $request->search != '') {
-    //          $searchTerm = $request->search;
-    //          $query->where('item_name', 'LIKE', "%{$searchTerm}%")
-    //                ->orWhere('barcode', 'LIKE', "%{$searchTerm}%"); // Include other fields if necessary
-    //      }
- 
-    //      $products = $query->get();
- 
-    //      return view('products', compact('products'));
-    //  }
+        //  return view('products.index', compact('products'));
+    }
 
 
     public function destroy($id)
@@ -164,4 +213,17 @@ class ProductController extends Controller
         // Redirect with a success message
         return redirect()->route('products.index')->with('success', 'Product deleted successfully'); 
     }
+
+    //Controller for clear all
+    public function clear(Request $request){
+        //This will delete all the data in the products table
+        Product::truncate();
+            // Redirect back with an empty collection
+    // return redirect()->route('products.index')->with([
+    //     'success' => 'All products have been deleted!!!',
+    //     'products' => collect() // Passing an empty collection
+    // ]);
+        return redirect()->route('products.index')->with('success', 'All products had been deleted!!!');
+    }
+
 }
