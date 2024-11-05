@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\TransactionRequest;
+use App\Http\Requests\SalesHistoryRequest;
 use App\Product;
 use App\SalesHistory;
 use App\Transaction;
@@ -157,11 +158,11 @@ class ProductController extends Controller
     
         // Create transaction
         $transaction = new Transaction();
-        $transaction->product_id = $productId;
-        $transaction->item_name = $product->item_name;
-        $transaction->quantity = $request->input('quantity');
-        $transaction->unit_price = $product->price;
-        $transaction->total_price = $transaction->quantity * $transaction->unit_price;
+        $transaction->product_id   = $productId;
+        $transaction->item_name    = $product->item_name;
+        $transaction->quantity     = $request->input('quantity');
+        $transaction->unit_price   = $product->price;
+        $transaction->total_price  = $transaction->quantity * $transaction->unit_price;
         $transaction->reference_no = $referenceNo; // Use the same reference number
     
         // Save transaction
@@ -197,52 +198,56 @@ class ProductController extends Controller
     }
 
     //ADD TO SALES HISTORY TABLE
-    public function saveToSalesHistory(Request $request)
+    public function saveToSalesHistory(SalesHistoryRequest $request)
     {
-        DB::beginTransaction();
+        // Process the transaction ID from the request
+        $transactionId = $request->input('transaction_id');
+        $transaction = Transaction::find($transactionId);
 
-        try {
-            // Insert each product into the saleshistory table
-            // Get the reference number from an existing transaction
-            $reference_no = DB::table('transactions')->value('reference_no');
-
-            foreach ($request->transactions as $transaction) {
-                DB::table('sales_history')->insert([
-                    'reference_id' => $reference_no,
-                    // 'employee_name' => Auth::user()->name,
-                    'item_name'  => $transaction['item_name'],
-                    'quantity'   => $transaction['quantity'],
-                    'unit_price' => $transaction['unit_price'],
-                    'total_price'=> $transaction['total_price'],
-                    'net_amount' => $request->amount_payable,
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now()
-                ]);
-            }
-
-            DB::table('sales_history')->insert([
-                'reference_id'   => $request->products[0]['reference_id'],
-                // 'employee_name'  => Auth::user()->name,
-                'net_amount'     => $request->amount_payable,
-                //'tax'            => $request->amount_payable * 0.01, // Example 12% tax calculation
-                // 'amount_payable' => $request->amount_payable,
-                'cash_amount'    => $request->cash_amount,
-                'change'         => $request->change,
-                'created_at'     => Carbon::now(),
-                'updated_at'     => Carbon::now()
-            ]);
-
-            // Clear the transactions table
-            DB::table('transactions')->delete();
-
-            DB::commit();
-
-            return response()->json(['success' => true]);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json(['success' => false, 'error' => $e->getMessage()]);
+        // Check if transaction exists
+        if (!$transaction) {
+            return redirect()->back()->with('error', 'Transaction not found.');
         }
+
+        // Create sales history
+        $salesHistory = new SalesHistory(); // Make sure the class name is capitalized correctly
+        $salesHistory->transaction_id = $transactionId; // Assuming you have this field in your sales_histories table
+        $salesHistory->item_name = $transaction->item_name;
+        $salesHistory->quantity = $transaction->quantity;
+        $salesHistory->unit_price = $transaction->unit_price;
+        $salesHistory->total_price = $transaction->total_price;
+        $salesHistory->reference_no = $transaction->reference_no; // Ensure this is the correct field name
+
+        // Save history
+        $salesHistory->save(); // Make sure you are using the correct variable name
+
+        return redirect()->back()->with('success', 'Transaction added successfully to history');
     }
+
+    // public function saveToSalesHistory(SalesHistoryRequest $request)
+    // {
+    //     // At this point, the request is already validated
+
+    //     // Logic to save data to sales_histories table
+    //     SalesHistory::create([
+    //         'amount_payable' => $request->amount_payable,
+    //         'cash_amount' => $request->cash_amount,
+    //         'change' => $request->change,
+    //         'item_name' => $item_name,
+
+    //     ]);
+
+    //     // Example data to return
+    //     return response()->json([
+    //         'success' => true,
+    //         'reference_no' => 'REF123456', // Generate or fetch the actual reference number
+    //         'user_name' => auth()->user()->name,
+    //         'products' => $request->input('products'), // This should be the validated products
+    //         'net_amount' => $request->amount_payable, // Use validated input
+    //         'tax' => 0, // Replace with actual tax calculation if needed
+    //     ]);
+    // }
+
 
 
 

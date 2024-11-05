@@ -887,61 +887,6 @@ cont-3{
 
 
 /*Style for receipt modal*/
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background: #fff;
-    width: 80%;
-    max-width: 500px;
-    padding: 20px;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-}
-
-.receipt-scrollable {
-    max-height: 400px;
-    overflow-y: auto;
-    padding: 10px;
-}
-
-.receipt-header, .receipt-footer {
-    text-align: center;
-}
-
-.receipt-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-.receipt-table th, .receipt-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
-
-.receipt-totals p {
-    margin: 5px 0;
-    font-weight: bold;
-    text-align: right;
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-}
 
 
 
