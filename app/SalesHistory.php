@@ -14,6 +14,7 @@ class SalesHistory extends Model
         'total_price',
         'net_amount',
         'payment_amount',
+        'change_amount',
         'timestamp',
         'reference_id',
     ];

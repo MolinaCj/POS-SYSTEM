@@ -823,6 +823,126 @@ cont-3{
     background-color: black;
 }
 
+/* General Modal Styles for Checkout and Cash Payment Modals */
+#checkoutModal.modal, #cashPaymentModal.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+  }
+  
+  /* Modal Content for Checkout and Cash Payment Modals */
+  #checkoutModal .modal-content, #cashPaymentModal .modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 90%; /* Adjusted for smaller screens */
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Input and Button Styling for Checkout and Cash Payment Modals */
+  #checkoutModal .modal-content input, 
+  #checkoutModal .modal-content select,
+  #cashPaymentModal .modal-content input, 
+  #cashPaymentModal .modal-content select {
+    width: calc(100% - 24px); /* Slightly smaller to prevent overflow */
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+  
+  /* Button Styling */
+  #checkoutModal .modal-content button, 
+  #cashPaymentModal .modal-content button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: calc(50% - 10px); /* Adjust width to fit two buttons side-by-side */
+    margin: 5px;
+  }
+  
+  /* Button Colors */
+  #checkoutModal .modal-content button:first-of-type,
+  #cashPaymentModal .modal-content button:first-of-type {
+    background-color: #ccc;
+    color: #000;
+  }
+  
+  #checkoutModal .modal-content button:last-of-type,
+  #cashPaymentModal .modal-content button:last-of-type {
+    background-color: #28a745;
+    color: #fff;
+  }  
+
+
+/*Style for receipt modal*/
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #fff;
+    width: 80%;
+    max-width: 500px;
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.receipt-scrollable {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.receipt-header, .receipt-footer {
+    text-align: center;
+}
+
+.receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.receipt-table th, .receipt-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.receipt-totals p {
+    margin: 5px 0;
+    font-weight: bold;
+    text-align: right;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
 
 
 

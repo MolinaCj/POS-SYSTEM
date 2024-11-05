@@ -51,6 +51,9 @@ Route::post('/add-to-transac', 'ProductController@addToTransac')->name('addToTra
 //Route for deleting a product inserted to my transaction table
 Route::delete('transactions/{transaction_id}', 'ProductController@deleteTransaction')->name('transactions.destroy');
 
+//Route for saving the transaction to sales history
+Route::post('/save-sales-history', 'ProductController@saveToSalesHistory')->name('transaction.saveToHistory');
+
 
 
 

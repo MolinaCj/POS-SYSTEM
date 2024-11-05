@@ -355,7 +355,7 @@
             </div>
             <div class="button">
                 <button class="scan btn-default">SCAN</button>
-                <button class="payment">Proceed to Checkout</button>
+                <button class="payment" onclick="showCheckoutModal()">Proceed to Payment</button>
                 <form action="{{ route('transactions.deleteAll') }}#sec2" method="POST">
                     {{ csrf_field() }}
                     {{ method_field('DELETE') }}
@@ -372,6 +372,278 @@
             </div>
         </div>
     </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal">
+    <div class="modal-content">
+      <h2>Checkout</h2>
+      <p>Amount Payable:</p>
+      <input type="text" id="amountPayable" readonly>
+      <p>Mode of Payment:</p>
+      <select id="paymentMode" onchange="handlePaymentModeChange()">
+        <option value="">Select Payment Method</option>
+        <option value="cash">Cash</option>
+        <option value="e_wallet">E-Wallet</option>
+        <option value="credit_card">Credit Card</option>
+      </select>
+      <button onclick="closeModal('checkoutModal')">Cancel</button>
+      <button onclick="processPayment()">Proceed to Cash Payment</button> 
+    </div>
+    </div>
+
+    <script>
+        // Function to show the checkout modal
+        function showCheckoutModal() {
+            const amountPayable = "₱{{ number_format($amount_payable, 2) }}";
+          document.getElementById('amountPayable').value = amountPayable; // Set dynamic value here
+          document.getElementById('checkoutModal').style.display = 'flex';
+        }
+
+        // Function to handle payment mode change
+        function handlePaymentModeChange() {
+        const paymentMode = document.getElementById('paymentMode').value;
+            if (paymentMode === 'cash') {
+                document.getElementById('totalAmount').value = document.getElementById('amountPayable').value;
+                closeModal('checkoutModal');
+                document.getElementById('cashPaymentModal').style.display = 'flex';
+            } else if (paymentMode === 'e-wallet') {
+                // Logic for e-wallet payment (if needed)
+                closeModal('checkoutModal');
+                // Display e-wallet modal here
+            } else if (paymentMode === 'credit card') {
+                // Logic for credit card payment (if needed)
+                closeModal('checkoutModal');
+                // Display credit card modal here
+            }
+        }  
+        
+        // Function to process payment
+        function processPayment() {
+            handlePaymentModeChange();
+        }
+
+        // Function to close the checkout modal
+        function closeModal(modalId) {
+          document.getElementById(modalId).style.display = 'none';
+        }
+    </script>
+
+    <!-- Cash Payment Modal -->
+    <div id="cashPaymentModal" class="modal">
+    <div class="modal-content">
+        <h2>Cash Payment</h2>
+        <p>Total Amount:</p>
+        <input type="text" id="totalAmount" readonly>
+        <p>Cash Amount:</p>
+        <input type="number" id="cashAmount" placeholder="Enter cash amount">
+        <p>Customer Change:</p>
+        <input type="text" id="customerChange" readonly>
+        <button onclick="returnToCheckoutModal()">Return</button>
+        <button onclick="confirmCashPayment()">Confirm Cash Payment</button>
+    </div>
+    </div>
+
+    <script>    
+        // Function to return to the checkout modal
+        function returnToCheckoutModal() {
+          document.getElementById('cashPaymentModal').style.display = 'none';
+          document.getElementById('checkoutModal').style.display = 'flex';
+        }
+
+        // // Function to confirm cash payment
+        // function confirmCashPayment() {
+        //     const cashAmount = parseFloat(document.getElementById('cashAmount').value);
+        //     const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, '')); // Remove currency symbol and commas
+
+        //     if (isNaN(cashAmount) || cashAmount < 0) {
+        //         alert("Please enter the right cash amount.");
+        //         return;
+        //     }
+        
+        //     if (cashAmount < totalAmount) {
+        //         alert("Insufficient cash amount. Please enter a valid amount.");
+        //         return;
+        //     }
+        
+        //     const change = cashAmount - totalAmount;
+        //     alert("Payment successful with cash amount: ₱" + cashAmount.toFixed(2) + ". Change: ₱" + change.toFixed(2));
+        //     document.getElementById('cashPaymentModal').style.display = 'none';
+        // }
+
+        // // Function to update customer change automatically
+        // function updateCustomerChange() {
+        //     const cashAmount = parseFloat(document.getElementById('cashAmount').value);
+        //     const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, ''));
+        
+        //     if (!isNaN(cashAmount) && !isNaN(totalAmount)) {
+        //         const change = cashAmount - totalAmount;
+        //         document.getElementById('customerChange').value = change >= 0 ? "₱" + change.toFixed(2) : "₱0.00";
+        //     } else {
+        //         document.getElementById('customerChange').value = "₱0.00";
+        //     }
+        // }
+
+        // // Add event listener to update change when cash amount changes
+        // document.getElementById('cashAmount').addEventListener('input', updateCustomerChange);
+
+
+        // Function to confirm cash payment and save to sales history
+        function confirmCashPayment() {
+            const cashAmount = parseFloat(document.getElementById('cashAmount').value);
+            const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, ''));
+
+            if (isNaN(cashAmount) || cashAmount < 0) {
+                alert("Please enter the right cash amount.");
+                return;
+            }
+
+            if (cashAmount < totalAmount) {
+                alert("Insufficient cash amount. Please enter a valid amount.");
+                return;
+            }
+
+            const change = cashAmount - totalAmount;
+            alert("Payment successful with cash amount: ₱" + cashAmount.toFixed(2) + ". Change: ₱" + change.toFixed(2));
+
+            // Send data to server
+            const transactionData = {
+                amount_payable: totalAmount,
+                cash_amount: cashAmount,
+                change: change,
+                products: transactions // Assuming `transactions` holds the products in the transaction
+            };
+
+            fetch('/save-sales-history', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify(transactionData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Payment successful and transaction saved!");
+                    document.getElementById('cashPaymentModal').style.display = 'none';
+                    clearTransactionTable(); // Clear transaction table after saving
+                } else {
+                    alert("Failed to save transaction. Please try again.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("An error occurred while processing the transaction.");
+            });
+        }
+
+        // Function to update customer change automatically
+        function updateCustomerChange() {
+            const cashAmount = parseFloat(document.getElementById('cashAmount').value);
+            const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, ''));
+
+            if (!isNaN(cashAmount) && !isNaN(totalAmount)) {
+                const change = cashAmount - totalAmount;
+                document.getElementById('customerChange').value = change >= 0 ? "₱" + change.toFixed(2) : "₱0.00";
+            } else {
+                document.getElementById('customerChange').value = "₱0.00";
+            }
+        }
+
+        // Add event listener to update change when cash amount changes
+        document.getElementById('cashAmount').addEventListener('input', updateCustomerChange);
+</script>
+
+
+    <script src="/path/to/checkoutModal.js"></script>
+    <script src="/path/to/cashPaymentModal.js"></script>
+
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="receipt_modal">
+        <div class="modal-content">
+            <!-- Scrollable Content Wrapper -->
+            <div class="receipt-scrollable">
+                <!-- Store Information -->
+                <div class="receipt-header">
+                    <h2>ABC Company</h2>
+                    <p>123 Main St, City, Country</p>
+                    <p>Reference No: <span id="receiptReferenceId">{{ $reference_no }}</span></p>
+                    <p>Date: <span id="receiptDateTime"> {{ $currentDate }}</span></p>
+                    <p>Cashier: <span id="receiptCashierName">Clent James Molina</span></p>
+                    {{-- {{ Auth::user()->name }} --}}
+                </div>
+
+                <!-- Product Table -->
+                <table class="receipt-table">
+                    <thead>
+                        <tr>
+                            <th>Qty</th>
+                            <th>Item</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="receiptItems">
+                        @foreach($histories as $history)
+                        <tr>
+                            <td>{{ $history->quantity }}</td>
+                            <td>{{ $history->item_name }}</td>
+                            <td>₱{{ number_format($history->unit_price, 2) }}</td>
+                            <td>₱{{ number_format($history->total_price, 2) }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+                <!-- Totals Section -->
+                <div class="receipt-totals">
+                    <p>Net Amount: <span id="receiptNetAmount">₱{{ number_format($net_amount, 2) }}</span></p>
+                    <p>Tax: <span id="receiptTax">₱{{ number_format($tax, 2) }}</span></p>
+                    <p>Amount Payable: <span id="receiptAmountPayable">₱{{ number_format($amount_payable, 2) }}</span></p>
+                    <p>Cash Amount: <span id="receiptCashAmount">₱{{ number_format($cash_amount, 2) }}</span></p>
+                    <p>Change: <span id="receiptChange">₱{{ number_format($change, 2) }}</span></p>
+                </div>
+
+                <!-- Thank You Note -->
+                <div class="receipt-footer">
+                    <p>Thank you for shopping with us.</p>
+                    <p>We are happy to serve you!!!</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="modal-actions">
+                <button onclick="printReceipt()">Print Receipt</button>
+                <button onclick="closeModal('receiptModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to print the receipt
+        function printReceipt() {
+            const receiptContent = document.querySelector('#receiptModal .receipt-scrollable').innerHTML;
+            const newWindow = window.open('', '_blank', 'width=600,height=800');
+            newWindow.document.write(`
+                <html>
+                <head><title>Print Receipt</title></head>
+                <body onload="window.print(); window.close();">
+                ${receiptContent}
+                </body>
+                </html>
+            `);
+            newWindow.document.close();
+        }
+
+        // Function to close the modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+    </script>
+
+
+
+
     </section>
 
     {{--------------------------------------------------------- THIS --------------------------------------------------------------------}}

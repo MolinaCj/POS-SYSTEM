@@ -5,8 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\TransactionRequest;
 use App\Product;
+use App\SalesHistory;
 use App\Transaction;
 use Illuminate\Http\Request; 
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
 
 class ProductController extends Controller
 {
@@ -29,9 +33,26 @@ class ProductController extends Controller
     
          $products = Product::paginate(12);
          $transactions = Transaction::all();
+
+        $histories = SalesHistory::all();
+        $reference_no = DB::table('transactions')->latest('created_at')->value('reference_no');
+
+         //Passing the current date in the view for receipt
+         $currentDate = Carbon::now()->format('Y-m-d H:i:s');
+
+         // Get the first transaction
+        $firstTransaction = $histories->first();
+
+         // Sample values for net amount, tax, etc. Adjust according to your logic
+        $net_amount = $histories->sum('total_price'); // Example calculation
+        $tax = $net_amount * 0.12; // Example tax calculation (12%)
+        $amount_payable = $net_amount + $tax;
+        // Retrieve the cash amount from the last transaction (or however you store it)
+        $cash_amount = isset($firstTransaction) ? $firstTransaction->cash_amount : 0; // Assuming cash_amount is a field in your Transaction model
+        $change = $cash_amount - $amount_payable;
          
         //Shows all the data in table form
-        return view('products', compact('products', 'transactions'));
+        return view('products', compact('products', 'transactions', 'reference_no', 'currentDate', 'histories', 'net_amount', 'tax', 'amount_payable', 'cash_amount', 'change'));
     }
 
     //SHOWING ADD FOR FOR CREATE PRODUCT
@@ -175,6 +196,61 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'All transactions deleted successfully!');
     }
 
+    //ADD TO SALES HISTORY TABLE
+    public function saveToSalesHistory(Request $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            // Insert each product into the saleshistory table
+            // Get the reference number from an existing transaction
+            $reference_no = DB::table('transactions')->value('reference_no');
+
+            foreach ($request->transactions as $transaction) {
+                DB::table('sales_history')->insert([
+                    'reference_id' => $reference_no,
+                    // 'employee_name' => Auth::user()->name,
+                    'item_name'  => $transaction['item_name'],
+                    'quantity'   => $transaction['quantity'],
+                    'unit_price' => $transaction['unit_price'],
+                    'total_price'=> $transaction['total_price'],
+                    'net_amount' => $request->amount_payable,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ]);
+            }
+
+            DB::table('sales_history')->insert([
+                'reference_id'   => $request->products[0]['reference_id'],
+                // 'employee_name'  => Auth::user()->name,
+                'net_amount'     => $request->amount_payable,
+                //'tax'            => $request->amount_payable * 0.01, // Example 12% tax calculation
+                // 'amount_payable' => $request->amount_payable,
+                'cash_amount'    => $request->cash_amount,
+                'change'         => $request->change,
+                'created_at'     => Carbon::now(),
+                'updated_at'     => Carbon::now()
+            ]);
+
+            // Clear the transactions table
+            DB::table('transactions')->delete();
+
+            DB::commit();
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+
+
+
+
+
+
+
 
     //FOR SEARCHING A PRODUCT
      public function productsearch(Request $request){
@@ -184,6 +260,7 @@ class ProductController extends Controller
 
         return response()->json($products);
      }
+
      public function search(Request $request)
      {
         $query = $request->get('query');
