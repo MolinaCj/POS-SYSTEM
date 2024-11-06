@@ -52,7 +52,7 @@ Route::post('/add-to-transac', 'ProductController@addToTransac')->name('addToTra
 Route::delete('transactions/{transaction_id}', 'ProductController@deleteTransaction')->name('transactions.destroy');
 
 //Route to insert the transation to my receipt modal
-Route::get('/api/transactions', 'ProductController@getTransaction')->name('transaction.get');
+Route::get('/api/getTransaction', 'ProductController@getTransaction')->name('getTransaction');
 //Route for saving the sales to sales history
 
 

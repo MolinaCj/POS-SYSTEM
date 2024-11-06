@@ -449,18 +449,77 @@
 
     <script>
 
+       // Function to update customer change automatically
+        function updateCustomerChange() {
+            const cashAmount = parseFloat(document.getElementById('cashAmount').value);
+            const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, ''));
+
+            // Check if both values are valid numbers
+            if (!isNaN(cashAmount) && !isNaN(totalAmount)) {
+                const change = cashAmount - totalAmount;
+                // Update the customer change field
+                document.getElementById('customerChange').value = change >= 0 ? "₱" + change.toFixed(2) : "₱0.00";
+            } else {
+                document.getElementById('customerChange').value = "₱0.00"; // Default value if input is invalid
+            }
+        }
+
+        // Add event listener to update change when cash amount changes
+        document.getElementById('cashAmount').addEventListener('input', updateCustomerChange);
+
+        // Function to return to the checkout modal from the cash payment modal
+        function returnToCheckoutModal() {
+            document.getElementById('cashPaymentModal').style.display = 'none';
+            document.getElementById('checkoutModal').style.display = 'flex';
+        }
+
+        // Function to confirm cash payment and display receipt modal
+        function confirmCashPayment() {
+            console.log("confirmCashPayment called"); // Check if this logs
+
+            const cashAmount = parseFloat(document.getElementById('cashAmount').value);
+            const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, '')); // Remove currency symbol and commas
+
+            // Validate if the cash amount is valid and sufficient
+            if (isNaN(cashAmount) || cashAmount < 0) {
+                alert("Please enter a valid cash amount.");
+                return;
+            }
+        
+            if (cashAmount < totalAmount) {
+                alert("Insufficient cash amount. Please enter a valid amount.");
+                return;
+            }
+        
+            const change = cashAmount - totalAmount;
+            alert("Payment successful with cash amount: ₱" + cashAmount.toFixed(2) + ". Change: ₱" + change.toFixed(2));
+
+            // Hide the cash payment modal and show the receipt modal
+            document.getElementById('cashPaymentModal').style.display = 'none';
+        
+            // Populate the receipt modal with transaction data
+            console.log("Populating receipt modal...");
+            populateReceiptModal();
+
+            // Show the receipt modal
+            console.log("Showing receipt modal...");
+            document.getElementById('receiptModal').style.display = 'flex';
+        }
+
+        // Function to populate the receipt modal with transaction data
         function populateReceiptModal() {
             console.log("Populating receipt modal...");
-        
+
             // Make an AJAX request to get the transaction data
-            fetch('/api/transactions')  // Use the endpoint defined in routes
+            fetch('/api/getTransaction')  // Assuming an endpoint that returns transaction data
                 .then(response => response.json())
                 .then(data => {
                     const receiptItemsTableBody = document.getElementById('receiptItems');
-                    
+
                     if (receiptItemsTableBody) {
                         receiptItemsTableBody.innerHTML = ''; // Clear existing rows
-                        
+
+                        // Loop through the transactions and add them to the table
                         data.transactions.forEach(transaction => {
                             const row = document.createElement('tr');
                             row.innerHTML = ` 
@@ -474,14 +533,14 @@
                     } else {
                         console.error("Receipt items table body element not found.");
                     }
-                
+
                     // Totals Calculation
                     const netAmount = data.transactions.reduce((acc, transaction) => acc + parseFloat(transaction.total_price), 0);
                     const tax = 0.01 * netAmount; // 1% tax
                     const amountPayable = netAmount + tax;
                     const cashAmount = parseFloat(document.getElementById('cashAmount').value);
                     const change = cashAmount - amountPayable;
-                
+
                     // Populate receipt totals
                     document.getElementById('receiptNetAmount').textContent = `₱${netAmount.toFixed(2)}`;
                     document.getElementById('receiptTax').textContent = `₱${tax.toFixed(2)}`;
@@ -493,174 +552,6 @@
                     console.error('Error fetching transaction data:', error);
                 });
         }
-
-        // function populateReceiptModal() {
-        //     console.log("Transaction Table:", document.querySelector('#transaction-tbl'));  // Check if the table exists
-        //     console.log("Populating receipt modal...");
-            
-        //     const transactions = [];
-        //     const rows = document.querySelectorAll('#transaction-tbl tbody tr'); // Get rows from tbody
-        //     console.log("Rows found:", rows.length);
-            
-        //     rows.forEach((row, index) => {
-        //         const itemNameElement = row.querySelector('td:nth-child(1)');
-        //         const quantityInput = row.querySelector('input[name^="quantity"]');
-        //         const unitPriceElement = row.querySelector('td:nth-child(3)');
-        //         const totalPriceElement = row.querySelector('td:nth-child(4)');
-                
-        //         if (itemNameElement && unitPriceElement && totalPriceElement) {
-        //             const itemName = itemNameElement.textContent.trim();
-        //             const quantity = quantityInput ? quantityInput.value : row.querySelector('td:nth-child(2)').textContent.trim();
-        //             const unitPrice = parseFloat(unitPriceElement.textContent.replace(/₱|,/g, ''));
-        //             const totalPrice = parseFloat(totalPriceElement.textContent.replace(/₱|,/g, ''));
-                    
-        //             console.log(`Row ${index} data:`, { itemName, quantity, unitPrice, totalPrice });
-                    
-        //             transactions.push({ itemName, quantity, unitPrice, totalPrice });
-        //         } else {
-        //             console.warn(`Row ${index} is missing expected elements.`);
-        //         }
-        //     });
-            
-        //     console.log("Transactions data collected:", transactions);
-            
-        //     // Check for receiptItems table body presence
-        //     const receiptItemsTableBody = document.getElementById('receiptItems');
-        //     console.log("Receipt items table body found:", receiptItemsTableBody !== null);
-            
-        //     if (receiptItemsTableBody) {
-        //         receiptItemsTableBody.innerHTML = ''; // Clear any existing rows
-                
-        //         transactions.forEach(transaction => {
-        //             const row = document.createElement('tr');
-        //             row.innerHTML = `
-        //                 <td>${transaction.quantity}</td>
-        //                 <td>${transaction.itemName}</td>
-        //                 <td>₱${transaction.unitPrice.toFixed(2)}</td>
-        //                 <td>₱${transaction.totalPrice.toFixed(2)}</td>
-        //             `;
-        //             receiptItemsTableBody.appendChild(row);
-        //         });
-        //     } else {
-        //         console.error("Receipt items table body element not found.");
-        //     }
-            
-        //     // Totals Calculation
-        //     const netAmount = transactions.reduce((acc, transaction) => acc + transaction.totalPrice, 0);
-        //     const tax = 0.01 * netAmount; // 1% tax
-        //     const amountPayable = netAmount + tax;
-        //     const cashAmount = parseFloat(document.getElementById('cashAmount').value);
-        //     const change = cashAmount - amountPayable;
-            
-        //     // Populate receipt totals
-        //     document.getElementById('receiptNetAmount').textContent = `₱${netAmount.toFixed(2)}`;
-        //     document.getElementById('receiptTax').textContent = `₱${tax.toFixed(2)}`;
-        //     document.getElementById('receiptAmountPayable').textContent = `₱${amountPayable.toFixed(2)}`;
-        //     document.getElementById('receiptCashAmount').textContent = `₱${cashAmount.toFixed(2)}`;
-        //     document.getElementById('receiptChange').textContent = `₱${change.toFixed(2)}`;
-        // }
-
-        // function populateReceiptModal() {
-
-        //     console.log("populateReceiptModal called"); // Check if this logs
-        //     // Get transaction data from the transactions table (your rows)
-        //     const transactions = [];
-        //     const rows = document.querySelectorAll('#transaction-tbl tbody tr');  // Assuming this is the ID for your transactions table
-            
-        //     rows.forEach(row => {
-        //         const itemName = row.querySelector('td:nth-child(1)').textContent.trim();
-        //         const quantity = row.querySelector('input[name^="quantity"]').value;
-        //         const unitPrice = parseFloat(row.querySelector('td:nth-child(3)').textContent.replace(/₱|,/g, ''));
-        //         const totalPrice = parseFloat(row.querySelector('td:nth-child(4)').textContent.replace(/₱|,/g, ''));
-    
-        //         console.log({ itemName, quantity, unitPrice, totalPrice });  // Log each transaction row to check data
-        //         transactions.push({ itemName, quantity, unitPrice, totalPrice });
-        //     });
-
-        //     console.log("Transactions data:", transactions); // Log transactions to verify
-    
-        //     // Populate the receipt items in the modal
-        //     const receiptItemsTableBody = document.getElementById('receiptItems');
-        //     receiptItemsTableBody.innerHTML = ''; // Clear any existing rows
-    
-        //     transactions.forEach(transaction => {
-        //         console.log("Adding transaction to receipt:", transaction); // Log each transaction
-        //         const row = document.createElement('tr');
-        //         row.innerHTML = `
-        //             <td>${transaction.quantity}</td>
-        //             <td>${transaction.itemName}</td>
-        //             <td>₱${transaction.unitPrice.toFixed(2)}</td>
-        //             <td>₱${transaction.totalPrice.toFixed(2)}</td>
-        //         `;
-        //         receiptItemsTableBody.appendChild(row);
-        //     });
-    
-        //     // Calculate and populate the totals
-        //     const netAmount = transactions.reduce((acc, transaction) => acc + transaction.totalPrice, 0);
-        //     const tax = 0.01 * netAmount; // 1% tax
-        //     const amountPayable = netAmount + tax;
-        //     const cashAmount = parseFloat(document.getElementById('cashAmount').value);
-        //     const change = cashAmount - amountPayable;
-    
-        //     // Populate receipt totals
-        //     document.getElementById('receiptNetAmount').textContent = `₱${netAmount.toFixed(2)}`;
-        //     document.getElementById('receiptTax').textContent = `₱${tax.toFixed(2)}`;
-        //     document.getElementById('receiptAmountPayable').textContent = `₱${amountPayable.toFixed(2)}`;
-        //     document.getElementById('receiptCashAmount').textContent = `₱${cashAmount.toFixed(2)}`;
-        //     document.getElementById('receiptChange').textContent = `₱${change.toFixed(2)}`;
-        // }
-    
-        function returnToCheckoutModal() {
-            document.getElementById('cashPaymentModal').style.display = 'none';
-            document.getElementById('checkoutModal').style.display = 'flex';
-        }
-    
-        function confirmCashPayment() {
-
-            console.log("confirmCashPayment called"); // Check if this logs
-            const cashAmount = parseFloat(document.getElementById('cashAmount').value);
-            const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, '')); // Remove currency symbol and commas
-    
-            if (isNaN(cashAmount) || cashAmount < 0) {
-                alert("Please enter the right cash amount.");
-                return;
-            }
-    
-            if (cashAmount < totalAmount) {
-                alert("Insufficient cash amount. Please enter a valid amount.");
-                return;
-            }
-    
-            const change = cashAmount - totalAmount;
-            alert("Payment successful with cash amount: ₱" + cashAmount.toFixed(2) + ". Change: ₱" + change.toFixed(2));
-    
-            // Hide cash payment modal and show receipt modal
-            document.getElementById('cashPaymentModal').style.display = 'none';
-
-            // Populate the receipt modal with transaction data
-            console.log("Populating receipt modal...");
-            populateReceiptModal();
-    
-            // Show the receipt modal here
-            console.log("Showing receipt modal...");
-            document.getElementById('receiptModal').style.display = 'flex';
-           }
-    
-        // Function to update customer change automatically
-        function updateCustomerChange() {
-            const cashAmount = parseFloat(document.getElementById('cashAmount').value);
-            const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, ''));
-    
-            if (!isNaN(cashAmount) && !isNaN(totalAmount)) {
-                const change = cashAmount - totalAmount;
-                document.getElementById('customerChange').value = change >= 0 ? "₱" + change.toFixed(2) : "₱0.00";
-            } else {
-                document.getElementById('customerChange').value = "₱0.00";
-            }
-        }
-    
-        // Add event listener to update change when cash amount changes
-        document.getElementById('cashAmount').addEventListener('input', updateCustomerChange);
     </script>
     
 
@@ -721,7 +612,60 @@
 
 
     <!-- Receipt Modal -->
+
+    <!-- Receipt Modal -->
     <div id="receiptModal" class="receipt_modal" style="display:none;">
+        <div class="receipt-modal-content">
+            <div class="receipt-scrollable">
+                <!-- Receipt Header -->
+                <div class="receipt-header">
+                    <h2>ABC Company</h2>
+                    <p>123 Main St, City, Country</p>
+                    <p>Reference No: <span id="receiptReferenceId">{{ isset($reference_no) ? $reference_no : 'N/A' }}</span></p>
+                    <p>Date: <span id="receiptDateTime">{{ $currentDate }}</span></p>
+                    <p>Cashier: <span id="receiptCashierName">{{ Auth::user() ? Auth::user()->name : 'N/A' }}</span></p>
+                </div>
+            
+                <!-- Receipt Table -->
+                <table class="receipt-table">
+                    <thead>
+                        <tr>
+                            <th>Qty</th>
+                            <th>Item</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="receiptItems">
+                        <!-- Rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            
+                <!-- Receipt Totals -->
+                <div class="receipt-totals">
+                    <p>Net Amount: <span id="receiptNetAmount">₱0.00</span></p>
+                    <p>Tax: <span id="receiptTax">₱0.00</span></p>
+                    <p>Amount Payable: <span id="receiptAmountPayable">₱0.00</span></p>
+                    <p>Cash Amount: <span id="receiptCashAmount">₱0.00</span></p>
+                    <p>Change: <span id="receiptChange">₱0.00</span></p>
+                </div>
+            
+                <!-- Receipt Footer -->
+                <div class="receipt-footer">
+                    <p>Thank you for shopping with us.</p>
+                    <p>We are happy to serve you!!!</p>
+                </div>
+            </div>
+        
+            <!-- Modal Actions -->
+            <div class="receipt-modal-actions">
+                <button class="print-receipt" onclick="printReceipt()">Print Receipt</button>
+                <button class="done-receipt" onclick="closeModal('receiptModal')">Done</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- <div id="receiptModal" class="receipt_modal" style="display:none;">
         <div class="receipt-modal-content">
             <div class="receipt-scrollable">
                 <!-- Receipt Header -->
@@ -770,58 +714,7 @@
                 <button class="done-receipt" onclick="closeModal('receiptModal')">Done</button>
             </div>
         </div>
-    </div>    
-
-
-   {{-- <!-- Receipt Modal -->
-<div id="receiptModal" class="receipt_modal" style="display:none;">
-    <div class="modal-content">
-        <div class="receipt-scrollable">
-            <div class="receipt-header">
-                <h2>ABC Company</h2>
-                <p>123 Main St, City, Country</p>
-                <p>Reference No: <span id="receiptReferenceId">{{ isset($reference_no) ? $reference_no : 'N/A' }}</span></p>
-                <p>Date: <span id="receiptDateTime">{{ $currentDate }}</span></p>
-                <p>Cashier: <span id="receiptCashierName">{{ Auth::user() ? Auth::user()->name : 'N/A' }}</span></p>
-            </div>
-            <table class="receipt-table">
-                <thead>
-                    <tr>
-                        <th>Qty</th>
-                        <th>Item</th>
-                        <th>Unit Price</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody id="receiptItems">
-                    @foreach($histories as $history)
-                    <tr>
-                        <td>{{ $history->quantity }}</td>
-                        <td>{{ $history->item_name }}</td>
-                        <td>₱{{ number_format($history->unit_price, 2) }}</td>
-                        <td>₱{{ number_format($history->total_price, 2) }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            <div class="receipt-totals">
-                <p>Net Amount: <span id="receiptNetAmount">₱{{ number_format($net_amount, 2) }}</span></p>
-                <p>Tax: <span id="receiptTax">₱{{ number_format($tax, 2) }}</span></p>
-                <p>Amount Payable: <span id="receiptAmountPayable">₱{{ number_format($amount_payable, 2) }}</span></p>
-                <p>Cash Amount: <span id="receiptCashAmount">₱{{ number_format($cash_amount, 2) }}</span></p>
-                <p>Change: <span id="receiptChange">₱{{ number_format($change, 2) }}</span></p>
-            </div>
-            <div class="receipt-footer">
-                <p>Thank you for shopping with us.</p>
-                <p>We are happy to serve you!!!</p>
-            </div>
-        </div>
-        <div class="modal-actions">
-            <button onclick="printReceipt()">Print Receipt</button>
-            <button onclick="closeModal('receiptModal')">Close</button>
-        </div>
-    </div>
-</div> --}}
+    </div>     --}}
 
     <script>
         // Function to print the receipt
@@ -845,6 +738,121 @@
         }
     </script>
 
+{{-- // function populateReceiptModal() {
+    //     console.log("Transaction Table:", document.querySelector('#transaction-tbl'));  // Check if the table exists
+    //     console.log("Populating receipt modal...");
+        
+    //     const transactions = [];
+    //     const rows = document.querySelectorAll('#transaction-tbl tbody tr'); // Get rows from tbody
+    //     console.log("Rows found:", rows.length);
+        
+    //     rows.forEach((row, index) => {
+    //         const itemNameElement = row.querySelector('td:nth-child(1)');
+    //         const quantityInput = row.querySelector('input[name^="quantity"]');
+    //         const unitPriceElement = row.querySelector('td:nth-child(3)');
+    //         const totalPriceElement = row.querySelector('td:nth-child(4)');
+            
+    //         if (itemNameElement && unitPriceElement && totalPriceElement) {
+    //             const itemName = itemNameElement.textContent.trim();
+    //             const quantity = quantityInput ? quantityInput.value : row.querySelector('td:nth-child(2)').textContent.trim();
+    //             const unitPrice = parseFloat(unitPriceElement.textContent.replace(/₱|,/g, ''));
+    //             const totalPrice = parseFloat(totalPriceElement.textContent.replace(/₱|,/g, ''));
+                
+    //             console.log(`Row ${index} data:`, { itemName, quantity, unitPrice, totalPrice });
+                
+    //             transactions.push({ itemName, quantity, unitPrice, totalPrice });
+    //         } else {
+    //             console.warn(`Row ${index} is missing expected elements.`);
+    //         }
+    //     });
+        
+    //     console.log("Transactions data collected:", transactions);
+        
+    //     // Check for receiptItems table body presence
+    //     const receiptItemsTableBody = document.getElementById('receiptItems');
+    //     console.log("Receipt items table body found:", receiptItemsTableBody !== null);
+        
+    //     if (receiptItemsTableBody) {
+    //         receiptItemsTableBody.innerHTML = ''; // Clear any existing rows
+            
+    //         transactions.forEach(transaction => {
+    //             const row = document.createElement('tr');
+    //             row.innerHTML = `
+    //                 <td>${transaction.quantity}</td>
+    //                 <td>${transaction.itemName}</td>
+    //                 <td>₱${transaction.unitPrice.toFixed(2)}</td>
+    //                 <td>₱${transaction.totalPrice.toFixed(2)}</td>
+    //             `;
+    //             receiptItemsTableBody.appendChild(row);
+    //         });
+    //     } else {
+    //         console.error("Receipt items table body element not found.");
+    //     }
+        
+    //     // Totals Calculation
+    //     const netAmount = transactions.reduce((acc, transaction) => acc + transaction.totalPrice, 0);
+    //     const tax = 0.01 * netAmount; // 1% tax
+    //     const amountPayable = netAmount + tax;
+    //     const cashAmount = parseFloat(document.getElementById('cashAmount').value);
+    //     const change = cashAmount - amountPayable;
+        
+    //     // Populate receipt totals
+    //     document.getElementById('receiptNetAmount').textContent = `₱${netAmount.toFixed(2)}`;
+    //     document.getElementById('receiptTax').textContent = `₱${tax.toFixed(2)}`;
+    //     document.getElementById('receiptAmountPayable').textContent = `₱${amountPayable.toFixed(2)}`;
+    //     document.getElementById('receiptCashAmount').textContent = `₱${cashAmount.toFixed(2)}`;
+    //     document.getElementById('receiptChange').textContent = `₱${change.toFixed(2)}`;
+    // }
+
+    // function populateReceiptModal() {
+
+    //     console.log("populateReceiptModal called"); // Check if this logs
+    //     // Get transaction data from the transactions table (your rows)
+    //     const transactions = [];
+    //     const rows = document.querySelectorAll('#transaction-tbl tbody tr');  // Assuming this is the ID for your transactions table
+        
+    //     rows.forEach(row => {
+    //         const itemName = row.querySelector('td:nth-child(1)').textContent.trim();
+    //         const quantity = row.querySelector('input[name^="quantity"]').value;
+    //         const unitPrice = parseFloat(row.querySelector('td:nth-child(3)').textContent.replace(/₱|,/g, ''));
+    //         const totalPrice = parseFloat(row.querySelector('td:nth-child(4)').textContent.replace(/₱|,/g, ''));
+
+    //         console.log({ itemName, quantity, unitPrice, totalPrice });  // Log each transaction row to check data
+    //         transactions.push({ itemName, quantity, unitPrice, totalPrice });
+    //     });
+
+    //     console.log("Transactions data:", transactions); // Log transactions to verify
+
+    //     // Populate the receipt items in the modal
+    //     const receiptItemsTableBody = document.getElementById('receiptItems');
+    //     receiptItemsTableBody.innerHTML = ''; // Clear any existing rows
+
+    //     transactions.forEach(transaction => {
+    //         console.log("Adding transaction to receipt:", transaction); // Log each transaction
+    //         const row = document.createElement('tr');
+    //         row.innerHTML = `
+    //             <td>${transaction.quantity}</td>
+    //             <td>${transaction.itemName}</td>
+    //             <td>₱${transaction.unitPrice.toFixed(2)}</td>
+    //             <td>₱${transaction.totalPrice.toFixed(2)}</td>
+    //         `;
+    //         receiptItemsTableBody.appendChild(row);
+    //     });
+
+    //     // Calculate and populate the totals
+    //     const netAmount = transactions.reduce((acc, transaction) => acc + transaction.totalPrice, 0);
+    //     const tax = 0.01 * netAmount; // 1% tax
+    //     const amountPayable = netAmount + tax;
+    //     const cashAmount = parseFloat(document.getElementById('cashAmount').value);
+    //     const change = cashAmount - amountPayable;
+
+    //     // Populate receipt totals
+    //     document.getElementById('receiptNetAmount').textContent = `₱${netAmount.toFixed(2)}`;
+    //     document.getElementById('receiptTax').textContent = `₱${tax.toFixed(2)}`;
+    //     document.getElementById('receiptAmountPayable').textContent = `₱${amountPayable.toFixed(2)}`;
+    //     document.getElementById('receiptCashAmount').textContent = `₱${cashAmount.toFixed(2)}`;
+    //     document.getElementById('receiptChange').textContent = `₱${change.toFixed(2)}`;
+    // } --}}
 
 
 

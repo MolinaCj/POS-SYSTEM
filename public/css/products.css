@@ -893,7 +893,7 @@ cont-3{
     left: 50%; /* Move the modal's left to 50% of the screen width */
     transform: translate(-50%, -50%); /* Offset the modal by half of its width and height to center it */
     width: 350px; /* You can adjust the width as needed */
-    max-height: 95vh; /* Keep the modal height within 80% of the viewport */
+    max-height: 80vh; /* Keep the modal height within 80% of the viewport */
     background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
     display: flex;
     align-items: center; /* Vertically center the modal content */
@@ -906,7 +906,7 @@ cont-3{
     background: #fff;
     padding: 20px;
     width: 100%; /* Take full width of the modal */
-    max-height: 95vh; /* Limit height to 80% of the viewport height */
+    max-height: 80vh; /* Limit height to 80% of the viewport height */
     overflow-y: auto; /* Allow scrolling if the content overflows */
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }

@@ -200,14 +200,17 @@ class ProductController extends Controller
     }
 
     //ADD TRANSACTIONS TO RECEIPT
-    public function getTransactions()
+    public function getTransaction()
     {
-        $transactions = Transaction::all(); // Adjust this query to get your transactions
-    
-        // Return the transactions as JSON
-        return response()->json(['transactions' => $transactions]);
+        try {
+            $transactions = Transaction::all();  // Or fetch the transactions however you need
+            //dd($transactions);  // Will dump and stop further execution
+            return response()->json(['transactions' => $transactions]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Unable to fetch transactions'], 500);
+        }
     }
-    
+
     //ADD TO SALES HISTORY TABLE
     
 
