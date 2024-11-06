@@ -716,8 +716,8 @@ cont-3{
     height: 100vh;
     margin-left: 350px;
     background-color:  rgb(209, 208, 208);
-  }
-  .srch-2{
+}
+.srch-2{
     background-color: white;
     color: rgb(0, 0, 0);
     margin-right: 50px;
@@ -886,7 +886,98 @@ cont-3{
   }  
 
 
-/*Style for receipt modal*/
+/* Style for receipt modal */
+.receipt_modal {
+    position: fixed;
+    top: 50%; /* Move the modal's top to 50% of the screen height */
+    left: 50%; /* Move the modal's left to 50% of the screen width */
+    transform: translate(-50%, -50%); /* Offset the modal by half of its width and height to center it */
+    width: 350px; /* You can adjust the width as needed */
+    max-height: 95vh; /* Keep the modal height within 80% of the viewport */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    display: flex;
+    align-items: center; /* Vertically center the modal content */
+    justify-content: center; /* Horizontally center the modal content */
+    z-index: 1000; /* Ensure it's on top of other content */
+}
+
+/* Style for the content inside the receipt modal */
+.receipt-modal-content {
+    background: #fff;
+    padding: 20px;
+    width: 100%; /* Take full width of the modal */
+    max-height: 95vh; /* Limit height to 80% of the viewport height */
+    overflow-y: auto; /* Allow scrolling if the content overflows */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Receipt header and footer styling */
+.receipt-header,
+.receipt-footer {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.receipt-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+/* Styling for the receipt table */
+.receipt-table {
+    width: 100%;
+    margin: 15px 0;
+    border-collapse: collapse;
+}
+
+.receipt-table th,
+.receipt-table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Styling for the totals section */
+.receipt-totals {
+    margin-top: 15px;
+    font-size: 0.9em;
+}
+
+.receipt-totals p {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+}
+
+/* Modal action buttons styling */
+.receipt-modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.receipt-modal-actions button {
+    padding: 10px 15px;
+    font-size: 0.9em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.print-receipt{
+    background-color: #28a745;
+    color: white;
+}
+.print-receipt:hover{
+    background-color: #007bff;
+}
+.done-receipt{
+    background-color: #007bff;
+    color: white;
+}
+.done-receipt:hover{
+    background-color: #28a745;
+}
 
 
 

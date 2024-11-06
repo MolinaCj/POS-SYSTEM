@@ -199,47 +199,16 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'All transactions deleted successfully!');
     }
 
-    //ADD TO SALES HISTORY TABLE
-    public function saveToSalesHistory(SalesHistoryRequest $request)
+    //ADD TRANSACTIONS TO RECEIPT
+    public function getTransactions()
     {
-        Log::info('Request data: ' . print_r($request->all(), true));  // Log the incoming request data
+        $transactions = Transaction::all(); // Adjust this query to get your transactions
     
-        try {
-            $transactionId = $request->input('transaction_id');
-            $transaction = Transaction::find($transactionId);
-    
-            if (!$transaction) {
-                return response()->json(['success' => false, 'message' => 'Transaction not found.'], 404);
-            }
-    
-            $salesHistory = new SalesHistory();
-            $salesHistory->transaction_id = $transactionId;
-            $salesHistory->item_name = $transaction->item_name;
-            $salesHistory->quantity = $transaction->quantity;
-            $salesHistory->unit_price = $transaction->unit_price;
-            $salesHistory->total_price = $transaction->total_price;
-            $salesHistory->reference_no = $transaction->reference_no;
-            $salesHistory->save();
-    
-            return response()->json([
-                'success' => true,
-                'reference_no' => $salesHistory->reference_no,
-                'transaction' => [
-                    'transaction_id' => $salesHistory->transaction_id,
-                    'item_name' => $salesHistory->item_name,
-                    'quantity' => $salesHistory->quantity,
-                    'unit_price' => $salesHistory->unit_price,
-                    'total_price' => $salesHistory->total_price,
-                ],
-                'net_amount' => $request->input('amount_payable'),
-                'tax' => 0,
-                'message' => 'Transaction added successfully to history.'
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error processing sales history: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred. Please try again later.'], 500);
-        }
+        // Return the transactions as JSON
+        return response()->json(['transactions' => $transactions]);
     }
+    
+    //ADD TO SALES HISTORY TABLE
     
 
 
