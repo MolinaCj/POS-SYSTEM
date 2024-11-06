@@ -15,6 +15,7 @@ class SalesHistoryRequest extends FormRequest
     {
         return [
             'transactions' => 'required|array',
+            'transactions.*.transaction_id' => 'required|integer',
             'transactions.*.item_name' => 'required|string',
             'transactions.*.quantity' => 'required|integer|min:1',
             'transactions.*.unit_price' => 'required|numeric',

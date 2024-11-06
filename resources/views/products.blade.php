@@ -438,6 +438,10 @@
         <input type="number" id="cashAmount" placeholder="Enter cash amount">
         <p>Customer Change:</p>
         <input type="text" id="customerChange" readonly>
+
+        <!-- Hidden input for transaction_id -->
+        <input type="hidden" id="transactionId" value="{{ csrf_token() }}">
+
         <button onclick="returnToCheckoutModal()">Return</button>
         <button onclick="confirmCashPayment()">Confirm Cash Payment</button>
     </div>
@@ -470,15 +474,22 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
                 },
                 body: JSON.stringify({
                     amount_payable: totalAmount,
                     cash_amount: cashAmount,
-                    change: change
+                    change: change,
+                    transaction_id: document.getElementById('transactionId').value
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     // Populate the receipt modal with dynamic data
@@ -589,8 +600,8 @@
     </script>     --}}
 
 
-    <script src="/path/to/checkoutModal.js"></script>
-    <script src="/path/to/cashPaymentModal.js"></script>
+    {{-- <script src="/path/to/checkoutModal.js"></script>
+    <script src="/path/to/cashPaymentModal.js"></script> --}}
 
 
     <!-- Receipt Modal -->

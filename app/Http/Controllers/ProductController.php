@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Log;
+
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\TransactionRequest;
 use App\Http\Requests\SalesHistoryRequest;
@@ -200,29 +202,96 @@ class ProductController extends Controller
     //ADD TO SALES HISTORY TABLE
     public function saveToSalesHistory(SalesHistoryRequest $request)
     {
-        // Process the transaction ID from the request
-        $transactionId = $request->input('transaction_id');
-        $transaction = Transaction::find($transactionId);
-
-        // Check if transaction exists
-        if (!$transaction) {
-            return redirect()->back()->with('error', 'Transaction not found.');
+        Log::info('Request data: ' . print_r($request->all(), true));  // Log the incoming request data
+    
+        try {
+            $transactionId = $request->input('transaction_id');
+            $transaction = Transaction::find($transactionId);
+    
+            if (!$transaction) {
+                return response()->json(['success' => false, 'message' => 'Transaction not found.'], 404);
+            }
+    
+            $salesHistory = new SalesHistory();
+            $salesHistory->transaction_id = $transactionId;
+            $salesHistory->item_name = $transaction->item_name;
+            $salesHistory->quantity = $transaction->quantity;
+            $salesHistory->unit_price = $transaction->unit_price;
+            $salesHistory->total_price = $transaction->total_price;
+            $salesHistory->reference_no = $transaction->reference_no;
+            $salesHistory->save();
+    
+            return response()->json([
+                'success' => true,
+                'reference_no' => $salesHistory->reference_no,
+                'transaction' => [
+                    'transaction_id' => $salesHistory->transaction_id,
+                    'item_name' => $salesHistory->item_name,
+                    'quantity' => $salesHistory->quantity,
+                    'unit_price' => $salesHistory->unit_price,
+                    'total_price' => $salesHistory->total_price,
+                ],
+                'net_amount' => $request->input('amount_payable'),
+                'tax' => 0,
+                'message' => 'Transaction added successfully to history.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error processing sales history: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'An error occurred. Please try again later.'], 500);
         }
-
-        // Create sales history
-        $salesHistory = new SalesHistory(); // Make sure the class name is capitalized correctly
-        $salesHistory->transaction_id = $transactionId; // Assuming you have this field in your sales_histories table
-        $salesHistory->item_name = $transaction->item_name;
-        $salesHistory->quantity = $transaction->quantity;
-        $salesHistory->unit_price = $transaction->unit_price;
-        $salesHistory->total_price = $transaction->total_price;
-        $salesHistory->reference_no = $transaction->reference_no; // Ensure this is the correct field name
-
-        // Save history
-        $salesHistory->save(); // Make sure you are using the correct variable name
-
-        return redirect()->back()->with('success', 'Transaction added successfully to history');
     }
+    
+
+
+
+
+    // public function saveToSalesHistory(SalesHistoryRequest $request)
+    // {
+    //     // Process the transaction ID from the request
+
+    //     $transactionId = $request->input('transaction_id');
+
+    //     $transaction = Transaction::find($transactionId);
+    
+    //     // Check if transaction exists
+    //     if (!$transaction) {
+    //         // Return JSON response for AJAX with error
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Transaction not found.'
+    //         ], 404);
+    //     }
+    
+    //     // Create a new sales history entry
+    //     $salesHistory = new SalesHistory();
+    //     $salesHistory->transaction_id = $transactionId; // Assuming this field exists in your sales_histories table
+    //     $salesHistory->item_name = $transaction->item_name;
+    //     $salesHistory->quantity = $transaction->quantity;
+    //     $salesHistory->unit_price = $transaction->unit_price;
+    //     $salesHistory->total_price = $transaction->total_price;
+    //     $salesHistory->reference_no = $transaction->reference_no; // Ensure this is the correct field name
+    
+    //     // Save the history entry
+    //     $salesHistory->save();
+    //     dd('Sales history saved successfully', $salesHistory);
+    
+    //     // Return a JSON response indicating success, with additional data for the receipt
+    //     return response()->json([
+    //         'success' => true,
+    //         'reference_no' => $salesHistory->reference_no,
+    //         'transaction' => [
+    //             'transaction_id' => $salesHistory->transaction_id,
+    //             'item_name' => $salesHistory->item_name,
+    //             'quantity' => $salesHistory->quantity,
+    //             'unit_price' => $salesHistory->unit_price,
+    //             'total_price' => $salesHistory->total_price,
+    //         ],
+    //         'net_amount' => $request->input('amount_payable'),
+    //         'tax' => 0, // Replace with actual tax calculation if needed
+    //         'message' => 'Transaction added successfully to history.'
+    //     ]);
+    // }
+    
 
     // public function saveToSalesHistory(SalesHistoryRequest $request)
     // {
