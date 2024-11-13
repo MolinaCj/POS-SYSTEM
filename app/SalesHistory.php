@@ -14,6 +14,7 @@ class SalesHistory extends Model
         'unit_price',
         'total_price',
         'net_amount',
+        'tax',
         'payment_amount',
         'change_amount',
         'timestamp',

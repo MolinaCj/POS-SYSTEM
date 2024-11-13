@@ -300,6 +300,7 @@ class ProductController extends Controller
             $items = $request->input('items');
             $reference_no = $request->input('reference_no');
             $net_amount = $request->input('net_amount');
+            $tax = $request->input('tax');
             $amount_payable = $request->input('amount_payable');
             $change_amount = $request->input('change_amount');
             $cash_amount = $request->input('cash_amount');
@@ -312,6 +313,7 @@ class ProductController extends Controller
                     'unit_price' => $item['unit_price'],
                     'total_price' => $item['total_price'],
                     'net_amount' => $net_amount,
+                    'tax' => $tax,
                     'amount_payable' => $amount_payable,
                     'change_amount' => $change_amount,
                     'cash_amount' => $cash_amount,
@@ -368,5 +370,44 @@ class ProductController extends Controller
         $products = Product::where('item_name', 'LIKE', "%$query%")->get(['id', 'item_name']);
         
         return response()->json($products);
+    }
+
+    //Function to see the details of the transaciton
+    public function getTransactionDetails($referenceNo)
+    {
+        // Retrieve all records with the same reference number
+    $transactionRecords = SalesHistory::where('reference_no', $referenceNo)->get();
+
+    // Check if any records exist
+    if ($transactionRecords->isNotEmpty()) {
+        // Fetch the first record for general transaction details
+        $history = $transactionRecords->first();
+
+        // Extract product-specific details
+        $products = $transactionRecords->map(function ($record) {
+            return [
+                'item_name' => $record->item_name,
+                'quantity' => $record->quantity,
+                'unit_price' => $record->unit_price,
+                'total_price' => $record->total_price,
+            ];
+        });
+
+        // Return the transaction details along with products as a JSON response
+        return response()->json([
+            'reference_no' => $history->reference_no,
+            'timestamp' => $history->created_at,
+            'net_amount' => $history->net_amount,
+            'tax' => $history->tax,
+            'amount_payable' => $history->amount_payable,
+            'cash_amount' => $history->cash_amount,
+            'change_amount' => $history->change_amount,
+            'employee_name' => $history->employee_name,
+            'products' => $products,
+        ]);
+    }
+
+    // If no history is found for the given reference number
+    return response()->json(['message' => 'Transaction not found'], 404);
     }
 }
