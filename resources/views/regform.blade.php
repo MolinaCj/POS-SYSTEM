@@ -9,28 +9,56 @@
 </head>
 <body>
 <div class="container">
-    <form class="form" method="POST" action="{{ route('regform') }}">
+    <form class="form" method="POST" action="{{ route('register') }}">
         {{ csrf_field() }}
         <p class="form-title">Create your account</p>
         <div class="input-container">
-            <input type="text" placeholder="Full Name" name="name" required>
+            <label for="name">Full Name</label>
+            <input id="name" type="text" placeholder="Full Name" name="employee_name" autocomplete="name" required>
         </div>
         <div class="input-container">
-            <input type="email" placeholder="Enter email" name="email" required>
+            <label for="username">Username</label>
+            <input id="username" type="text" placeholder="Username" name="username" autocomplete="username" required>
         </div>
         <div class="input-container">
-            <input type="password" placeholder="Enter password" name="password" required>
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="Enter email" name="email" autocomplete="email" required>
         </div>
         <div class="input-container">
-            <input type="password" placeholder="Confirm password" name="password_confirmation" required>
+            <label for="password">Password</label>
+            <input id="password" type="password" placeholder="Enter password" name="password" autocomplete="new-password" required>
+        </div>
+        <div class="input-container">
+            <label for="password_confirmation">Confirm Password</label>
+            <input id="password_confirmation" type="password" placeholder="Confirm password" name="password_confirmation" autocomplete="new-password" required>
         </div>
         <button type="submit" class="submit">Sign up</button>
 
         <p class="signup-link">
             Already have an account?
-            <a href="{{ route('loginform') }}">Sign in</a>
+            <a href="{{ route('loginForm') }}">Sign in</a>
         </p>
     </form>
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+<script>
+    window.onload = function() {
+    let notification = document.querySelector('.notification');
+    if (notification) {
+        setTimeout(function() {
+            notification.classList.add('fade-out');
+        }, 5000); // 5 seconds before it fades out
+    }
+}
+</script>
+
 </div>
 </body>
 </html>

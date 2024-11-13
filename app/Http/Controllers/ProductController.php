@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Log;
 
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\TransactionRequest;
-use App\Http\Requests\SalesHistoryRequest;
+use App\Http\Requests\SaveReceiptRequest;
 use App\Product;
 use App\SalesHistory;
 use App\Transaction;
@@ -34,14 +34,28 @@ class ProductController extends Controller
     public function index(Request $request)
     {
     
-         $products = Product::paginate(12);
-         $transactions = Transaction::all();
+        // Get the search term from the request
+        $search = $request->query('searchProducts');
+        
+        // Fetch products, with optional search filtering
+        $products = Product::when($search, function ($query, $search) {
+            return $query->where('item_name', 'LIKE', '%' . $search . '%')
+                         ->orWhere('barcode', 'LIKE', '%' . $search . '%');
+        })->paginate(12); 
+
+        $transactions = Transaction::all();
+        $reference_no = DB::table('transactions')->latest('created_at')->value('reference_no');
+        //Passing the current date in the view for receipt
+        $currentDate = Carbon::now()->format('Y-m-d H:i:s');
 
         $histories = SalesHistory::all();
-        $reference_no = DB::table('transactions')->latest('created_at')->value('reference_no');
 
-         //Passing the current date in the view for receipt
-         $currentDate = Carbon::now()->format('Y-m-d H:i:s');
+        // Log key variables for debugging
+        Log::info('Products:', ['products' => $products]);
+        Log::info('Transactions:', ['transactions' => $transactions]);
+        Log::info('Histories:', ['histories' => $histories->toArray()]); // Log as an array to see contents
+
+        
 
          // Get the first transaction
         $firstTransaction = $histories->first();
@@ -55,7 +69,17 @@ class ProductController extends Controller
         $change = $cash_amount - $amount_payable;
          
         //Shows all the data in table form
-        return view('products', compact('products', 'transactions', 'reference_no', 'currentDate', 'histories', 'net_amount', 'tax', 'amount_payable', 'cash_amount', 'change'));
+        return view('products', compact(
+            'products',
+             'transactions',
+              'reference_no', 
+              'currentDate', 
+              'histories', 
+              'net_amount', 
+              'tax', 
+              'amount_payable',
+               'cash_amount', 
+               'change'));
     }
 
     //SHOWING ADD FOR FOR CREATE PRODUCT
@@ -122,6 +146,47 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product updated successfully'); // Redirect with a success message
     }
 
+    public function destroy($id)
+    {
+        // Find the product by ID
+        $product = Product::findOrFail($id); 
+
+        // Delete the product
+        $product->delete(); 
+
+        // Redirect with a success message
+        return redirect()->route('products.index')->with('success', 'Product deleted successfully'); 
+    }
+
+    //Controller for clear all
+    public function clear(Request $request){
+        //This will delete all the data in the products table
+        Product::truncate();
+            // Redirect back with an empty collection
+    // return redirect()->route('products.index')->with([
+    //     'success' => 'All products have been deleted!!!',
+    //     'products' => collect() // Passing an empty collection
+    // ]);
+        return redirect()->route('products.index')->with('success', 'All products had been deleted!!!');
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     //ADD TO TRANSACTION CONTROLLER
     public function addToTransac(TransactionRequest $request)
     {
@@ -169,6 +234,22 @@ class ProductController extends Controller
     
         // Save transaction
         $transaction->save();
+
+        // Calculate updated totals for net amount, tax, and amount payable
+        $currentNetAmount = session('net_amount', 0);
+        $currentTax = session('tax', 0);
+        $currentAmountPayable = session('amount_payable', 0);
+
+        // Assuming a tax rate of 10% as an example
+        $newNetAmount = $currentNetAmount + $transaction->total_price;
+        $newTax = $newNetAmount * 0.01;
+        $newAmountPayable = $newNetAmount + $newTax;
+
+        session([
+            'net_amount' => $newNetAmount,
+            'tax' => $newTax,
+            'amount_payable' => $newAmountPayable
+        ]);
     
         return redirect()->back()->with('success', 'Transaction added successfully');
     }
@@ -212,101 +293,74 @@ class ProductController extends Controller
     }
 
     //ADD TO SALES HISTORY TABLE
-    
+    public function saveReceipt(SaveReceiptRequest $request)
+    {
+        try {
+            // Retrieve items and other data from the request
+            $items = $request->input('items');
+            $reference_no = $request->input('reference_no');
+            $net_amount = $request->input('net_amount');
+            $amount_payable = $request->input('amount_payable');
+            $change_amount = $request->input('change_amount');
+            $cash_amount = $request->input('cash_amount');
+            
+            foreach ($items as $item) {
+                DB::table('histories')->insert([
+                    'reference_no' => $reference_no,
+                    'item_name' => $item['item_name'],
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'total_price' => $item['total_price'],
+                    'net_amount' => $net_amount,
+                    'amount_payable' => $amount_payable,
+                    'change_amount' => $change_amount,
+                    'cash_amount' => $cash_amount,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]);
+            }
 
+            // Clear transactions table
+            //DB::table('transactions')->truncate();
+            // DB::table('transactions')->where('transaction_id', auth()->id())->delete();
+            DB::table('transactions')->delete();
 
+            // Reset reference_no in session for next transaction
+            session()->forget(['reference_no', 'net_amount', 'tax', 'amount_payable']);
 
+            Log::info(session()->all());
 
-    // public function saveToSalesHistory(SalesHistoryRequest $request)
-    // {
-    //     // Process the transaction ID from the request
-
-    //     $transactionId = $request->input('transaction_id');
-
-    //     $transaction = Transaction::find($transactionId);
-    
-    //     // Check if transaction exists
-    //     if (!$transaction) {
-    //         // Return JSON response for AJAX with error
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Transaction not found.'
-    //         ], 404);
-    //     }
-    
-    //     // Create a new sales history entry
-    //     $salesHistory = new SalesHistory();
-    //     $salesHistory->transaction_id = $transactionId; // Assuming this field exists in your sales_histories table
-    //     $salesHistory->item_name = $transaction->item_name;
-    //     $salesHistory->quantity = $transaction->quantity;
-    //     $salesHistory->unit_price = $transaction->unit_price;
-    //     $salesHistory->total_price = $transaction->total_price;
-    //     $salesHistory->reference_no = $transaction->reference_no; // Ensure this is the correct field name
-    
-    //     // Save the history entry
-    //     $salesHistory->save();
-    //     dd('Sales history saved successfully', $salesHistory);
-    
-    //     // Return a JSON response indicating success, with additional data for the receipt
-    //     return response()->json([
-    //         'success' => true,
-    //         'reference_no' => $salesHistory->reference_no,
-    //         'transaction' => [
-    //             'transaction_id' => $salesHistory->transaction_id,
-    //             'item_name' => $salesHistory->item_name,
-    //             'quantity' => $salesHistory->quantity,
-    //             'unit_price' => $salesHistory->unit_price,
-    //             'total_price' => $salesHistory->total_price,
-    //         ],
-    //         'net_amount' => $request->input('amount_payable'),
-    //         'tax' => 0, // Replace with actual tax calculation if needed
-    //         'message' => 'Transaction added successfully to history.'
-    //     ]);
-    // }
-    
-
-    // public function saveToSalesHistory(SalesHistoryRequest $request)
-    // {
-    //     // At this point, the request is already validated
-
-    //     // Logic to save data to sales_histories table
-    //     SalesHistory::create([
-    //         'amount_payable' => $request->amount_payable,
-    //         'cash_amount' => $request->cash_amount,
-    //         'change' => $request->change,
-    //         'item_name' => $item_name,
-
-    //     ]);
-
-    //     // Example data to return
-    //     return response()->json([
-    //         'success' => true,
-    //         'reference_no' => 'REF123456', // Generate or fetch the actual reference number
-    //         'user_name' => auth()->user()->name,
-    //         'products' => $request->input('products'), // This should be the validated products
-    //         'net_amount' => $request->amount_payable, // Use validated input
-    //         'tax' => 0, // Replace with actual tax calculation if needed
-    //     ]);
-    // }
-
-
-
-
-
-
-
-
-
+            return response()->json(['status' => 'success', 'message' => 'Receipt saved successfully!']);
+            } catch (\Exception $e) {
+                return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
+            }
+    }
 
     //FOR SEARCHING A PRODUCT
-     public function productsearch(Request $request){
-        $firstQuery = $request->get('firstQuery');
+    public function searchProducts(Request $request)
+    {
+        $search = $request->get('searchProducts');
+    
+        if ($search) {
+            $products = Product::where('item_name', 'LIKE', "%$search%")
+                                ->orWhere('barcode', 'LIKE', "%$search%")
+                                ->get();
+        } else {
+            $products = Product::paginate(12); // Return all products if no search term is provided
+        }
+    
+        return response()->json(['products' => $products]);
 
-        $products = Product::where('item_name', 'LIKE', "%$firstQuery%")->get(['id', 'item_name']);
 
-        return response()->json($products);
-     }
+        // $query = $request->input('searchProducts');
+        // $products = Product::where('item_name', 'like', "%{$query}%")
+        //                 ->orWhere('barcode', 'like', "%{$query}%")
+        //                 ->get();
+    
+        // return response()->json(['products' => $products]);
+    }
 
+    //This is the function for search
      public function search(Request $request)
      {
         $query = $request->get('query');
@@ -314,39 +368,5 @@ class ProductController extends Controller
         $products = Product::where('item_name', 'LIKE', "%$query%")->get(['id', 'item_name']);
         
         return response()->json($products);
-
-        // $query = $request->input('query');
-        //$products = Product::query()
-        //      ->where('item_name', 'LIKE', "%{$query}%")
-        //      ->orWhere('barcode', 'LIKE', "%{$query}%")
-        //      ->all();
- 
-        //  return view('products.index', compact('products'));
     }
-
-
-    public function destroy($id)
-    {
-        // Find the product by ID
-        $product = Product::findOrFail($id); 
-
-        // Delete the product
-        $product->delete(); 
-
-        // Redirect with a success message
-        return redirect()->route('products.index')->with('success', 'Product deleted successfully'); 
-    }
-
-    //Controller for clear all
-    public function clear(Request $request){
-        //This will delete all the data in the products table
-        Product::truncate();
-            // Redirect back with an empty collection
-    // return redirect()->route('products.index')->with([
-    //     'success' => 'All products have been deleted!!!',
-    //     'products' => collect() // Passing an empty collection
-    // ]);
-        return redirect()->route('products.index')->with('success', 'All products had been deleted!!!');
-    }
-
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SalesHistory extends Model
 {
+    protected $table = 'histories';
     protected $fillable = [
         'employee_name',
         'item_name',

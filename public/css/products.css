@@ -235,58 +235,175 @@ body{
     font-size: 50px;
     font-family: Arial, Helvetica, sans-serif;
 }
-.srch-1{
-    background-color: white;
-    color: rgb(0, 0, 0);
-    margin-right: 50px;
-    padding-left: 10px;
-    margin-top: 40px;
-    width: 400px;
-    height: 50px;
-    border: 2px solid #000000;
+
+/*SEARCH CSS*/
+/* Search container */
+.search-container {
+    display: flex;
+    justify-content: space-between; /* Align input and button next to each other */
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 10px;
+    margin-right: -20px;
+    margin-top: 30px;
+}
+
+/* Search input field */
+.search-input {
+    height: 40px;
+    width: 80%; /* Make input take most of the space */
+    padding: 10px 40px 10px 20px;
+    border: 1px solid #ccc;
     border-radius: 15px;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
 }
-.srch:hover{
-    background-color: white; 
-    border: 2px solid #15177a;
+
+/* Input field placeholder */
+.search-input::placeholder {
+    color: #aaa;
+    font-style: italic;
 }
-.cont-2{
+
+/* Focus effect on input */
+.search-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Search icon */
+.search-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 18px;
+    pointer-events: none;
+}
+
+/* Search input animation */
+.search-input:focus + .search-icon {
+    color: #007bff;
+}
+
+/* Base button styling */
+.productSearch {
+    height: 40px;
+    padding: 10px 10px;            
+    background-color: #007bff;    
+    color: white;                 
+    border: 1px solid transparent; 
+    border-radius: 30px;           
+    cursor: pointer;               
+    font-size: 14px;               
+    font-weight: 400;              
+    text-transform: uppercase;     
+    transition: all 0.3s ease;     
+    display: inline-block;         
+    text-align: center;            
+    letter-spacing: 1px;           
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
+}
+
+/* Hover state */
+.productSearch:hover {
+    background-color: #0056b3;          /* Darker blue on hover */
+    color: #ffffff;                     /* Keep text white on hover */
+    border-color: #0056b3;              /* Border matches the background on hover */
+    transform: translateY(-3px);        /* Slight lift effect to make it feel interactive */
+    box-shadow: 0 6px 8px rgba(0, 123, 255, 0.3); /* Stronger shadow on hover for emphasis */
+}
+
+/* Active state (when button is clicked) */
+.productSearch:active {
+    background-color: #004080;          /* Even darker blue for active state */
+    transform: translateY(1px);         /* Button 'presses down' when clicked */
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2); /* Reduced shadow for the press effect */
+}
+
+/* Focus state */
+.productSearch:focus {
+    outline: none;                      /* Remove default outline */
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.6); /* Blue glow effect for focus state */
+}
+
+/* Button icon (if any) */
+.productSearch i {
+    margin-right: 8px;                  /* Space between icon and text */
+    font-size: 16px;                    /* Icon size */
+}
+
+/* Disable state (if you need to disable the button) */
+.productSearch:disabled {
+    background-color: #ccc;             /* Grey background when disabled */
+    color: #666;                        /* Greyed-out text */
+    cursor: not-allowed;                /* Change cursor to indicate the button is disabled */
+    box-shadow: none;                   /* Remove shadow when disabled */
+}
+
+/*Table CSS*/
+.tbl-1{
+    width: 100%;
+}
+.cont-1{
+    width: 100%;
     display: flex;
     padding-left: 50px;
     height: 400px;
 }
-.tbl{
-    max-height: 619px;
+/* Container to make the table responsive and longer */
+/* Responsive table container */
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Allows horizontal scrolling on smaller screens */
+    padding: 0 20px; /* Optional: Adds space around the table */
 }
-table{
-    width: 1000px;
+
+/* Products table styling */
+.products-table {
+    width: 1200px; /* Allows the table to span the full width of the container */
     border-collapse: collapse;
-    line-height: 30px;
-    font-family: Arial, Helvetica, sans-serif;
-    max-height: 850px;
 }
-th{
-    text-align: center;
+
+.products-table th, .products-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
 }
-td{
-    border-bottom: 1px dashed gray;
-    background-color: white;
-    text-align: center;
-    max-height: 75px;
-} 
-tr:hover {
-    background-color: rgba(26, 28, 155, 0.1);
-    cursor: pointer;
-}
-td:hover {
-    background-color: rgba(26, 28, 155, 0.1); 
-    cursor: pointer; 
-}
-tr:hover td:nth-child(-n+6) { 
-    background-color:#15177a;
-    cursor: pointer; 
+
+.products-table th {
+    position: sticky;
+    top: 0;
+    background-color: #1a1c9b;
     color: white;
+    font-weight: bold;
+    z-index: 1;
 }
+
+.products-table tbody {
+    max-height: 500px;
+    overflow-y: auto;
+    display: block;
+    width: 100%; /* Ensures the table body spans the full width */
+}
+
+.products-table thead, .products-table tbody tr {
+    display: table;
+    table-layout: auto; /* Allows columns to adjust to content width */
+    width: 100%;
+}
+
+/* Hover effect */
+tr:hover td:nth-child(-n+6) {
+    background-color: #15177a;
+    cursor: pointer;
+    color: white;
+} */
+
+
 /* Blank space */
 .edit, .delete {
     color: rgb(1, 21, 112); 
@@ -312,7 +429,10 @@ tr:hover td:nth-child(-n+6) {
     cursor: pointer; 
     font-size: 16px; 
     transition: background-color 0.3s;
-    margin-top: -20px;
+    margin-top: 15px;
+}
+.add-container{
+    margin-top: -30px;
 }
 /*Insert to sales button*/
 .insert-to-sales {
@@ -418,9 +538,9 @@ cont-3{
     justify-content: space-between; 
     align-items: center; 
     margin: 20px 0; 
-} */
+}
 
-/* .date-time p {
+.date-time p {
     margin: 0; 
 } */
 
@@ -475,6 +595,8 @@ cont-3{
     height: 200px;
     border-radius: 25px;
     border: 1px solid black;
+    padding-bottom: 20px;
+    margin-right: 20px;
 }
 .scan{
     background-color: #007bff;
@@ -489,35 +611,44 @@ cont-3{
 .scan:hover{
     background-color:  #1a1c9b;
 }
-.payment{
+.payment2{
     cursor: pointer;
     border-radius: 10px;
     border: none;
-    margin-top: 40PX;
+    margin-top: 20PX;
     margin-left: 50px;
     width: 300px;
-    height: 30px;
-    background-color: #1a1c9b;
+    height: 70px;
+    background-color: #28a745;
     color: white;
 }
-.payment:hover{
-    background-color:olivedrab;
+.payment2:hover{
+    background-color:#1a1c9b;
     color: white;
 }
-.clear{
+.clear {
     cursor: pointer;
-    border-radius: 10px;
-    border: none;
-    margin-top: 10px;
+    border-radius: 5px; 
+    border: 1px solid #ccc;
     margin-left: 50px;
-    width: 300px;
-    height: 30px;
-    background-color: red;
+    width: 100%; 
+    max-width: 50px; 
+    height: 40px;
+    background-color: #ff3b30; 
     color: white;
+    font-size: 16px; 
+    font-weight: bold; 
+    text-align: center; 
+    transition: all 0.3s ease;
+    margin-right: 20px;
+    margin-top: -20px;
 }
-.clear:hover{
-    background-color: #1a1c9b;
-    color: white;
+
+.clear:hover {
+    background-color: #1a1c9b; /* Dark blue when hovered */
+    color: white; /* Keep text color white */
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow effect on hover */
+    transform: translateY(-2px); /* Subtle lift effect */
 }
 .sub-tot{
     margin-right: 20px;
@@ -555,7 +686,7 @@ cont-3{
     margin-top: 0px;
     font-size: 23px;
 }
-.tx{
+.tax{
     font-family: Arial, Helvetica, sans-serif;
     margin-top: -10px;
     font-size: 25px;
@@ -572,6 +703,7 @@ cont-3{
     margin-top: -10px;
     font-size: 40px;
 }
+
 
 /*MODAL CSS*/
 /* Modal styles */
@@ -761,11 +893,278 @@ cont-3{
     margin-left: 50px;
     width: 300px;
     height: 30px;
-    background-color: red;
+    background-color: rgb(235, 54, 54);
 }
 .deleteAll:hover{
-    background-color:  #15177a;
+    background-color:  #ff0000;
 }
+
+/* Style for the SCAN button */
+.scanProduct {
+    color: white;
+    cursor: pointer;
+    border-radius: 10px;
+    border: none;
+    margin-top: 10px;
+    margin-left: 50px;
+    width: 300px;
+    height: 30px;
+    background-color: rgb(142, 114, 243);
+}
+
+.scanProduct:hover {
+    background-color: #1b0092;
+}
+/* Style for the SCAN button */
+.seeHistory {
+    color: white;
+    cursor: pointer;
+    border-radius: 10px;
+    border: none;
+    margin-top: 10px;
+    margin-left: 50px;
+    width: 300px;
+    height: 30px;
+    background-color:  #1f00a7;
+}
+
+.seeHistory:hover {
+    background-color: #1b0092;
+}
+
+/*For Section 2*/
+.cont-2{
+    display: flex;
+    padding-left: 50px;
+    height: 600px;
+    width: 100%;
+}
+.sales-container{
+    width: 100%;
+}
+table{
+    width: 100%;
+    max-width: 1450px;
+    border-collapse: collapse;
+    line-height: 30px;
+    font-family: Arial, Helvetica, sans-serif;
+    max-height: 619px;
+}
+th{
+    background-color: transparent;
+    text-align: center;
+}
+td{
+    padding-top: 2px;
+    border-bottom: 1px dashed gray;
+    background-color: white;
+    text-align: center;
+} 
+tr:hover {
+    background-color: rgba(26, 28, 155, 0.1); /*Light background color on hover*/
+    cursor: pointer; /*Change cursor to pointer */
+}
+td:hover {
+    background-color: rgba(26, 28, 155, 0.1); 
+    cursor: pointer; 
+}
+tr:hover td:nth-child(-n+5) { 
+    background-color:#15177a;
+    cursor: pointer; 
+    color: white;
+}
+
+#transaction-tbl {
+    width: 100%;
+    max-width: 800px;
+    border-collapse: collapse;
+    margin: 0 auto; /* Centers the table within its container */
+}
+
+#transaction-tbl th, #transaction-tbl td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+#transaction-tbl th {
+    background-color: rgb(1, 21, 112);
+    color: white;
+    font-weight: bold;
+}
+
+#transaction-tbl tbody {
+    max-height: 400px; /* Adjust based on needs */
+    overflow-y: auto;
+    display: block;
+}
+
+#transaction-tbl thead, #transaction-tbl tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+/* #transaction-tbl{
+    width: 100%;
+    max-width: 800px;
+    border-collapse: collapse;
+    line-height: 30px;
+    font-family: Arial, Helvetica, sans-serif;
+    max-height: 619px;
+}
+#transaction-tbl th{
+    background-color: transparent;
+    text-align: center;
+}
+#transaction-tbl td{
+    padding-top: 2px;
+    border-bottom: 1px dashed gray;
+    background-color: white;
+    text-align: center;
+} 
+#transaction-tbl tr:hover {
+    background-color: rgba(26, 28, 155, 0.1);
+    cursor: pointer;
+}
+#transaction-tbl td:hover {
+    background-color: rgba(26, 28, 155, 0.1); 
+    cursor: pointer; 
+}
+#transaction-tbl tr:hover td:nth-child(-n+5) { 
+    background-color:#15177a;
+    cursor: pointer; 
+    color: white;
+} */
+
+/* .products-table {
+    width: 1200px;
+    border-collapse: collapse;
+}
+
+.products-table th, .products-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.products-table th {
+    position: sticky;
+    top: 0;
+    background-color: #1a1c9b;
+    color: white;
+    font-weight: bold;
+    z-index: 1;
+}
+
+.products-table tbody {
+    max-height: 500px;
+    overflow-y: auto;
+    display: block;
+    width: 100%; /* Ensures the table body spans the full width 
+}
+
+.products-table thead, .products-table tbody tr {
+    display: table;
+    table-layout: auto; /* Allows columns to adjust to content width 
+    width: 100%;
+}
+
+/* Hover effect 
+tr:hover td:nth-child(-n+6) {
+    background-color: #15177a;
+    cursor: pointer;
+    color: white;
+} */
+
+/* Container styling */
+.sales-container {
+    max-height: 600px;
+    overflow-y: auto;
+    display: block;
+    width: 100%;
+    padding: 0 20px;
+}
+
+/* Sales Table Styling */
+.sales-table {
+    width: 1000px;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+} */
+
+/* Header Styling */
+.sales-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: rgb(1, 21, 112);
+    color: white;
+    padding: 10px;
+    z-index: 1;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid #ddd;
+}
+
+/* Table Body Styling */
+ .sales-table tbody tr {
+    border-bottom: 1px solid #ddd;
+} 
+
+.sales-table tbody td {
+    padding: 8px;
+    text-align: center;
+    color: #333;
+    font-size: 14px;
+}
+
+/* Quantity Input Styling */
+.sales-table .quantity {
+    width: 50px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 3px;
+} 
+
+/* Action Button Styling */
+/* .sales-table .delete {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+} */
+
+/* .sales-table .delete:hover {
+    background-color: #d93636;
+} */
+
+/* Delete Icon Styling */
+/* .sales-table .delIcon {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+} */
+
+/* Hover Effect for Rows */
+/* .sales-table tbody tr:hover {
+    background-color: rgba(1, 21, 112, 0.1);
+} */
+
+/* Specific Column Widths */
+/* .sales-table td:first-child {
+    width: 130px;
+}
+
+.sales-table td:nth-child(2),
+.sales-table td:nth-child(3),
+.sales-table td:nth-child(4),
+.sales-table td:nth-child(5) {
+    width: 100px;
+} */
 
 
 
@@ -782,8 +1181,175 @@ cont-3{
     margin-left: 350px;
     background-color:  rgb(209, 208, 208);
   }
+  .history-header {
+    font-size: 24px;
+    margin: 0 0 20px 20px;
+}
+.search-section {
+    display: flex;
+    gap: 10px;
+    margin: 0 20px 20px 20px;
+}
 
+.search-bar {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px;
+}
 
+.history-content {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+}
+
+.history-item {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.history-table {
+    width: 100%; /*Ensures the table takes up the full container width */
+    border-collapse: collapse;
+}
+
+.history-table th, .history-table td {
+    width: 100%;
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.history-table th {
+    width: 100%;
+    position: sticky;
+    top: 0;
+    background-color: #1a1c9b;
+    color: white;
+    font-weight: bold;
+    z-index: 1;
+}
+
+.history-table tbody {
+    width: 100%;
+    max-height: 500px;
+    overflow-y: auto;
+    display: block;
+}
+
+.history-table thead, .history-table tbody tr {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* .history-header p {
+    margin: 0;
+    padding: 5px 0;
+    color: #333;
+} */
+.history-header {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+    text-align: center;
+    padding: 10px 20px;
+    width: 60%; /* Adjusted width */
+    margin: 0 auto; /* Centers the header */
+    background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.history-header::before {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    height: 4px;
+    background-color: #ffce00;
+    border-radius: 4px;
+}
+
+.history-header::after {
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    transform: rotate(25deg);
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/*search-bar css*/
+.search-bar {
+    padding: 8px 12px; /* Adjust padding for a more comfortable input size */
+    border: 1px solid #007bff; /* Border color */
+    border-radius: 4px; /* Rounded corners for a soft look */
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    transition: all 0.3s ease; /* Smooth transition on focus */
+
+    /* Set a slight box shadow for a subtle elevation effect */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar::placeholder {
+    color: #007bff; /* Placeholder color */
+    opacity: 0.7; /* Slightly faded placeholder */
+}
+
+.search-bar:focus {
+    border-color: #0056b3; /* Darker blue on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Blue glow effect on focus */
+}
+
+/* Optional hover effect */
+.search-bar:hover {
+    background-color: #f0f8ff; /* Light blue background on hover */
+}
+
+/*Return Button CSS*/
+.return-btn {
+    background-color: #ff4d4d; /* Bright red background */
+    color: #fff; /* White text color */
+    padding: 8px 16px; /* Adjust padding for a comfortable button size */
+    border: none; /* Remove default border */
+    border-radius: 4px; /* Rounded corners for a softer look */
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease; /* Smooth transition on hover and focus */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Slight shadow for a raised look */
+    margin: 20px; /* Margin for spacing */
+}
+
+.return-btn:hover {
+    background-color: #e60000; /* Darker red for hover effect */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
+}
+
+.return-btn:focus {
+    outline: none; /* Remove default outline */
+    box-shadow: 0 0 5px rgba(255, 77, 77, 0.7); /* Red glow on focus */
+}
+
+.return-btn:active {
+    background-color: #cc0000; /* Even darker red for active press */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Return to slight shadow */
+}
 
 
 
@@ -928,13 +1494,19 @@ cont-3{
     width: 100%;
     margin: 15px 0;
     border-collapse: collapse;
+    font-family: "Courier New", Courier, monospace;
 }
 
 .receipt-table th,
 .receipt-table td {
-    padding: 8px;
+    padding: 2px 5px;
     text-align: left;
     border-bottom: 1px solid #ddd;
+    font-size: 12px;
+    border: none;
+}
+.receipt-table th:last-child, .receipt-table td:last-child {
+    text-align: right;
 }
 
 /* Styling for the totals section */
@@ -945,15 +1517,22 @@ cont-3{
 
 .receipt-totals p {
     display: flex;
+    font-size: 14px;
     justify-content: space-between;
     margin: 5px 0;
+    font-family: "Courier New", Courier, monospace;
 }
 
 /* Modal action buttons styling */
 .receipt-modal-actions {
     display: flex;
     justify-content: space-between;
+    position: sticky;
+    bottom: 0;
+    background-color: white;
+    padding: 10px 0;
     margin-top: 15px;
+    border-top: 1px solid #ddd;
 }
 
 .receipt-modal-actions button {
@@ -978,6 +1557,12 @@ cont-3{
 .done-receipt:hover{
     background-color: #28a745;
 }
+/* Emphasize Amount Payable and Change */
+#receiptAmountPayable, #receiptChange {
+    font-size: 16px; /* Larger font size */
+    font-weight: bold;
+    color: black;
+}
 
 
 
@@ -989,8 +1574,158 @@ cont-3{
 
 
 
+cont-3{
+    display: flex;
+    flex-direction: column;
+}
 
+.date-time input {
+    padding: 10px; /* Add padding for better appearance */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 16px; /* Font size */
+    width: 100%; /* Make input take full width */
+    max-width: 200px; /* Limit the width for better layout */
+    transition: border-color 0.3s; /* Smooth transition for focus */
+}
 
+.date-time input:focus {
+    border-color: #1a1c9b; /* Change border color on focus */
+    outline: none; /* Remove outline */
+}
+
+.date-time input::-webkit-calendar-picker-indicator {
+    border-radius: 4px; /* Round the indicator */
+}
+
+.date-time{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
+    width: 390px;
+    background-color: white;
+    margin-left: 50px;
+    border-radius: 25px;
+    border: 1px solid black;
+}
+.date{
+    cursor: pointer;
+    width: 200px;
+    height: 25px;
+}
+.time{
+    cursor: pointer;
+    width: 200px;
+    height: 25px;
+}
+.button{
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    margin-left: 50px;
+    width: 400px;
+    background-color: white;
+    justify-content: center;
+    height: 200px;
+    border-radius: 25px;
+    border: 1px solid black;
+}
+.scan{
+    cursor: pointer;
+    border-radius: 15px;
+    border: none;
+    margin-left: 50px;
+    width: 300px;
+    height: 50px;
+    background-color: #bdbdbd;
+}
+.scan:hover{
+    background-color: #8f8f8f;
+}
+.payment{
+    cursor: pointer;
+    border-radius: 10px;
+    border: none;
+    margin-top: 40PX;
+    margin-left: 50px;
+    width: 300px;
+    height: 30px;
+    background-color: #1a1c9b;
+    color: white;
+}
+.payment:hover{
+    background-color: #15177a;
+}
+.clear{
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-left: 50px;
+    margin-right: 225px;
+    width: 100%;
+    max-width: 200px;
+    height: 40px;
+    background-color: rgb(255, 68, 68);
+}
+.clear:hover{
+    background-color: red;
+}
+.sub-tot{
+    margin-right: 20px;
+    margin-left: 50px;
+    margin-top: 25px;
+    padding-left: 10px;
+    background-color: white;
+    border-radius: 25px;
+    height: 224px;
+    width: 390px;
+    border: 1px solid black;
+}
+.amount{
+    display: flex;
+    justify-content: space-between;
+}
+.tax{
+    display: flex;
+    justify-content: space-between;
+}
+.sub{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 25px;
+    font-weight: normal;
+}
+.price{
+    font-family: Arial, Helvetica, sans-serif;
+    margin-right: 20px;
+    margin-top: 20px;
+    font-size: 23px;
+}
+.taxx{
+    font-family: Arial, Helvetica, sans-serif;
+    margin-right: 20px;
+    margin-top: 0px;
+    font-size: 23px;
+}
+.tx{
+    font-family: Arial, Helvetica, sans-serif;
+    margin-top: -10px;
+    font-size: 25px;
+    font-weight: normal;
+}
+.total{
+    font-family: Arial, Helvetica, sans-serif;
+    margin-top: -10px;
+    font-weight: bold;
+}
+.tot{
+    font-family: Arial, Helvetica, sans-serif;
+    margin-left: 180px;
+    margin-top: -10px;
+    font-size: 40px;
+}
 
 
 

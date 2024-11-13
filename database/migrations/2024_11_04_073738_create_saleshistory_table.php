@@ -13,7 +13,7 @@ class CreateSaleshistoryTable extends Migration
      */
     public function up()
     {
-        Schema::create('sales_history', function (Blueprint $table) {
+        Schema::create('histories', function (Blueprint $table) {
             $table->increments('id')->unique();
             $table->string('employee_name');
             $table->string('item_name');
@@ -36,6 +36,6 @@ class CreateSaleshistoryTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sales_history');
+        Schema::dropIfExists('histories');
     }
 }

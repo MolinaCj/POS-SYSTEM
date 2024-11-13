@@ -4,7 +4,10 @@ use illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Product;
+
+use App\Http\Controllers\CustomAuthController;
 
 
 Route::get('/', function () {
@@ -17,23 +20,12 @@ Route::resource('products', 'ProductController');
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-// Authentication Routes
-Route::get('loginform', 'Auth\AuthController@getLogin')->name('loginform');
-Route::post('loginform', 'Auth\AuthController@postLogin');
-
-// Registration Routes
-Route::get('regform', 'Auth\AuthController@getRegister')->name('regform');
-Route::post('regform', 'Auth\AuthController@postRegister');
-
-// Logout Route
-Route::get('logout', 'Auth\AuthController@logout')->name('logout');
-
 //Clear all route
 Route::post('/products/clear', 'ProductController@clear')->name('products.clear');
 
 
 //Search route for the list of products
-// Route::get('/search-products', 'ProductController@productsearch');
+Route::get('/search-products', 'ProductController@searchProducts')->name('search.products');
 
 //Adding and Search Route
 // Route::get('/search-transactions', 'ProductController@search');
@@ -53,8 +45,12 @@ Route::delete('transactions/{transaction_id}', 'ProductController@deleteTransact
 
 //Route to insert the transation to my receipt modal
 Route::get('/api/getTransaction', 'ProductController@getTransaction')->name('getTransaction');
-//Route for saving the sales to sales history
 
+//Route for saving the sales to sales history
+Route::post('/saveReceipt', 'ProductController@saveReceipt')->name('saveReceipt');
+
+//ROUTE FOR RETRIEVING THE SALES HISTORY IN THE HISTORIES TABLE
+Route::get('/transaction-history', 'ProductController@getTransactionHistory')->name('transaction.history');
 
 
 
@@ -63,6 +59,20 @@ Route::get('/api/getTransaction', 'ProductController@getTransaction')->name('get
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
+//Showing login form
+Route::get('/loginForm', 'Auth\AuthController@showLoginForm')->name('loginForm');
+
+//Processing the login
+Route::post('/login','Auth\AuthController@login')->name('login');
+
+//SHowing the registration form
+Route::get('/regForm', 'Auth\AuthController@showRegistrationForm')->name('regForm');
+
+//Route for processing the registration
+Route::post('/register', 'Auth\AuthController@register')->name('register');
+
+//Route for logout
+Route::post('/logout', 'Auth\AuthController@logout')->name('logout');
 
 //Add to transaction route
 // Route::post('/transactions', 'TransactionController@transfer')->name('transactions.store');

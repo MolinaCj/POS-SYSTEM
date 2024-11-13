@@ -1,62 +1,71 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
+use Illuminate\Support\Facades\Log;
 
 use App\Employee;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth; // Ensure this line is included
 use App\Http\Controllers\ProductController;
-use App\User;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function getLogin()
+    // Show the login form
+    public function showLoginForm()
     {
-        return view('loginform');
+        return view('loginform'); // Ensure you have a view for this form
     }
 
-    public function postLogin(Request $request)
+    public function login(LoginRequest $request)
     {
-        $this->validate($request, [
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        // The request is automatically validated before this method is called
+        $credentials = $request->only('username', 'password');
 
-        if (Auth::attempt($request->only('email', 'password'))) {
-            return redirect()->intended(route('products.index')); // Change to your intended route
+        if (Auth::attempt($credentials)) {
+            // Redirect to the intended route or to the products view
+            return redirect()->intended('/products');
         }
 
-        return back()->withErrors(['email' => 'Invalid email or password.']);
+        // Redirect back with an error if login fails
+        return back()->withErrors(['username' => 'Invalid username or password.']);
     }
 
-    public function getRegister()
+    // Show the registration form
+    public function showRegistrationForm()
     {
-        return view('regform');
+        return view('regform'); // Ensure you have a view for this form
     }
 
-    public function postRegister(Request $request)
-    {
-        $this->validate($request, [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
+    // Handle registration submission
+    public function register(RegisterRequest $request)
+{
+    // The validation is automatically handled by the RegisterRequest class
 
-        $employees = Employee::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-        ]);
+    Log::info($request->all());
 
-        Auth::login($employees);
+    // Create the user
+    Employee::create([
+        'employee_name' => $request->input('employee_name'),
+        'username' => $request->input('username'),
+        'email' => $request->input('email'),
+        'password' => Hash::make($request->input('password')),
+    ]);
 
-        return redirect('loginform'); // Change to your intended route
-    }
+    // Redirect to the login page after successful registration
+    return redirect()->route('loginForm')->with('status', 'Registration successful. Please login.');
+}
 
+    // Handle logout
     public function logout()
     {
         Auth::logout();
-        return redirect('loginform'); // Redirect to login page
+        session()->flush();
+
+        // Redirect to the login page after logout
+        return redirect()->route('loginForm');
     }
 }

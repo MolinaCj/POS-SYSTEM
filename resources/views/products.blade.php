@@ -11,8 +11,6 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-
-
     <script src="js/products.js"></script>
 </head>
 <body>
@@ -28,10 +26,10 @@
                 <h2 class="abc">ABC Company</h2>
                 <p><Address class="address">Address: xxxxx, xxxxxxx</Address></p>
             </div>
-            <form id="logout-form" action="{{ route('logout') }}" method="GET">
+            <form id="logout-form" action="{{ route('logout') }}" method="POST">
                 {{ csrf_field() }}
                 <div class="out">
-                    <button class="Btn">
+                    <button type="submit" class="Btn">
                         <div class="sign">
                           <svg viewBox="0 0 512 512">
                             <path
@@ -111,26 +109,143 @@
         <div class="item-list">
             <div class="cashier">
                 <h1 class="cashier-1">List of Products</h1>
-                        <div class="ewan">
-                            <input id="search-1" class="srch-1" type="text" name="firstQuery" placeholder="Search by code or product" required>
-                        </div>
+
+                {{-- Products Search --}}
+                <div class="search-container">
+                    <form  
+                            action="{{ route('products.index') }}"  
+                            method="GET"
+                            id="searchProductsForm" 
+                            class="searchProducts" 
+                            style="display: flex;">
+                        <input class="search-input" 
+                                name="searchProducts" 
+                                value="{{ request()->query('searchProducts') }}"
+                                type="text" 
+                                id="searchInput" 
+                                placeholder="Search by barcode or product name"
+                                required>
+                        <i class="fas fa-search search-icon"></i>
+                        <button id="searchButton" class="productSearch" type="submit">Search</button>
+                    </form>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const searchInput = document.getElementById('searchInput'); // The search input
+                            const searchButton = document.getElementById('searchButton'); // The search button
+                            const productTableBody = document.querySelector('#productsTable tbody'); // The table body for products
+
+                            // Add an event listener to the search button
+                            searchButton.addEventListener('click', function (event) {
+                                event.preventDefault(); // Prevent the form from submitting the default way
+                                const query = searchInput.value.trim(); // Get the search query
+                                fetchProducts(query); // Fetch products based on the search query
+                            });
+                        
+                            // Add an event listener to the input field to handle clearing the search
+                            searchInput.addEventListener('input', function () {
+                                const query = searchInput.value.trim();
+                                if (!query) {
+                                    fetchProducts(''); // Fetch all products if the input is cleared
+                                }
+                            });
+                        
+                            // Function to fetch products based on the search query
+                            function fetchProducts(query) {
+                                // Send an AJAX request to the controller to get the filtered products
+                                fetch(`/search-products?searchProducts=${query}`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        // Clear the existing table rows
+                                        productTableBody.innerHTML = '';
+                                    
+                                        // Check if any products were returned
+                                        if (data.products && data.products.length > 0) {
+                                            // Add each product to the table
+                                            data.products.forEach(product => {
+                                                const row = document.createElement('tr');
+                                                row.innerHTML = `
+                                                    <td>${product.id}</td>
+                                                    <td>${product.barcode}</td>
+                                                    <td>${product.item_name}</td>
+                                                    <td>${product.stocks}</td>
+                                                    <td>
+                                                        <input class="quantity" type="number" name="quantity[${product.id}]" value="1" min="1" style="width: 50px;">
+                                                    </td>
+                                                    <td>${product.price}</td>
+                                                    <td style="display: flex;">
+                                                        <form action="{{ route('addToTransac') }}" method="POST">
+                                                            {{ csrf_field() }}
+                                                            <input type="hidden" name="product_id" value="${product.id}">
+                                                            <input type="hidden" name="item_name" value="${product.item_name}">
+                                                            <input type="hidden" name="quantity" value="1">
+                                                            <input type="hidden" name="unit_price" value="${product.price}">
+                                                            <button class="insert-to-sales" type="submit">Add to Sales</button>
+                                                        </form>
+                                                    </td>
+                                                `;
+                                                productTableBody.appendChild(row);
+                                            });
+                                        } else {
+                                            // If no products were found, display a message
+                                            const row = document.createElement('tr');
+                                            row.innerHTML = '<td colspan="7">No products found</td>';
+                                            productTableBody.appendChild(row);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error fetching products:', error);
+                                    });
+                            }
+                        });
+                    </script>
+                    {{-- <script>
+                        // JavaScript function to auto-submit form when input is cleared
+                        function checkSearchInput(input) {
+                            if (input.value.trim() === '') {
+                                document.getElementById('searchProducts').submit();
+                            }
+                        }
+                    </script> --}}
+                    
+                    <!-- Search Input -->
+    {{-- <div class="d-flex justify-content-end my-3" >
+        <form action="{{ route('product.index') }}#section2" method="GET" class="d-flex" id="searchForm">
+            <input type="text" name="search" class="form-control"
+                   placeholder="Search products..."
+                   value="{{ request()->query('search') }}"
+                   oninput="checkSearchInput(this)"
+                   required>
+            <button type="submit" class="btn btn-primary ms-2">Search</button>
+        </form>
+    </div> --}}
+                </div>
             </div>
-            <div class="cont-2">
-                <div class="tbl">
-                    <!-- Add Product Button -->
-                    <a href="javascript:void(0)#sec1;" id="addProductButton">
-                        <button class="add-product">Add Product</button>
-                    </a>
-                    <table id="product-table">
-                            <tr>
-                                <th style="width: 40px;">No.</th>
-                                <th style="width: 100px;">Barcode</th>
-                                <th>Product Name</th>
-                                <th>Stocks</th>
-                                <th>Quantity</th>
-                                <th>Price</th>
-                                <th style="width: 50px;">Actions</th>
-                            </tr> 
+            <div class="cont-1">
+                <div class="tbl-1">
+                    <div class="add-container" style="display: flex; justify-content: space-between">
+                        <!-- Add Product Button -->
+                        <a href="javascript:void(0)#sec1;" id="addProductButton">
+                            <button class="add-product">Add Product</button>
+                        </a>
+                        <form action="{{ route('products.clear') }}#sec1" method="POST">
+                            {{ csrf_field() }}
+                            <button type="submit" class="clear btn-danger" onclick="return confirm('Are you sure you want to clear all products?');"">Clear All</button>
+                        </form>
+                    </div>
+                    <div class="products-container">
+                        <table id="productsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">No.</th>
+                                    <th style="width: 100px;">Barcode</th>
+                                    <th>Product Name</th>
+                                    <th>Stocks</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th style="width: 50px;">Actions</th>
+                                </tr>
+                            </thead> 
+                        <tbody id="products-table-body">
                             @foreach ($products as $product)
                             <tr>
                                 <td>{{ $product->id }}</td>
@@ -222,8 +337,9 @@
                                 </td>
                             </tr>
                             @endforeach
+                        </tbody>
                     </table>
-
+                    </div>
                     <ul class="pagination">
                         {{-- {{ $products->links() }} --}}
                         {{ $products->appends(request()->query())->links() }}
@@ -269,18 +385,6 @@
                             </div>
                         </div>               
             </div>
-            <div class="cont-3">
-                <div class="date-time">
-                    <p><input class="date" type="date"></p>
-                    <p><input class="time" type="time"></p>
-                </div>
-                <div class="button">
-                    <form action="{{ route('products.clear') }}#sec1" method="POST">
-                        {{ csrf_field() }}
-                        <button type="submit" class="clear btn-danger" onclick="return confirm('Are you sure you want to clear all products?');"">Clear All</button>
-                    </form>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -299,9 +403,9 @@
             </form>
         </div>
         <div class="cont-2">
-            <div class="tbl">
-                <div style="max-height: 600px; overflow-y: auto; display:block; width:100%;">
-                    <table id="transaction-tbl border-collapse: collapse; border-spacing: 0;">
+            <div class="tbl-2">
+                <div class="sales-container" style="max-height: 600px; overflow-y: auto; display:block; width:100%;">
+                    <table class="sales-table" id="transaction-tbl border-collapse: collapse; border-spacing: 0; width: 800px">
                         <thead style="background-color: rgb(1, 21, 112); color:white;">
                             <tr>
                                 <th style="position: sticky; top: 0; background-color: rgb(1, 21, 112); width: 130px; z-index: 1;">Item Name</th>
@@ -348,14 +452,18 @@
                 </table>     
                 </div>         
             </div>
-        <div class="cont-3">
+        <div class="cont-3" style="display: flex; flex-direction: column;">
             <div class="date-time">
                 <p><input class="date" type="date"></p>
                 <p><input class="time" type="time"></p>
             </div>
             <div class="button">
-                <button class="scan btn-default">SCAN</button>
-                <button class="payment" onclick="showCheckoutModal()">Proceed to Payment</button>
+                <button class="payment2" onclick="showCheckoutModal()">Proceed to Payment</button>
+
+                <button class="scanProduct btn-default">SCAN</button>
+
+                <button class="seeHistory btn-default">See History</button>
+                
                 <form action="{{ route('transactions.deleteAll') }}#sec2" method="POST">
                     {{ csrf_field() }}
                     {{ method_field('DELETE') }}
@@ -364,12 +472,15 @@
             </div>
             <div class="sub-tot">
                 <div>
-                    <div class="amount"><h1 class="sub">Net Amount</h1><p class="price">₱{{number_format($net_amount, 2)}}</p></div>
-                    <div class="tax"><h1 class="tx">Tax</h1><p class="taxx">₱{{number_format($tax, 2)}}</p></div>
+                    <div class="amount"><h1 class="sub">Net Amount</h1><p class="price">₱{{ number_format(session('net_amount', 0), 2) }}</p></div>
+                    <div class="tax"><h1 class="tx">Tax</h1><p class="taxx">₱{{ number_format(session('tax', 0), 2) }}</p></div>
                 </div>
                     <h1 class="total">Amount Payable:</h1>
-                    <h3 class="tot">₱{{number_format($amount_payable, 2)}}</h3>
+                    <h3 class="tot">₱{{ number_format(session('amount_payable', 0), 2) }}</h3>
             </div>
+        </div>
+        <div>
+            <button class="return-btn" style="margin-top: -10px; margin-right: 20px;">Return</button>
         </div>
     </div>
 
@@ -523,10 +634,10 @@
                         data.transactions.forEach(transaction => {
                             const row = document.createElement('tr');
                             row.innerHTML = ` 
-                                <td>${transaction.quantity}</td>
-                                <td>${transaction.item_name}</td>
-                                <td>₱${parseFloat(transaction.unit_price).toFixed(2)}</td>
-                                <td>₱${parseFloat(transaction.total_price).toFixed(2)}</td>
+                                <td class="item-quantity">${transaction.quantity}</td>
+                                <td class="item-name">${transaction.item_name}</td>
+                                <td class="item-unit-price">₱${parseFloat(transaction.unit_price).toFixed(2)}</td>
+                                <td class="item-total">₱${parseFloat(transaction.total_price).toFixed(2)}</td>
                             `;
                             receiptItemsTableBody.appendChild(row);
                         });
@@ -553,65 +664,6 @@
                 });
         }
     </script>
-    
-
-    {{-- <script>
-        function returnToCheckoutModal() {
-            document.getElementById('cashPaymentModal').style.display = 'none';
-            document.getElementById('checkoutModal').style.display = 'flex';
-        }
-    
-        function confirmCashPayment() {
-            const cashAmount = parseFloat(document.getElementById('cashAmount').value);
-            const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, '')); // Remove currency symbol and commas
-    
-            if (isNaN(cashAmount) || cashAmount < 0) {
-                alert("Please enter the right cash amount.");
-                return;
-            }
-    
-            if (cashAmount < totalAmount) {
-                alert("Insufficient cash amount. Please enter a valid amount.");
-                return;
-            }
-    
-            const change = cashAmount - totalAmount;
-            alert("Payment successful with cash amount: ₱" + cashAmount.toFixed(2) + ". Change: ₱" + change.toFixed(2));
-    
-            // Hide cash payment modal and show receipt modal
-            document.getElementById('cashPaymentModal').style.display = 'none';
-    
-            // Show the receipt modal here
-            document.getElementById('receiptModal').style.display = 'flex';
-
-             // Populate the receipt modal with transaction data
-            populateReceiptModal();
-        }
-    
-        // Function to update customer change automatically
-        function updateCustomerChange() {
-            const cashAmount = parseFloat(document.getElementById('cashAmount').value);
-            const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, ''));
-    
-            if (!isNaN(cashAmount) && !isNaN(totalAmount)) {
-                const change = cashAmount - totalAmount;
-                document.getElementById('customerChange').value = change >= 0 ? "₱" + change.toFixed(2) : "₱0.00";
-            } else {
-                document.getElementById('customerChange').value = "₱0.00";
-            }
-        }
-    
-        // Add event listener to update change when cash amount changes
-        document.getElementById('cashAmount').addEventListener('input', updateCustomerChange);
-
-    </script>     --}}
-
-
-    {{-- <script src="/path/to/checkoutModal.js"></script>
-    <script src="/path/to/cashPaymentModal.js"></script> --}}
-
-
-    <!-- Receipt Modal -->
 
     <!-- Receipt Modal -->
     <div id="receiptModal" class="receipt_modal" style="display:none;">
@@ -621,7 +673,7 @@
                 <div class="receipt-header">
                     <h2>ABC Company</h2>
                     <p>123 Main St, City, Country</p>
-                    <p>Reference No: <span id="receiptReferenceId">{{ isset($reference_no) ? $reference_no : 'N/A' }}</span></p>
+                    <p>Reference No: <span id="receiptReferenceNo">{{ isset($reference_no) ? $reference_no : 'N/A' }}</span></p>
                     <p>Date: <span id="receiptDateTime">{{ $currentDate }}</span></p>
                     <p>Cashier: <span id="receiptCashierName">{{ Auth::user() ? Auth::user()->name : 'N/A' }}</span></p>
                 </div>
@@ -632,7 +684,7 @@
                         <tr>
                             <th>Qty</th>
                             <th>Item</th>
-                            <th>Unit Price</th>
+                            <th>Price</th>
                             <th>Total</th>
                         </tr>
                     </thead>
@@ -665,60 +717,117 @@
         </div>
     </div>
 
-    {{-- <div id="receiptModal" class="receipt_modal" style="display:none;">
-        <div class="receipt-modal-content">
-            <div class="receipt-scrollable">
-                <!-- Receipt Header -->
-                <div class="receipt-header">
-                    <h2>ABC Company</h2>
-                    <p>123 Main St, City, Country</p>
-                    <p>Reference No: <span id="receiptReferenceId">{{ isset($reference_no) ? $reference_no : 'N/A' }}</span></p>
-                    <p>Date: <span id="receiptDateTime">{{ $currentDate }}</span></p>
-                    <p>Cashier: <span id="receiptCashierName">{{ Auth::user() ? Auth::user()->name : 'N/A' }}</span></p>
-                </div>
-    
-                <!-- Receipt Table -->
-                <table class="receipt-table">
-                    <thead>
-                        <tr>
-                            <th>Qty</th>
-                            <th>Item</th>
-                            <th>Unit Price</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="receiptItems">
-                        <!-- Rows will be populated by JavaScript -->
-                    </tbody>
-                </table>
-    
-                <!-- Receipt Totals -->
-                <div class="receipt-totals">
-                    <p>Net Amount: <span id="receiptNetAmount">₱0.00</span></p>
-                    <p>Tax: <span id="receiptTax">₱0.00</span></p>
-                    <p>Amount Payable: <span id="receiptAmountPayable">₱0.00</span></p>
-                    <p>Cash Amount: <span id="receiptCashAmount">₱0.00</span></p>
-                    <p>Change: <span id="receiptChange">₱0.00</span></p>
-                </div>
-    
-                <!-- Receipt Footer -->
-                <div class="receipt-footer">
-                    <p>Thank you for shopping with us.</p>
-                    <p>We are happy to serve you!!!</p>
-                </div>
-            </div>
-    
-            <!-- Modal Actions -->
-            <div class="receipt-modal-actions">
-                <button class="print-receipt" onclick="printReceipt()">Print Receipt</button>
-                <button class="done-receipt" onclick="closeModal('receiptModal')">Done</button>
-            </div>
-        </div>
-    </div>     --}}
-
     <script>
+        // Function to save receipt data to the database
+        function saveReceipt() {
+            console.log("Starting to save receipt...");
+
+            // Get the CSRF token from the meta tag
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+            // Gather receipt data from modal
+            const items = [];
+            document.querySelectorAll('#receiptItems tr').forEach(row => {
+                // Check if row and its cells exist
+                const itemNameCell = row.querySelector('.item-name');
+                const quantityCell = row.querySelector('.item-quantity');
+                const unitPriceCell = row.querySelector('.item-unit-price');
+                const totalPriceCell = row.querySelector('.item-total');
+            
+                // Log each row to see if it's being processed
+                console.log("Processing row:", row);
+            
+                if (itemNameCell && quantityCell && unitPriceCell && totalPriceCell) {
+                    const item = {
+                        item_name: itemNameCell.textContent.trim(),
+                        quantity: parseInt(quantityCell.textContent.trim()) || 0,
+                        unit_price: parseFloat(unitPriceCell.textContent.trim().replace('₱', '')) || 0,
+                        total_price: parseFloat(totalPriceCell.textContent.trim().replace('₱', '')) || 0,
+                    };
+                    console.log("Item processed:", item); // Log each item
+                    items.push(item);
+                } else {
+                    console.log("Missing data in row, skipping:", row);
+                }
+            });
+        
+            // Log the gathered items
+            console.log("Items gathered:", items);
+        
+            // Check if items array is empty
+            if (items.length === 0) {
+                console.log("No items found, aborting save.");
+                return; // Stop execution if no items are found
+            }
+            const referenceNo = document.getElementById('receiptReferenceNo').textContent.trim();
+            const netAmount = parseFloat(document.getElementById('receiptNetAmount').textContent.replace('₱', ''));
+            const amountPayable = parseFloat(document.getElementById('receiptAmountPayable').textContent.replace('₱', ''));
+            const changeAmount = parseFloat(document.getElementById('receiptChange').textContent.replace('₱', ''));
+            const cashAmount = parseFloat(document.getElementById('receiptCashAmount').textContent.replace('₱', ''));
+        
+            // Log the values before sending to the server
+            console.log("Receipt details:");
+            console.log("Reference No:", referenceNo);
+            console.log("Net Amount:", netAmount);
+            console.log("Amount Payable:", amountPayable);
+            console.log("Change Amount:", changeAmount);
+            console.log("Cash Amount:", cashAmount);
+        
+            // Send data via AJAX to save in the database
+            fetch('/saveReceipt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    reference_no: referenceNo,
+                    items: items,
+                    net_amount: netAmount,
+                    amount_payable: amountPayable,
+                    change_amount: changeAmount,
+                    cash_amount: cashAmount,
+                })
+            })
+            .then(response => {
+                // Log the response as text
+                console.log("Full response:", response);
+            
+                // Check if the response is not JSON, which might indicate an error page
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        console.error("Error page returned:", text);
+                        throw new Error('Server returned an error page');
+                    });
+                }
+            
+                // Parse JSON if it's a valid response
+                return response.json();
+            })
+            .then(data => {
+                console.log("Response from server:", data);
+                if (data.status === 'success') {
+                    alert(data.message);  // Notify the user after saving
+                    window.location.reload();  // Reload the page after successful save and clear
+                } else {
+                    alert('Failed to save receipt. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error("Error during save:", error);
+            });
+        }
+
+        // Function to close the modal and save receipt automatically
+        function closeModal(modalId) {
+            saveReceipt();  // Call saveReceipt function when closing the modal
+            console.log("Closing modal...");
+            document.getElementById(modalId).style.display = 'none';
+        }
+
         // Function to print the receipt
         function printReceipt() {
+            console.log("Printing receipt...");
             const receiptContent = document.querySelector('#receiptModal .receipt-scrollable').innerHTML;
             const newWindow = window.open('', '_blank', 'width=600,height=800');
             newWindow.document.write(`
@@ -731,131 +840,7 @@
             `);
             newWindow.document.close();
         }
-
-        // Function to close the modal
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-    </script>
-
-{{-- // function populateReceiptModal() {
-    //     console.log("Transaction Table:", document.querySelector('#transaction-tbl'));  // Check if the table exists
-    //     console.log("Populating receipt modal...");
-        
-    //     const transactions = [];
-    //     const rows = document.querySelectorAll('#transaction-tbl tbody tr'); // Get rows from tbody
-    //     console.log("Rows found:", rows.length);
-        
-    //     rows.forEach((row, index) => {
-    //         const itemNameElement = row.querySelector('td:nth-child(1)');
-    //         const quantityInput = row.querySelector('input[name^="quantity"]');
-    //         const unitPriceElement = row.querySelector('td:nth-child(3)');
-    //         const totalPriceElement = row.querySelector('td:nth-child(4)');
-            
-    //         if (itemNameElement && unitPriceElement && totalPriceElement) {
-    //             const itemName = itemNameElement.textContent.trim();
-    //             const quantity = quantityInput ? quantityInput.value : row.querySelector('td:nth-child(2)').textContent.trim();
-    //             const unitPrice = parseFloat(unitPriceElement.textContent.replace(/₱|,/g, ''));
-    //             const totalPrice = parseFloat(totalPriceElement.textContent.replace(/₱|,/g, ''));
-                
-    //             console.log(`Row ${index} data:`, { itemName, quantity, unitPrice, totalPrice });
-                
-    //             transactions.push({ itemName, quantity, unitPrice, totalPrice });
-    //         } else {
-    //             console.warn(`Row ${index} is missing expected elements.`);
-    //         }
-    //     });
-        
-    //     console.log("Transactions data collected:", transactions);
-        
-    //     // Check for receiptItems table body presence
-    //     const receiptItemsTableBody = document.getElementById('receiptItems');
-    //     console.log("Receipt items table body found:", receiptItemsTableBody !== null);
-        
-    //     if (receiptItemsTableBody) {
-    //         receiptItemsTableBody.innerHTML = ''; // Clear any existing rows
-            
-    //         transactions.forEach(transaction => {
-    //             const row = document.createElement('tr');
-    //             row.innerHTML = `
-    //                 <td>${transaction.quantity}</td>
-    //                 <td>${transaction.itemName}</td>
-    //                 <td>₱${transaction.unitPrice.toFixed(2)}</td>
-    //                 <td>₱${transaction.totalPrice.toFixed(2)}</td>
-    //             `;
-    //             receiptItemsTableBody.appendChild(row);
-    //         });
-    //     } else {
-    //         console.error("Receipt items table body element not found.");
-    //     }
-        
-    //     // Totals Calculation
-    //     const netAmount = transactions.reduce((acc, transaction) => acc + transaction.totalPrice, 0);
-    //     const tax = 0.01 * netAmount; // 1% tax
-    //     const amountPayable = netAmount + tax;
-    //     const cashAmount = parseFloat(document.getElementById('cashAmount').value);
-    //     const change = cashAmount - amountPayable;
-        
-    //     // Populate receipt totals
-    //     document.getElementById('receiptNetAmount').textContent = `₱${netAmount.toFixed(2)}`;
-    //     document.getElementById('receiptTax').textContent = `₱${tax.toFixed(2)}`;
-    //     document.getElementById('receiptAmountPayable').textContent = `₱${amountPayable.toFixed(2)}`;
-    //     document.getElementById('receiptCashAmount').textContent = `₱${cashAmount.toFixed(2)}`;
-    //     document.getElementById('receiptChange').textContent = `₱${change.toFixed(2)}`;
-    // }
-
-    // function populateReceiptModal() {
-
-    //     console.log("populateReceiptModal called"); // Check if this logs
-    //     // Get transaction data from the transactions table (your rows)
-    //     const transactions = [];
-    //     const rows = document.querySelectorAll('#transaction-tbl tbody tr');  // Assuming this is the ID for your transactions table
-        
-    //     rows.forEach(row => {
-    //         const itemName = row.querySelector('td:nth-child(1)').textContent.trim();
-    //         const quantity = row.querySelector('input[name^="quantity"]').value;
-    //         const unitPrice = parseFloat(row.querySelector('td:nth-child(3)').textContent.replace(/₱|,/g, ''));
-    //         const totalPrice = parseFloat(row.querySelector('td:nth-child(4)').textContent.replace(/₱|,/g, ''));
-
-    //         console.log({ itemName, quantity, unitPrice, totalPrice });  // Log each transaction row to check data
-    //         transactions.push({ itemName, quantity, unitPrice, totalPrice });
-    //     });
-
-    //     console.log("Transactions data:", transactions); // Log transactions to verify
-
-    //     // Populate the receipt items in the modal
-    //     const receiptItemsTableBody = document.getElementById('receiptItems');
-    //     receiptItemsTableBody.innerHTML = ''; // Clear any existing rows
-
-    //     transactions.forEach(transaction => {
-    //         console.log("Adding transaction to receipt:", transaction); // Log each transaction
-    //         const row = document.createElement('tr');
-    //         row.innerHTML = `
-    //             <td>${transaction.quantity}</td>
-    //             <td>${transaction.itemName}</td>
-    //             <td>₱${transaction.unitPrice.toFixed(2)}</td>
-    //             <td>₱${transaction.totalPrice.toFixed(2)}</td>
-    //         `;
-    //         receiptItemsTableBody.appendChild(row);
-    //     });
-
-    //     // Calculate and populate the totals
-    //     const netAmount = transactions.reduce((acc, transaction) => acc + transaction.totalPrice, 0);
-    //     const tax = 0.01 * netAmount; // 1% tax
-    //     const amountPayable = netAmount + tax;
-    //     const cashAmount = parseFloat(document.getElementById('cashAmount').value);
-    //     const change = cashAmount - amountPayable;
-
-    //     // Populate receipt totals
-    //     document.getElementById('receiptNetAmount').textContent = `₱${netAmount.toFixed(2)}`;
-    //     document.getElementById('receiptTax').textContent = `₱${tax.toFixed(2)}`;
-    //     document.getElementById('receiptAmountPayable').textContent = `₱${amountPayable.toFixed(2)}`;
-    //     document.getElementById('receiptCashAmount').textContent = `₱${cashAmount.toFixed(2)}`;
-    //     document.getElementById('receiptChange').textContent = `₱${change.toFixed(2)}`;
-    // } --}}
-
-
-
+    </script>    
     </section>
 
     {{--------------------------------------------------------- THIS --------------------------------------------------------------------}}
@@ -863,7 +848,47 @@
     {{------------------------------------------------------- SECTION 3 -----------------------------------------------------------------}}
     <section id="sec3" class="section-3">
         <div class="history">
-            <p>This is the SALES HISTORY</p>
+            <!-- Header Section -->
+                <div class="history-header" style="margin-top: 20px;">
+                    <h2 class="history-header">Sales History</h2>
+                </div>
+
+                <!-- Search Section -->
+                <div style="display: flex; justify-content: space-between;">
+                    <div class="search-section" style="display: flex; margin-top: -10px; gap: 10px; padding: 20px; flex-direction: column;">
+                        <input type="text" id="searchReference" placeholder="Search by Reference No" class="search-bar" style="padding: 5px;">
+                        <input type="date" id="searchDate" class="search-bar" style="padding: 5px;">
+                    </div>
+                </div>
+
+                <!-- History Content -->
+                <div class="history-content">
+                        <!-- Products Table for Each Transaction -->
+                        <table class="history-table" style="width: 100%; border-collapse: collapse; margin-top: -20px; padding-top: 20px;  ">
+                            <thead>
+                                <tr style="background-color: #f2f2f2;">
+                                    <th style="border: 1px solid #ccc; padding: 8px;">Product Name</th>
+                                    <th style="border: 1px solid #ccc; padding: 8px;">Quantity</th>
+                                    <th style="border: 1px solid #ccc; padding: 8px;">Unit Price</th>
+                                    <th style="border: 1px solid #ccc; padding: 8px;">Total Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($histories as $history)
+                                    <tr>
+                                        <td style="border: 1px solid #ccc; padding: 8px;">{{ $history->item_name }}</td>
+                                        <td style="border: 1px solid #ccc; padding: 8px;">{{ $history->quantity }}</td>
+                                        <td style="border: 1px solid #ccc; padding: 8px;">₱{{ number_format($history->unit_price, 2) }}</td>
+                                        <td style="border: 1px solid #ccc; padding: 8px;">₱{{ number_format($history->total_price, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                </div>
+                <div>
+                    <button class="return-btn" style="margin-top: -10px; margin-right: 20px;">Return</button>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -982,5 +1007,9 @@ $(document).ready(function() {
         }
     });
 </script>
+
+
+{{-- /////////////////////=========SEARCH PRODUCTS SCRIPT=========///////////////////// --}}
+
 </body>
 </html>

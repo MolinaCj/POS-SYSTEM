@@ -14,8 +14,9 @@ class CreateEmployeesTable extends Migration
     public function up()
     {
         Schema::create('employees', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
+            $table->increments('employee_id');
+            $table->string('employee_name');
+            $table->string('username')->unique();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
@@ -23,17 +24,9 @@ class CreateEmployeesTable extends Migration
             $table->timestamps();
         });
     }
-    /**
-     * Reverse the migrations.
-     */
+
     public function down()
     {
         Schema::dropIfExists('employees');
     }
-
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
 }

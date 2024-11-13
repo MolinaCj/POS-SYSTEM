@@ -9,16 +9,22 @@
 </head>
 <body>
 <div class="container">
-  <form class="form" method="POST" action="{{route('loginform')}}">
+  <form class="form" method="POST" action="{{route('login')}}">
     {{ csrf_field() }}
     <p class="form-title">Sign in to your account</p>
         <div class="input-container">
-          <input type="email" placeholder="Enter email">
-          <span>
-          </span>
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" placeholder="Enter username" autocomplete="username">
+          @if ($errors->has('username'))
+        <span class="error">{{ $errors->first('username') }}</span>
+      @endif
       </div>
       <div class="input-container">
-          <input type="password" placeholder="Enter password">
+        <label for="password">Password</label>
+          <input id="password" name="password" type="password" placeholder="Enter password" autocomplete="current-password">
+          @if ($errors->has('password'))
+        <span class="error">{{ $errors->first('password') }}</span>
+      @endif
         </div>
          <button type="submit" class="submit">
         Sign in
@@ -26,9 +32,19 @@
 
       <p class="signup-link">
         No account?
-        <a href="{{route('regform')}}">Sign up</a>
+        <a href="{{route('regForm')}}">Sign up</a>
       </p>
   </form>
 </div>
+<script>
+  window.onload = function() {
+    let notification = document.querySelector('.notification');
+    if (notification) {
+        setTimeout(function() {
+            notification.classList.add('fade-out');
+        }, 5000); // 5 seconds before it fades out
+    }
+}
+</script>
 </body>
 </html>

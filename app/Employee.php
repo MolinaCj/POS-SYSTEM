@@ -14,8 +14,15 @@ class Employee extends Authenticatable
      *
      * @var array
      */
+
+     protected $table = 'employees';
+
     protected $fillable = [
-        'name', 'email', 'password',
+        'employee_name', 'username', 'email', 'password',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
     ];
 
     /**
