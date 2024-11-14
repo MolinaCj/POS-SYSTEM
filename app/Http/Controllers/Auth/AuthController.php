@@ -1,16 +1,16 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-use Illuminate\Support\Facades\Log;
-
-use App\Employee;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Requests\RegisterRequest;
+
 use App\Http\Requests\LoginRequest;
-use Illuminate\Support\Facades\Auth; // Ensure this line is included
-use App\Http\Controllers\ProductController;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Controllers\ProductController;
+use Illuminate\Support\Facades\Auth; // Ensure this line is included
 
 class AuthController extends Controller
 {
@@ -22,7 +22,6 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
-        // The request is automatically validated before this method is called
         $credentials = $request->only('username', 'password');
 
         if (Auth::attempt($credentials)) {
@@ -30,8 +29,20 @@ class AuthController extends Controller
             return redirect()->intended('/products');
         }
 
-        // Redirect back with an error if login fails
         return back()->withErrors(['username' => 'Invalid username or password.']);
+
+        // $credentials = $request->only('username', 'password');
+    
+        // if (Auth::guard('users')->attempt($credentials)) {
+        //      [
+        //         'username' => Auth::guard('users')->user()->username,
+        //         'employee_name' => Auth::guard('users')->user()->employee_name
+        //     ];
+        //     // Redirect to the intended route or to the products view
+        //     return redirect()->intended('/products');
+        // }
+    
+        // return back()->withErrors(['username' => 'Invalid username or password.']);
     }
 
     // Show the registration form
@@ -45,10 +56,8 @@ class AuthController extends Controller
 {
     // The validation is automatically handled by the RegisterRequest class
 
-    Log::info($request->all());
-
     // Create the user
-    Employee::create([
+    User::create([
         'employee_name' => $request->input('employee_name'),
         'username' => $request->input('username'),
         'email' => $request->input('email'),

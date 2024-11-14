@@ -130,38 +130,39 @@
                     </form>
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
-                            const searchInput = document.getElementById('searchInput'); // The search input
-                            const searchButton = document.getElementById('searchButton'); // The search button
-                            const productTableBody = document.querySelector('#productsTable tbody'); // The table body for products
-
+                            const searchInput = document.getElementById('searchInput');
+                            const searchButton = document.getElementById('searchButton');
+                            const productTableBody = document.querySelector('#productsTable tbody');
+                            const paginationContainer = document.getElementById('pagination');
+                            let currentPage = 1;
+                            let currentQuery = '';
+                                            
                             // Add an event listener to the search button
                             searchButton.addEventListener('click', function (event) {
-                                event.preventDefault(); // Prevent the form from submitting the default way
-                                const query = searchInput.value.trim(); // Get the search query
-                                fetchProducts(query); // Fetch products based on the search query
+                                event.preventDefault();
+                                currentQuery = searchInput.value.trim(); // Update current query
+                                fetchProducts(currentQuery, 1); // Reset to page 1 for new search
                             });
                         
-                            // Add an event listener to the input field to handle clearing the search
+                            // Event listener for clearing the search input
                             searchInput.addEventListener('input', function () {
                                 const query = searchInput.value.trim();
                                 if (!query) {
-                                    fetchProducts(''); // Fetch all products if the input is cleared
+                                    currentQuery = ''; // Reset query
+                                    fetchProducts('', 1); // Fetch all products on page 1
                                 }
                             });
                         
-                            // Function to fetch products based on the search query
-                            function fetchProducts(query) {
-                                // Send an AJAX request to the controller to get the filtered products
-                                fetch(`/search-products?searchProducts=${query}`)
+                            // Function to fetch products based on the search query and page
+                            function fetchProducts(query = '', page = 1) {
+                                currentPage = page;
+                                productTableBody.innerHTML = ''; // Clear existing rows
+                            
+                                fetch(`/search-products?searchProducts=${query}&page=${page}`)
                                     .then(response => response.json())
                                     .then(data => {
-                                        // Clear the existing table rows
-                                        productTableBody.innerHTML = '';
-                                    
-                                        // Check if any products were returned
-                                        if (data.products && data.products.length > 0) {
-                                            // Add each product to the table
-                                            data.products.forEach(product => {
+                                        if (data.products && data.products.data.length > 0) {
+                                            data.products.data.forEach(product => {
                                                 const row = document.createElement('tr');
                                                 row.innerHTML = `
                                                     <td>${product.id}</td>
@@ -185,8 +186,8 @@
                                                 `;
                                                 productTableBody.appendChild(row);
                                             });
+                                            renderPaginationButtons(data.products); // Render pagination buttons
                                         } else {
-                                            // If no products were found, display a message
                                             const row = document.createElement('tr');
                                             row.innerHTML = '<td colspan="7">No products found</td>';
                                             productTableBody.appendChild(row);
@@ -340,7 +341,7 @@
                         </tbody>
                     </table>
                     </div>
-                    <ul class="pagination">
+                    <ul id="pagination" class="pagination">
                         {{-- {{ $products->links() }} --}}
                         {{ $products->appends(request()->query())->links() }}
                     </ul>
@@ -394,7 +395,7 @@
     <section id="sec2" class="section-2">
         <div class="item-list">
         <div class="cashier">
-            <h1 class="cashier-1">Cashier 1</h1>
+            <h1 class="cashier-1">{{ auth()->check() ? auth()->user()->username : 'Guest' }}</h1>
             <form action="" method="GET">
                 <div class="ewan">
                     <input id="search-2" class="srch-2" type="text" name="query" placeholder="Search by code or product" required>
@@ -668,6 +669,10 @@
     <!-- Receipt Modal -->
     <div id="receiptModal" class="receipt_modal" style="display:none;">
         <div class="receipt-modal-content">
+
+             <!-- Close Button -->
+        <span style="cursor: pointer;" class="receipt-close-btn" onclick="receiptcloseModal('receiptModal')">&times;</span>
+
             <div class="receipt-scrollable">
                 <!-- Receipt Header -->
                 <div class="receipt-header">
@@ -675,7 +680,7 @@
                     <p>123 Main St, City, Country</p>
                     <p>Reference No: <span id="receiptReferenceNo">{{ isset($reference_no) ? $reference_no : 'N/A' }}</span></p>
                     <p>Date: <span id="receiptDateTime">{{ $currentDate }}</span></p>
-                    <p>Cashier: <span id="receiptCashierName">{{ Auth::user() ? Auth::user()->name : 'N/A' }}</span></p>
+                    <p>Cashier: <span id="receiptCashierName">{{ Auth::user() ? Auth::user()->username : 'N/A' }}</span></p>
                 </div>
             
                 <!-- Receipt Table -->
@@ -761,6 +766,7 @@
             }
             const referenceNo = document.getElementById('receiptReferenceNo').textContent.trim();
             const netAmount = parseFloat(document.getElementById('receiptNetAmount').textContent.replace('₱', ''));
+            const tax = parseFloat(document.getElementById('receiptTax').textContent.replace('₱', ''));
             const amountPayable = parseFloat(document.getElementById('receiptAmountPayable').textContent.replace('₱', ''));
             const changeAmount = parseFloat(document.getElementById('receiptChange').textContent.replace('₱', ''));
             const cashAmount = parseFloat(document.getElementById('receiptCashAmount').textContent.replace('₱', ''));
@@ -769,6 +775,7 @@
             console.log("Receipt details:");
             console.log("Reference No:", referenceNo);
             console.log("Net Amount:", netAmount);
+            console.log("Tax:", tax);
             console.log("Amount Payable:", amountPayable);
             console.log("Change Amount:", changeAmount);
             console.log("Cash Amount:", cashAmount);
@@ -784,6 +791,7 @@
                     reference_no: referenceNo,
                     items: items,
                     net_amount: netAmount,
+                    tax: tax,
                     amount_payable: amountPayable,
                     change_amount: changeAmount,
                     cash_amount: cashAmount,
@@ -840,6 +848,9 @@
             `);
             newWindow.document.close();
         }
+        function receiptcloseModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
     </script>    
     </section>
 
@@ -862,24 +873,139 @@
                 </div>
 
                 <!-- History Content -->
-                <div class="history-content">
+                <div class="history-content" style="max-height: 800px;">
                         <!-- Products Table for Each Transaction -->
-                        <table class="history-table" style="width: 100%; border-collapse: collapse; margin-top: -20px; padding-top: 20px;  ">
+                        @php
+                            // Group histories by reference_no
+                            $groupedHistories = $histories->groupBy('reference_no');
+                        @endphp
+
+                        <table class="history-table" style="width: 100%; border-collapse: collapse; margin-top: -20px; padding-top: 20px;">
                             <thead>
                                 <tr style="background-color: #f2f2f2;">
-                                    <th style="border: 1px solid #ccc; padding: 8px;">Product Name</th>
-                                    <th style="border: 1px solid #ccc; padding: 8px;">Quantity</th>
-                                    <th style="border: 1px solid #ccc; padding: 8px;">Unit Price</th>
-                                    <th style="border: 1px solid #ccc; padding: 8px;">Total Price</th>
+                                    <th style="border: 1px solid #ccc; padding: 8px;">Reference No</th>
+                                    <th style="border: 1px solid #ccc; padding: 8px;">Date</th>
+                                    <th style="border: 1px solid #ccc; padding: 8px;">Items</th>
+                                    <th style="border: 1px solid #ccc; padding: 8px;">Amount Payable</th>
+                                    <th style="border: 1px solid #ccc; padding: 8px;">Cash Amount</th>
+                                    <th style="border: 1px solid #ccc; padding: 8px;">Change</th>
+                                    <th style="border: 1px solid #ccc; padding: 8px;">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($histories as $history)
-                                    <tr>
-                                        <td style="border: 1px solid #ccc; padding: 8px;">{{ $history->item_name }}</td>
-                                        <td style="border: 1px solid #ccc; padding: 8px;">{{ $history->quantity }}</td>
-                                        <td style="border: 1px solid #ccc; padding: 8px;">₱{{ number_format($history->unit_price, 2) }}</td>
-                                        <td style="border: 1px solid #ccc; padding: 8px;">₱{{ number_format($history->total_price, 2) }}</td>
+                                @foreach ($groupedHistories as $referenceNo => $transactionProducts)
+                                    <!-- Transaction Header Row -->
+                                    <tr style="background-color: #f9f9f9;">
+                                        <td style="border: 1px solid #ccc;">{{ $referenceNo }}</td>
+                                        <td style="border: 1px solid #ccc;">{{ $transactionProducts->first()->timestamp}}</td>
+                                        <td style="border: 1px solid #ccc;">
+                                            <!-- List of product names -->
+                                            <ul style="list-style: none; padding-left: 0; margin: 0; height: 100px; overflow-y: auto; display: block;">
+                                                @foreach ($transactionProducts as $product)
+                                                    <li>{{ $product->item_name }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </td>
+                                        <td style="border: 1px solid #ccc;">₱{{ number_format($transactionProducts->first()->amount_payable, 2) }}</td>
+                                        <td style="border: 1px solid #ccc;">₱{{ number_format($transactionProducts->first()->cash_amount, 2) }}</td>
+                                        <td style="border: 1px solid #ccc;">₱{{ number_format($transactionProducts->first()->change_amount, 2) }}</td>
+                                        <!-- Action Column with "See Details" Button -->
+                                        <td style="border: 1px solid #ccc; text-align: center;">
+                                            
+                                            <!-- Modal HTML Structure -->
+                                            <div id="transactionDetailsModal" class="modal custom-modal">
+                                                <div class="modal-content">
+                                                    <span class="close-btn">&times;</span>
+                                                    <h2>Transaction Details</h2>
+                                                    <div id="historyDetails"></div>
+                                                
+                                                    <h3>Detailed Product List for the Transaction</h3>
+                                                    <table id="productDetailsTable" style="width: 100%; border-collapse: collapse;">
+                                                        <thead>
+                                                            <tr style="background-color: #eaeaea;">
+                                                                <th style="border: 1px solid #ccc; padding: 8px; color:black;">Product Name</th>
+                                                                <th style="border: 1px solid #ccc; padding: 8px; color:black;">Quantity</th>
+                                                                <th style="border: 1px solid #ccc; padding: 8px; color:black;">Unit Price</th>
+                                                                <th style="border: 1px solid #ccc; padding: 8px; color:black;">Total Price</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <button class="see-details-btn" id="see-details-{{ $referenceNo }}" data-reference-no="{{ $referenceNo }}">
+                                                See Details
+                                            </button>
+                                            <script>
+                                                document.querySelectorAll('.see-details-btn').forEach(button => {
+                                                    button.addEventListener('click', function() {
+                                                        var referenceNo = this.getAttribute('data-reference-no');
+                                                    
+                                                        // Make an AJAX request to get the transaction details for the clicked reference number
+                                                        fetch(`/get-transaction-details/${referenceNo}`)
+                                                            .then(response => response.json())
+                                                            .then(data => {
+                                                                // Populate modal with the transaction details
+                                                                var modal = document.getElementById('transactionDetailsModal');
+                                                                var transactionDetailsContainer = document.getElementById('historyDetails');
+                                                                var productDetailsTable = document.getElementById('productDetailsTable').getElementsByTagName('tbody')[0];
+                                                            
+                                                                // Clear previous details
+                                                                transactionDetailsContainer.innerHTML = '';
+                                                                productDetailsTable.innerHTML = '';
+                                                            
+                                                                // Populate transaction details
+                                                                transactionDetailsContainer.innerHTML = `
+                                                                        <div class="historydetailscolumn">
+                                                                            <p><strong>Reference ID:</strong> ${data.reference_no}</p>
+                                                                            <p><strong>Timestamp:</strong> ${data.timestamp}</p>
+                                                                            <p><strong>Net Amount:</strong> ₱${data.net_amount}</p>
+                                                                            <p><strong>Tax:</strong> ₱${data.tax}</p>
+                                                                        </div>
+                                                                        <div class="historydetailscolumn2">
+                                                                            <p><strong>Amount Payable:</strong> ₱${data.amount_payable}</p>
+                                                                            <p><strong>Cash Amount:</strong> ₱${data.cash_amount}</p>
+                                                                            <p><strong>Change:</strong> ₱${data.change_amount}</p>
+                                                                            <p><strong>Employee Name:</strong> ${data.employee_name}</p>
+                                                                        </div>
+                                                                `;
+                                                            
+                                                                // Populate product details table
+                                                                data.products.forEach(product => {
+                                                                    var row = productDetailsTable.insertRow();
+                                                                    row.innerHTML = `
+                                                                        <td style="border: 1px solid #ccc; padding: 8px;">${product.item_name}</td>
+                                                                        <td style="border: 1px solid #ccc; padding: 8px;">${product.quantity}</td>
+                                                                        <td style="border: 1px solid #ccc; padding: 8px;">₱${product.unit_price}</td>
+                                                                        <td style="border: 1px solid #ccc; padding: 8px;">₱${product.total_price}</td>
+                                                                    `;
+                                                                });
+                                                            
+                                                                // Show the modal
+                                                                modal.style.display = 'block';
+                                                            })
+                                                            .catch(error => {
+                                                                console.error('Error fetching transaction details:', error);
+                                                            });
+                                                    });
+                                                });
+
+                                                // Close the modal when the user clicks on the close button
+                                                document.querySelector('.close-btn').addEventListener('click', function() {
+                                                    document.getElementById('transactionDetailsModal').style.display = 'none';
+                                                });
+
+                                                // Close the modal if the user clicks outside of it
+                                                window.onclick = function(event) {
+                                                    var modal = document.getElementById('transactionDetailsModal');
+                                                    if (event.target === modal) {
+                                                        modal.style.display = 'none';
+                                                    }
+                                                };
+                                            </script>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

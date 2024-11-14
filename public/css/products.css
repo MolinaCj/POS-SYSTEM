@@ -1233,7 +1233,6 @@ tr:hover td:nth-child(-n+6) {
     font-weight: bold;
     z-index: 1;
 }
-
 .history-table tbody {
     width: 100%;
     max-height: 500px;
@@ -1245,6 +1244,9 @@ tr:hover td:nth-child(-n+6) {
     display: table;
     table-layout: fixed;
     width: 100%;
+}
+.history-table:hover{
+    background-color: rgb(204, 204, 204);
 }
 
 /* .history-header p {
@@ -1349,6 +1351,149 @@ tr:hover td:nth-child(-n+6) {
 .return-btn:active {
     background-color: #cc0000; /* Even darker red for active press */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Return to slight shadow */
+}
+
+/*See history details css*/
+.see-details-btn {
+    background-color: #007bff; /* Primary blue color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Slight shadow for depth */
+}
+
+/* Hover effect */
+.see-details-btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
+    transform: translateY(-2px); /* Slightly raise on hover */
+}
+
+/* Active button effect */
+.see-details-btn:active {
+    background-color: #004085; /* Darker blue on active */
+    transform: translateY(0); /* Button resets position when clicked */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Specific Modal styles for the Transaction Details Modal */
+#transactionDetailsModal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 10; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+
+/* Modal content styles - shorter and wider */
+#transactionDetailsModal .modal-content {
+    background-color: #fff;
+    margin: 10% auto; /* Closer to the top */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%; /* Increased width for a wider modal */
+    max-width: 1200px; /* Limit max width on larger screens */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+/* Close button styles */
+#transactionDetailsModal .close-btn {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px; /* Position close button closer to the top */
+    right: 15px;
+}
+
+#transactionDetailsModal .close-btn:hover,
+#transactionDetailsModal .close-btn:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Modal header and content styling */
+#transactionDetailsModal h2,
+#transactionDetailsModal h3 {
+    margin: 10px 0;
+    text-align: center;
+}
+#transactionDetailsModal h3 {
+    margin: 10px 0;
+    text-align: left;
+}
+
+/* Modal table styles */
+#transactionDetailsModal table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+#transactionDetailsModal table th, 
+#transactionDetailsModal table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+#transactionDetailsModal table th {
+    background-color: #eaeaea;
+    font-weight: bold;
+}
+    #historyDetails{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        width: 100%;
+    }
+
+/* Horizontal grid layout for transaction details */
+.history-details-horizontal {
+    display: flex;
+    flex-direction: row; /* Display as a flex container */
+    gap: 20px; /* Space between the columns */
+    margin-top: 20px;
+    flex-wrap: wrap; /* Allows items to wrap in case of small screen sizes */
+    width: 100%;
+}
+
+.historydetailscolumn {
+    width: 40%; /* Adjust width to ensure columns fit within container */
+    box-sizing: border-box; /* Ensure padding and border are included in width calculation */
+}
+.historydetailscolumn2 {
+    width: 40%; /* Adjust width to ensure columns fit within container */
+    box-sizing: border-box; /* Ensure padding and border are included in width calculation */
+}
+
+.historydetailscolumn p {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 5px 0; /* Space between items */
+    text-align: left;
+}
+.historydetailscolumn2 p {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 5px 0; /* Space between items */
+    text-align: left;
 }
 
 

@@ -1,6 +1,7 @@
 <?php
 
 use illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
@@ -11,9 +12,14 @@ use App\Http\Controllers\CustomAuthController;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('loginform');
 });
 
+Route::get('/products', function () {
+    return view('loginform');
+})->middleware('auth');
+
+Auth::user(); // This will return the authenticated user
 
 //Connecting the route and controller
 Route::resource('products', 'ProductController');
@@ -73,6 +79,10 @@ Route::post('/register', 'Auth\AuthController@register')->name('register');
 
 //Route for logout
 Route::post('/logout', 'Auth\AuthController@logout')->name('logout');
+
+//SEE TRANSACTION DETAILS ROUTE
+Route::get('/get-transaction-details/{referenceNo}', 'ProductController@getTransactionDetails');
+
 
 //Add to transaction route
 // Route::post('/transactions', 'TransactionController@transfer')->name('transactions.store');

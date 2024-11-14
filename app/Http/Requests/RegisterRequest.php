@@ -26,8 +26,8 @@ class RegisterRequest extends FormRequest
         return [
             //'employee_id' => 'required|string|max:255|unique:employees,employee_id', // Unique employee_id
             'employee_name' => 'required|string|max:255', // Employee name
-            'username' => 'required|string|max:191|unique:employees,username',
-            'email' => 'required|string|email|max:255|unique:employees,email', // Unique email
+            'username' => 'required|string|max:191|unique:users,username',
+            'email' => 'required|string|email|max:255|unique:users,email', // Unique email
             'email_verified_at' => 'nullable|date', // Nullable date for email verification
             'password' => 'required|string|min:8|confirmed', // Password with confirmation field
             'remember_token' => 'nullable|string|max:100', // Optional remember_token

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Employee;
 use Illuminate\Support\Facades\Log;
 
 use App\Http\Requests\StoreProductRequest;
@@ -222,6 +223,7 @@ class ProductController extends Controller
         // Update stock and save product
         $product->stocks -= $request->input('quantity');
         $product->save();
+
     
         // Create transaction
         $transaction = new Transaction();
@@ -330,8 +332,6 @@ class ProductController extends Controller
             // Reset reference_no in session for next transaction
             session()->forget(['reference_no', 'net_amount', 'tax', 'amount_payable']);
 
-            Log::info(session()->all());
-
             return response()->json(['status' => 'success', 'message' => 'Receipt saved successfully!']);
             } catch (\Exception $e) {
                 return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
@@ -342,16 +342,29 @@ class ProductController extends Controller
     public function searchProducts(Request $request)
     {
         $search = $request->get('searchProducts');
+        $productsQuery = Product::query();
     
+        // Add search filtering if a search term is provided
         if ($search) {
-            $products = Product::where('item_name', 'LIKE', "%$search%")
-                                ->orWhere('barcode', 'LIKE', "%$search%")
-                                ->get();
-        } else {
-            $products = Product::paginate(12); // Return all products if no search term is provided
+            $productsQuery->where('item_name', 'LIKE', "%{$search}%")
+                          ->orWhere('barcode', 'LIKE', "%{$search}%");
         }
     
+        // Paginate the query result
+        $products = $productsQuery->paginate(12);
+    
         return response()->json(['products' => $products]);
+        // $search = $request->get('searchProducts');
+    
+        // if ($search) {
+        //     $products = Product::where('item_name', 'LIKE', "%$search%")
+        //                         ->orWhere('barcode', 'LIKE', "%$search%")
+        //                         ->get();
+        // } else {
+        //     $products = Product::paginate(12); // Return all products if no search term is provided
+        // }
+    
+        // return response()->json(['products' => $products]);
 
 
         // $query = $request->input('searchProducts');

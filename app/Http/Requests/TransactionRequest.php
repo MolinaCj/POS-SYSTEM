@@ -15,6 +15,7 @@ class TransactionRequest extends FormRequest
     {
         return [
             'product_id' => 'required|integer',
+            // 'employee_name' => 'required|string',
             'item_name' => 'required|string|max:255',
             'quantity' => 'required|integer|min:1',
             'unit_price' => ['required', 'regex:/^\d+(\.\d{1,2})?$/', 'min:0'],

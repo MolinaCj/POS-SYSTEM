@@ -25,7 +25,7 @@ class RegisterController extends Controller
         // The request has already been validated by RegisterRequest
 
         // Create the new employee
-        $employee = Employee::create([
+        $user = User::create([
             'employee_id' => $request->input('employee_id'),
             'employee_name' => $request->input('employee_name'),
             'username' => $request->input('username'),

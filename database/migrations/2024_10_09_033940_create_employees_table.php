@@ -13,7 +13,7 @@ class CreateEmployeesTable extends Migration
      */
     public function up()
     {
-        Schema::create('employees', function (Blueprint $table) {
+        Schema::create('users', function (Blueprint $table) {
             $table->increments('employee_id');
             $table->string('employee_name');
             $table->string('username')->unique();
@@ -27,6 +27,6 @@ class CreateEmployeesTable extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('employees');
+        Schema::dropIfExists('users');
     }
 }
