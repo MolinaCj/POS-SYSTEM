@@ -396,12 +396,159 @@
         <div class="item-list">
         <div class="cashier">
             <h1 class="cashier-1">{{ auth()->check() ? auth()->user()->username : 'Guest' }}</h1>
-            <form action="" method="GET">
+            <form action="sales-search-form" method="GET">
                 <div class="ewan">
                     <input id="searchSales" class="srch-2" type="text" name="query" placeholder="Search by code or product" required>
                     <div id="results" class="dropdown-results"></div>
                 </div>
             </form>
+
+            {{-- adding quantity modal --}}
+            <div id="quantity-modal" style="display: none; position: fixed; top: 30%; left: 50%; transform: translate(-50%, -30%); background: white; border: 1px solid #ccc; padding: 20px; z-index: 1000; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+                <h3>Enter Quantity</h3>
+                <input type="number" id="quantity-input" value="1" min="1" style="width: 100px; margin-bottom: 10px;">
+                <br>
+                <button id="add-to-transaction-table">Add</button>
+                <button id="quantity-close-modal">Close</button>
+            </div>
+            <div id="quanity-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+            
+            <script>
+                $(document).ready(function() {
+                    let selectedProductId = null;
+
+                    // Prevent form submission
+                    $('#sales-search-form').on('submit', function(e) {
+                        e.preventDefault();
+                    });
+                
+                    // Handle input for searching sales
+                    $('#searchSales').on('keyup', function() {
+                        let query = $(this).val(); // Get input value
+                    
+                        if (query.length > 0) {
+                            $.ajax({
+                                url: '/search-sales',
+                                method: 'GET',
+                                data: { query: query },
+                                success: function(data) {
+                                    $('#results').empty().show(); // Show results dropdown
+                                    if (data.length > 0) {
+                                        data.forEach(function(product) {
+                                            $('#results').append(`<div class="result-item" data-id="${product.id}">${product.item_name}</div>`);
+                                        });
+                                    } else {
+                                        $('#results').append('<div>No results found</div>'); // Optional message for no results
+                                    }
+                                }
+                            });
+                        } else {
+                            $('#results').empty().hide(); // Hide results if no input
+                        }
+                    });
+                
+                    // When a search result is clicked, show the modal
+                    $('#results').on('click', '.result-item', function() {
+                        selectedProductId = $(this).data('id'); // Save the selected product ID
+                        $('#quantity-modal').fadeIn();
+                        $('#quantity-modal-overlay').fadeIn();
+                    });
+
+                    // When "Enter" is pressed in the search field, show the modal (without submitting the form)
+                    $('#searchSales').on('keypress', function(e) {
+                        if (e.which == 32) { // 13 is the keycode for "Enter"
+                            e.preventDefault(); // Prevent form submission
+                            if ($('#results .result-item').length > 0) {
+                                // Select the first product from the search results and show the modal
+                                selectedProductId = $('#results .result-item').first().data('id');
+                                $('#quantity-modal').fadeIn();
+                                $('#modal-overlay').fadeIn();
+                            }
+                        }
+                    });
+                
+                    // Close the modal
+                    $('#quantity-close-modal').on('click', function() {
+                        $('#quantity-modal').fadeOut();
+                        $('#quantity-modal-overlay').fadeOut();
+                    });
+                
+                    // Add to transaction when "Add" button is clicked
+                    $('#add-to-transaction-table').on('click', function() {
+                        let quantity = $('#quantity-input').val();
+
+                        console.log("Add button clicked"); // Debugging
+                        console.log("Quantity: " + quantity); // Debugging
+                    
+                        if (!selectedProductId || quantity <= 0) {
+                            alert('Invalid product or quantity!');
+                            return;
+                        }
+                    
+                        $.ajax({
+                            url: '/add-to-transaction',
+                            method: 'POST',
+                            data: {
+                                product_id: selectedProductId,
+                                quantity: quantity,
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    alert('Product added to transaction!');
+                                    $('#quantity-modal').fadeOut();
+                                    $('#modal-overlay').fadeOut();
+                                    $('#results').empty().hide();
+                                    $('#searchSales').val('');
+                                    // Refresh the page
+                                    location.reload();
+                                } else {
+                                    alert('Failed to add product: ' + response.message);
+                                }
+                            }
+                        });
+                    });
+                    
+                    // Trigger "Add" button click when "Enter" is pressed
+                    $('#quantity-input').on('keypress', function(e) {
+                        if (e.which === 13) { // Enter key
+                            e.preventDefault();
+                            $('#add-to-transaction-table').click();
+                        }
+                    });
+                });
+                // $(document).ready(function() {
+                //     // Prevent form submission
+                //     $('#sales-search-form').on('submit', function(e) {
+                //         e.preventDefault();
+                //     });
+            
+                //     // Handle input for searching sales
+                //     $('#searchSales').on('keyup', function() {
+                //         let query = $(this).val(); // Get input value
+            
+                //         if (query.length > 0) {
+                //             $.ajax({
+                //                 url: '/search-sales',
+                //                 method: 'GET',
+                //                 data: { query: query },
+                //                 success: function(data) {
+                //                     $('#results').empty().show(); // Show results dropdown
+                //                     if (data.length > 0) {
+                //                         data.forEach(function(product) {
+                //                             $('#results').append(`<div class="result-item" data-id="${product.id}">${product.item_name}</div>`);
+                //                         });
+                //                     } else {
+                //                         $('#results').append('<div>No results found</div>'); // Optional message for no results
+                //                     }
+                //                 }
+                //             });
+                //         } else {
+                //             $('#results').empty().hide(); // Hide results if no input
+                //         }
+                //     });
+                // });
+            </script>
         </div>
         <div class="cont-2">
             <div class="tbl-2">
@@ -668,7 +815,7 @@
         <div class="receipt-modal-content">
 
              <!-- Close Button -->
-        <span style="cursor: pointer;" class="receipt-close-btn" onclick="receiptcloseModal('receiptModal')">&times;</span>
+        <span style="cursor: pointer;" id="receipt-close-btn" class="no-print" onclick="receiptcloseModal('receiptModal')">&times;</span>
 
             <div class="receipt-scrollable">
                 <!-- Receipt Header -->
@@ -705,7 +852,7 @@
                 </div>
             
                 <!-- Receipt Footer -->
-                <div class="receipt-footer">
+                <div id="receipt-footer">
                     <p>Thank you for shopping with us.</p>
                     <p>We are happy to serve you!!!</p>
                 </div>
@@ -713,8 +860,8 @@
         
             <!-- Modal Actions -->
             <div class="receipt-modal-actions">
-                <button class="print-receipt" onclick="printReceipt()">Print Receipt</button>
-                <button class="done-receipt" onclick="closeModal('receiptModal')">Done</button>
+                <button id="print-receipt" class="no-print" onclick="printReceipt()">Print Receipt</button>
+                <button id="done-receipt" class="no-print" onclick="closeModal('receiptModal')">Done</button>
             </div>
         </div>
     </div>
@@ -831,20 +978,31 @@
         }
 
         // Function to print the receipt
-        function printReceipt() {
-            console.log("Printing receipt...");
-            const receiptContent = document.querySelector('#receiptModal .receipt-scrollable').innerHTML;
-            const newWindow = window.open('', '_blank', 'width=600,height=800');
-            newWindow.document.write(`
-                <html>
-                <head><title>Print Receipt</title></head>
-                <body onload="window.print(); window.close();">
-                ${receiptContent}
-                </body>
-                </html>
-            `);
-            newWindow.document.close();
-        }
+         // Function to print the receipt
+         function printReceipt() {
+                // Hide elements that should not be printed
+                document.body.style.visibility = 'hidden';
+                document.getElementById('receiptModal').style.visibility = 'visible';
+
+                window.print();
+
+                // Restore the visibility of the page after printing
+                document.body.style.visibility = 'visible';
+            }
+        // function printReceipt() {
+        //     console.log("Printing receipt...");
+        //     const receiptContent = document.querySelector('#receiptModal .receipt-scrollable').innerHTML;
+        //     const newWindow = window.open('', '_blank', 'width=600,height=800');
+        //     newWindow.document.write(`
+        //         <html>
+        //         <head><title>Print Receipt</title></head>
+        //         <body onload="window.print(); window.close();">
+        //         ${receiptContent}
+        //         </body>
+        //         </html>
+        //     `);
+        //     newWindow.document.close();
+        // }
         function receiptcloseModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
@@ -871,12 +1029,12 @@
                             document.getElementById('searchDate').addEventListener('input', function() {
                                 filterTable();
                             });
-                            
+
                             // Function to filter table rows based on search input
                             document.getElementById('searchReference').addEventListener('input', function() {
                                 filterTable();
                             });
-                            
+
                             // Function to filter the table based on both date and reference number
                             function filterTable() {
                                 const selectedDate = document.getElementById('searchDate').value; // Get selected date in YYYY-MM-DD format

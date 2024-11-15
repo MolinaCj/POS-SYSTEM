@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\TransactionControllers;
 use App\Product;
 
 use App\Http\Controllers\CustomAuthController;
@@ -34,8 +35,8 @@ Route::post('/products/clear', 'ProductController@clear')->name('products.clear'
 Route::get('/search-products', 'ProductController@searchProducts')->name('search.products');
 
 //Adding and Search Route
-// Route::get('/search-transactions', 'ProductController@search');
-// Route::post('/add-to-transaction', 'TransactionController@add');
+Route::get('/search-sales', 'ProductController@searchSales');
+Route::post('/add-to-transaction', 'TransactionController@addToTransaction');
 
 //Clear all the dara in my transaction table
 Route::delete('transactions/delete-all', 'ProductController@deleteAllTransactions')->name('transactions.deleteAll');

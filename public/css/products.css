@@ -853,7 +853,7 @@ cont-3{
 /* Style for the searchSales input */
 #searchSales {
     height: 40px;
-    width: 25%; /* Make input take most of the space */
+    width: 25%; /* Adjusts input width */
     padding: 10px 40px 10px 20px;
     border: 1px solid #ccc;
     border-radius: 15px;
@@ -862,9 +862,8 @@ cont-3{
     transition: all 0.3s ease;
     box-sizing: border-box;
     margin-left: 50px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     margin-top: -100px;
-    padding-top: -50px;
 }
 
 /* Placeholder styling for searchSales */
@@ -878,37 +877,48 @@ cont-3{
     border-color: #007bff;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
-/* .srch-2{
-    background-color: white;
-    color: rgb(0, 0, 0);
-    margin-left: 50px;
-    margin-bottom: 50px;
-    margin-top: -10px;
-    padding-left: 10px;
-    width: 400px;
-    height: 50px;
-    border: 2px solid #000000;
-    border-radius: 15px;
-} */
+
 .dropdown-results {
     border: 1px solid #ccc;
     display: none; /* Initially hidden */
     position: absolute;
     background: white;
     z-index: 1000;
-    overflow: scroll;
-    width: 400px;
-    max-height: 300px;
+    overflow-y: auto; /* Scroll for overflow */
+    width: 375px;
+    max-height: 300px; /* Limits the height */
+    margin-left: 50px; /* Matches searchSales margin */
+    margin-top: 1px; /* Slight spacing below search input */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
 }
 
 .dropdown-results .result-item {
     padding: 10px;
     cursor: pointer;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+}
+
+.dropdown-results .result-item:last-child {
+    border-bottom: none; /* No border for the last item */
 }
 
 .dropdown-results .result-item:hover {
     background-color: #f0f0f0;
 }
+
+#quantity-modal {
+    border-radius: 10px;
+    text-align: center;
+    width: 300px;
+}
+
+#quantity-modal-overlay {
+    cursor: pointer;
+}
+
+
 .transac{
     background-color: white;
 }
@@ -1652,7 +1662,7 @@ tr:hover td:nth-child(-n+6) {
 
 /* Receipt header and footer styling */
 .receipt-header,
-.receipt-footer {
+#receipt-footer {
     text-align: center;
     margin-bottom: 15px;
 }
@@ -1716,18 +1726,18 @@ tr:hover td:nth-child(-n+6) {
     cursor: pointer;
     transition: background 0.2s;
 }
-.print-receipt{
+#print-receipt{
     background-color: #28a745;
     color: white;
 }
-.print-receipt:hover{
+#print-receipt:hover{
     background-color: #007bff;
 }
-.done-receipt{
+#done-receipt{
     background-color: #007bff;
     color: white;
 }
-.done-receipt:hover{
+#done-receipt:hover{
     background-color: #28a745;
 }
 /* Emphasize Amount Payable and Change */
@@ -1735,6 +1745,25 @@ tr:hover td:nth-child(-n+6) {
     font-size: 16px; /* Larger font size */
     font-weight: bold;
     color: black;
+}
+@media print {
+    /* Hide elements during print */
+    body {
+        overflow: hidden; /* Hide the scrollbar */
+    }
+
+    #receiptModal {
+        visibility: visible !important; /* Ensure the modal is visible */
+    }
+
+    #printButton {
+        display: none; /* Hide the print button during print */
+    }
+
+    /* Optionally, hide other elements you don't want to print */
+    .no-print {
+        display: none;
+    }
 }
 
 

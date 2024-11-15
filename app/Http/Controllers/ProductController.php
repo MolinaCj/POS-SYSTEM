@@ -376,11 +376,11 @@ class ProductController extends Controller
     }
 
     //This is the function for search
-     public function ssalesSearch(Request $request)
-     {
+    public function searchSales(Request $request)
+    {
         $query = $request->get('query');
         
-        $products = Product::where('barcode', 'LIKE', "%$query%")->get(['id', 'barcode']);
+        $products = Product::where('barcode', 'LIKE', "%$query%")->get(['id', 'item_name']);
         
         return response()->json($products);
     }
@@ -423,22 +423,4 @@ class ProductController extends Controller
     // If no history is found for the given reference number
     return response()->json(['message' => 'Transaction not found'], 404);
     }
-
-    //METHOD FOR THE DATE FILTER OF SALES HISTORY
-    // public function filterHistory(Request $request)
-    // {
-    //     $searchDate = $request->input('searchDate');
-
-    //     // Filter by date if a date is selected
-    //     $query = SalesHistory::query();
-
-    //     if ($searchDate) {
-    //         $query->whereDate('timestamp', $searchDate);
-    //     }
-
-    //     // Retrieve grouped history data
-    //     $groupedHistories = $query->get()->groupBy('reference_no');
-
-    //     return view('products', compact('groupedHistories'));
-    // }
 }
