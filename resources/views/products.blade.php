@@ -398,7 +398,7 @@
             <h1 class="cashier-1">{{ auth()->check() ? auth()->user()->username : 'Guest' }}</h1>
             <form action="" method="GET">
                 <div class="ewan">
-                    <input id="search-2" class="srch-2" type="text" name="query" placeholder="Search by code or product" required>
+                    <input id="searchSales" class="srch-2" type="text" name="query" placeholder="Search by code or product" required>
                     <div id="results" class="dropdown-results"></div>
                 </div>
             </form>
@@ -406,7 +406,7 @@
         <div class="cont-2">
             <div class="tbl-2">
                 <div class="sales-container" style="max-height: 600px; overflow-y: auto; display:block; width:100%;">
-                    <table class="sales-table" id="transaction-tbl border-collapse: collapse; border-spacing: 0; width: 800px">
+                    <table class="sales-table" id="transaction-tbl border-collapse: collapse; border-spacing: 0; width: 750px">
                         <thead style="background-color: rgb(1, 21, 112); color:white;">
                             <tr>
                                 <th style="position: sticky; top: 0; background-color: rgb(1, 21, 112); width: 130px; z-index: 1;">Item Name</th>
@@ -479,9 +479,6 @@
                     <h1 class="total">Amount Payable:</h1>
                     <h3 class="tot">₱{{ number_format(session('amount_payable', 0), 2) }}</h3>
             </div>
-        </div>
-        <div>
-            <button class="return-btn" style="margin-top: -10px; margin-right: 20px;">Return</button>
         </div>
     </div>
 
@@ -869,6 +866,38 @@
                     <div class="search-section" style="display: flex; margin-top: -10px; gap: 10px; padding: 20px; flex-direction: column;">
                         <input type="text" id="searchReference" placeholder="Search by Reference No" class="search-bar" style="padding: 5px;">
                         <input type="date" id="searchDate" class="search-bar" style="padding: 5px;">
+                        <script>
+                           // Function to filter table rows based on selected date
+                            document.getElementById('searchDate').addEventListener('input', function() {
+                                filterTable();
+                            });
+                            
+                            // Function to filter table rows based on search input
+                            document.getElementById('searchReference').addEventListener('input', function() {
+                                filterTable();
+                            });
+                            
+                            // Function to filter the table based on both date and reference number
+                            function filterTable() {
+                                const selectedDate = document.getElementById('searchDate').value; // Get selected date in YYYY-MM-DD format
+                                const searchQuery = document.getElementById('searchReference').value.toLowerCase(); // Get search reference text
+                                const rows = document.querySelectorAll('.transaction-row');
+                            
+                                rows.forEach(row => {
+                                    const transactionDate = row.querySelector('td:nth-child(2)').textContent.trim(); // Get the timestamp (date) from the second column
+                                    const rowDate = transactionDate.split(' ')[0]; // Extract the date (ignore time)
+                                
+                                    const referenceNo = row.querySelector('td:nth-child(1)').textContent.trim().toLowerCase(); // Get the reference number from the first column
+                                
+                                    // Apply both filters: date and reference number
+                                    if ((selectedDate === '' || rowDate === selectedDate) && (searchQuery === '' || referenceNo.includes(searchQuery))) {
+                                        row.style.display = ''; // Show row if both conditions match
+                                    } else {
+                                        row.style.display = 'none'; // Hide row if either condition doesn't match
+                                    }
+                                });
+                            }
+                        </script>
                     </div>
                 </div>
 
@@ -892,10 +921,10 @@
                                     <th style="border: 1px solid #ccc; padding: 8px;">Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="transactionTableBody">
                                 @foreach ($groupedHistories as $referenceNo => $transactionProducts)
                                     <!-- Transaction Header Row -->
-                                    <tr style="background-color: #f9f9f9;">
+                                    <tr style="background-color: #f9f9f9;" class="transaction-row" data-reference-no="{{ $referenceNo }}">
                                         <td style="border: 1px solid #ccc;">{{ $referenceNo }}</td>
                                         <td style="border: 1px solid #ccc;">{{ $transactionProducts->first()->timestamp}}</td>
                                         <td style="border: 1px solid #ccc;">

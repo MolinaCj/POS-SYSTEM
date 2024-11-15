@@ -52,9 +52,9 @@ class ProductController extends Controller
         $histories = SalesHistory::all();
 
         // Log key variables for debugging
-        Log::info('Products:', ['products' => $products]);
-        Log::info('Transactions:', ['transactions' => $transactions]);
-        Log::info('Histories:', ['histories' => $histories->toArray()]); // Log as an array to see contents
+        // Log::info('Products:', ['products' => $products]);
+        // Log::info('Transactions:', ['transactions' => $transactions]);
+        // Log::info('Histories:', ['histories' => $histories->toArray()]); // Log as an array to see contents
 
         
 
@@ -376,11 +376,11 @@ class ProductController extends Controller
     }
 
     //This is the function for search
-     public function search(Request $request)
+     public function ssalesSearch(Request $request)
      {
         $query = $request->get('query');
         
-        $products = Product::where('item_name', 'LIKE', "%$query%")->get(['id', 'item_name']);
+        $products = Product::where('barcode', 'LIKE', "%$query%")->get(['id', 'barcode']);
         
         return response()->json($products);
     }
@@ -409,7 +409,7 @@ class ProductController extends Controller
         // Return the transaction details along with products as a JSON response
         return response()->json([
             'reference_no' => $history->reference_no,
-            'timestamp' => $history->created_at,
+            'timestamp' => $history->timestamp,
             'net_amount' => $history->net_amount,
             'tax' => $history->tax,
             'amount_payable' => $history->amount_payable,
@@ -423,4 +423,22 @@ class ProductController extends Controller
     // If no history is found for the given reference number
     return response()->json(['message' => 'Transaction not found'], 404);
     }
+
+    //METHOD FOR THE DATE FILTER OF SALES HISTORY
+    // public function filterHistory(Request $request)
+    // {
+    //     $searchDate = $request->input('searchDate');
+
+    //     // Filter by date if a date is selected
+    //     $query = SalesHistory::query();
+
+    //     if ($searchDate) {
+    //         $query->whereDate('timestamp', $searchDate);
+    //     }
+
+    //     // Retrieve grouped history data
+    //     $groupedHistories = $query->get()->groupBy('reference_no');
+
+    //     return view('products', compact('groupedHistories'));
+    // }
 }

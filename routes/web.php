@@ -83,6 +83,10 @@ Route::post('/logout', 'Auth\AuthController@logout')->name('logout');
 //SEE TRANSACTION DETAILS ROUTE
 Route::get('/get-transaction-details/{referenceNo}', 'ProductController@getTransactionDetails');
 
+//FILTER THE SALES HISTORY BY DATE
+Route::get('/history/filter', 'ProductController@index')->name('history.filter');
+
+
 
 //Add to transaction route
 // Route::post('/transactions', 'TransactionController@transfer')->name('transactions.store');
