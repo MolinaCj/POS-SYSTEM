@@ -42,4 +42,31 @@ class TransactionController extends Controller
 
     return response()->json(['success' => true]);
     }
+
+    public function updateSalesQuantity(Request $request, $id)
+    {
+        $transaction = Transaction::where('transaction_id', $id)->firstOrFail();
+
+        // Calculate the quantity difference
+        $quantityDifference = $request->quantity - $transaction->quantity;
+    
+        // Update product stock
+        $product = Product::where('id', $transaction->product_id)->firstOrFail();
+        $product->stocks -= $quantityDifference;
+        $product->save();
+    
+        // Update transaction quantity
+        $transaction->quantity = $request->quantity;
+        $transaction->total_price = $transaction->quantity * $transaction->unit_price;
+        $transaction->save();
+    
+        // Return updated stock value
+        return response()->json([
+            'success' => true,
+            'message' => 'Quantity updated successfully.',
+            'product_id' => $product->id,
+            'new_stock' => $product->stocks,
+            'new_total_price' => $transaction->total_price,
+        ]);
+    }
 }

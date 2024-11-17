@@ -252,13 +252,13 @@
                                 <td>{{ $product->id }}</td>
                                 <td>{{ $product->barcode }}</td>
                                 <td>{{ $product->item_name }}</td>
-                                <td>{{ $product->stocks }}</td>
+                                <td id="stocks-{{ $product->id }}">{{ $product->stocks }}</td>
                                 <td>
                                     {{-- <input class="quantity" type="number" name="quantity[{{ $product->id }}]" value="1" min="1" style="width: 50px;" onchange="updateHiddenQuantity(this)"> --}}
                                     <input class="quantity" type="number" name="quantity[{{ $product->id }}]" value="1" min="1" style="width: 50px;" onchange="updateHiddenQuantity(this, {{ $product->id }})">
                                 </td>
                                 {{-- <td>{{ $product->quantity}}</td> --}}
-                                <td>{{ $product->price }}</td>
+                                <td>₱{{ $product->price }}</td>
                                 <td style="display: flex;">
                                     <!-- Edit Button -->
                                         <a href="javascript:void(0);" class="edit-button"
@@ -576,10 +576,19 @@
                                 <td style="width: 20px margin: 0;">{{ $transaction->item_name }}</td>
                                 <td>
                                     {{-- {{ $transaction->quantity }} --}}
-                                    <input class="quantity" type="number" name="quantity[{{ $product->id }}]" value="{{ $transaction->quantity }}" min="1" style="width: 50px">
+                                    {{-- <input class="quantity" type="number" name="quantity[{{ $product->id }}]" value="{{ $transaction->quantity }}" min="1" style="width: 50px"> --}}
+                                    <input 
+                                        class="quantity" 
+                                        type="number" 
+                                        name="quantity[{{ $product->id }}]" 
+                                        value="{{ $transaction->quantity }}" 
+                                        min="1" 
+                                        style="width: 50px" 
+                                        data-id="{{ $transaction->transaction_id }}"
+                                    >
                                 </td>
-                                <td style="margin: 0;">{{ $transaction->unit_price }}</td>
-                                <td style="margin: 0;">{{ $transaction->total_price }}</td>
+                                <td style="margin: 0;">₱{{ $transaction->unit_price }}</td>
+                                <td id="total-price-{{ $transaction->transaction_id }}" style="margin: 0;">₱{{ $transaction->total_price }}</td>
                                 <td style="display: flex; margin:0;">
                                     <form action="">
                                         <button></button>
@@ -597,7 +606,87 @@
                             @endphp
                         @endforeach
                     </tbody>
-                </table>     
+                </table>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        // Attach event listener to all quantity input fields
+                        document.querySelectorAll('.quantity').forEach(input => {
+                            input.addEventListener('change', function () {
+                                const transactionId = this.getAttribute('data-id'); // Get transaction ID
+                                const newQuantity = this.value; // Get the new quantity
+
+                                // Send AJAX request to update the quantity in the database
+                                updateQuantity(transactionId, newQuantity, this);
+                            });
+                        });
+                    
+                        function updateQuantity(transactionId, quantity, inputElement) {
+                            fetch(`/transactions/${transactionId}`, {
+                                method: 'PUT', // Use PUT for updating
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                },
+                                body: JSON.stringify({ quantity: quantity }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    console.log('Quantity updated successfully!');
+
+                                     // Dynamically update the total price and stock on the page
+                                    const totalPriceElement = document.querySelector(`#total-price-${transactionId}`);
+                                    if (totalPriceElement) {
+                                        totalPriceElement.textContent = `₱${data.new_total_price.toFixed(2)}`;
+                                    }
+                                
+                                    // Optionally update stock values or other UI elements dynamically
+                                    const stockElement = document.querySelector(`#stocks-${data.product_id}`);
+                                    if (stockElement) {
+                                        stockElement.textContent = data.new_stock; // Update stock display
+                                    }
+                                
+                                    inputElement.value = quantity; // Reflect the updated quantity
+                                } else {
+                                    alert(data.message || 'Error updating quantity.');
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                        }
+                    });
+                    // document.addEventListener('DOMContentLoaded', function () {
+                    //     // Attach event listener to all quantity input fields
+                    //     document.querySelectorAll('.quantity').forEach(input => {
+                    //         input.addEventListener('change', function () {
+                    //             const transactionId = this.getAttribute('data-id'); // Get transaction ID
+                    //             const newQuantity = this.value; // Get the new quantity
+                            
+                    //             // Send AJAX request to update the quantity in the database
+                    //             updateQuantity(transactionId, newQuantity);
+                    //         });
+                    //     });
+                    
+                    //     function updateQuantity(transactionId, quantity) {
+                    //         fetch(`/transactions/${transactionId}`, {
+                    //             method: 'PUT', // Use PUT for updating
+                    //             headers: {
+                    //                 'Content-Type': 'application/json',
+                    //                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    //             },
+                    //             body: JSON.stringify({ quantity: quantity }),
+                    //         })
+                    //         .then(response => response.json())
+                    //         .then(data => {
+                    //             if (data.success) {
+                    //                 console.log('Quantity updated successfully!');
+                    //             } else {
+                    //                 alert('Error updating quantity.');
+                    //             }
+                    //         })
+                    //         .catch(error => console.error('Error:', error));
+                    //     }
+                    // });
+                </script>     
                 </div>         
             </div>
         <div class="cont-3" style="display: flex; flex-direction: column;">

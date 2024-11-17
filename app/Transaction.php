@@ -23,8 +23,10 @@ class Transaction extends Model
     ];
     protected $primaryKey = 'transaction_id';
     protected $dates = ['created_at', 'updated_at'];
+
+    //RELATION BETWEEN TRANSACTION PRODUCT_ID AND PRODUCTS ID
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'products_id', 'id');
     }
 }

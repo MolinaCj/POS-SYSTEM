@@ -34,10 +34,6 @@ Route::post('/products/clear', 'ProductController@clear')->name('products.clear'
 //Search route for the list of products
 Route::get('/search-products', 'ProductController@searchProducts')->name('search.products');
 
-//Adding and Search Route
-Route::get('/search-sales', 'ProductController@searchSales');
-Route::post('/add-to-transaction', 'TransactionController@addToTransaction');
-
 //Clear all the dara in my transaction table
 Route::delete('transactions/delete-all', 'ProductController@deleteAllTransactions')->name('transactions.deleteAll');
 
@@ -86,6 +82,14 @@ Route::get('/get-transaction-details/{referenceNo}', 'ProductController@getTrans
 
 //FILTER THE SALES HISTORY BY DATE
 Route::get('/history/filter', 'ProductController@index')->name('history.filter');
+
+//ROUTES USING THE TRANSACTION CONTROLLER
+//ADDING AND SEARCH ROUTE FOR SALE TABLE
+Route::get('/search-sales', 'ProductController@searchSales');
+Route::post('/add-to-transaction', 'TransactionController@addToTransaction');
+
+//LISTEN TO THE UPDATE IN QUANITY ON MY SALES TABLE
+Route::put('/transactions/{transaction_id}', 'TransactionController@updateSalesQuantity')->name('transactions.quantity.update');
 
 
 
