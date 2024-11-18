@@ -416,6 +416,9 @@ tr:hover td:nth-child(-n+6) {
 .edit:hover, .delete:hover {
     background-color: #15177a; 
 }
+.deleteTransac:hover {
+    background-color: #15177a; 
+}
 .quantity{
     border: none;
 }
@@ -481,6 +484,12 @@ tr:hover td:nth-child(-n+6) {
     transform: scale(1.1);
 } */
 .delete{   
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.deleteTransac{   
     border: none;
     background-color: transparent;
     cursor: pointer;
@@ -924,7 +933,7 @@ cont-3{
 }
 
 /* CLEAR ALL TRANSACTION BUTTON */
-.deleteAll{
+.deleteAllTransac{
     color: white;
     cursor: pointer;
     border-radius: 10px;
@@ -935,7 +944,7 @@ cont-3{
     height: 30px;
     background-color: rgb(235, 54, 54);
 }
-.deleteAll:hover{
+.deleteAllTransac:hover{
     background-color:  #ff0000;
 }
 

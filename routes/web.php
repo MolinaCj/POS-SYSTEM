@@ -34,14 +34,14 @@ Route::post('/products/clear', 'ProductController@clear')->name('products.clear'
 //Search route for the list of products
 Route::get('/search-products', 'ProductController@searchProducts')->name('search.products');
 
-//Clear all the dara in my transaction table
-Route::delete('transactions/delete-all', 'ProductController@deleteAllTransactions')->name('transactions.deleteAll');
-
 // routes/web.php
 Route::get('/products/{id}', 'ProductController@show');
 
 //Route for importing the products to sales/transaction table
 Route::post('/add-to-transac', 'ProductController@addToTransac')->name('addToTransac');
+
+//Clear all the data in my transaction table
+Route::delete('transactions/delete-all', 'ProductController@deleteAllTransactions')->name('transactions.deleteAll');
 
 //Route for deleting a product inserted to my transaction table
 Route::delete('transactions/{transaction_id}', 'ProductController@deleteTransaction')->name('transactions.destroy');

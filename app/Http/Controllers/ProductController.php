@@ -261,25 +261,72 @@ class ProductController extends Controller
         {
             // Find the transaction by ID
             $transaction = Transaction::findOrFail($transaction_id);
-        
-            //dd($transaction_id);
+
+            // Find the corresponding product in the products table
+            $product = Product::findOrFail($transaction->product_id);
+
+            // Restore the quantity from the transaction to the product's stock
+            $product->stocks += $transaction->quantity;
+            $product->save();
+
             // Delete the transaction
             $transaction->delete();
-        
-            // Redirect to products.index with a success message
-            return redirect()->route('products.index')->with('success', 'Transaction deleted successfully'); 
-            // Alternatively, if you want to return a JSON response for AJAX requests:
-            // return response()->json(['success' => true]);
+
+            // Recalculate the net amount, tax, and amount payable
+            $transactions = Transaction::all();
+            $net_amount = $transactions->sum(function ($transaction) {
+                return $transaction->unit_price * $transaction->quantity;
+            });
+            $tax = 0.01 * $net_amount;
+            $amount_payable = $net_amount + $tax;
+
+            // Update session values
+            session([
+                'net_amount' => $net_amount,
+                'tax' => $tax,
+                'amount_payable' => $amount_payable,
+            ]);
+
+           // Return JSON response
+            return response()->json([
+                'success' => true,
+                'net_amount' => $net_amount,
+                'tax' => $tax,
+                'amount_payable' => $amount_payable
+            ]);
         }
     
     //FOR THE DELETION OF ALL PRODUCTS IMPORTED TO TRANSACTION TABLE
     public function deleteAllTransactions()
     {
-        // Use the delete() method to remove all records from the transactions table
+        // Retrieve all transactions
+        $transactions = Transaction::all();
+
+        // Loop through each transaction to restore the product stock
+        foreach ($transactions as $transaction) {
+            $product = Product::find($transaction->product_id);
+
+            if ($product) {
+                // Restore the quantity to the product stock
+                $product->stocks += $transaction->quantity;
+                $product->save();
+            }
+        }
+
+        // Delete all transactions
         Transaction::query()->delete();
 
-        // Redirect back to the products view with a success message
-        return redirect()->route('products.index')->with('success', 'All transactions deleted successfully!');
+        // Clear session values
+        session([
+            'net_amount' => 0,
+            'tax' => 0,
+            'amount_payable' => 0,
+        ]);
+
+       // Return a JSON response with success status
+        return response()->json([
+            'success' => true
+        ]);
     }
 
     //ADD TRANSACTIONS TO RECEIPT

@@ -517,37 +517,6 @@
                         }
                     });
                 });
-                // $(document).ready(function() {
-                //     // Prevent form submission
-                //     $('#sales-search-form').on('submit', function(e) {
-                //         e.preventDefault();
-                //     });
-            
-                //     // Handle input for searching sales
-                //     $('#searchSales').on('keyup', function() {
-                //         let query = $(this).val(); // Get input value
-            
-                //         if (query.length > 0) {
-                //             $.ajax({
-                //                 url: '/search-sales',
-                //                 method: 'GET',
-                //                 data: { query: query },
-                //                 success: function(data) {
-                //                     $('#results').empty().show(); // Show results dropdown
-                //                     if (data.length > 0) {
-                //                         data.forEach(function(product) {
-                //                             $('#results').append(`<div class="result-item" data-id="${product.id}">${product.item_name}</div>`);
-                //                         });
-                //                     } else {
-                //                         $('#results').append('<div>No results found</div>'); // Optional message for no results
-                //                     }
-                //                 }
-                //             });
-                //         } else {
-                //             $('#results').empty().hide(); // Hide results if no input
-                //         }
-                //     });
-                // });
             </script>
         </div>
         <div class="cont-2">
@@ -590,14 +559,38 @@
                                 <td style="margin: 0;">₱{{ $transaction->unit_price }}</td>
                                 <td id="total-price-{{ $transaction->transaction_id }}" style="margin: 0;">₱{{ $transaction->total_price }}</td>
                                 <td style="display: flex; margin:0;">
-                                    <form action="">
-                                        <button></button>
-                                    </form> 
                                     <form action="{{ route('transactions.destroy', $transaction->transaction_id) }}#sec2" method="POST" style="display:inline;">
                                         {{ csrf_field() }}
                                         {{ method_field('DELETE') }} <!-- Use this method to specify the DELETE request -->
-                                        <button class="delete btn-danger" type="submit" onclick="return confirm('Are you sure you want to delete this product?');"><img class="delIcon" src="images/delete.png" alt=""></button>
+                                        <button class="deleteTransac btn-danger" type="submit"><img class="delIcon" src="images/delete.png" alt=""></button>
                                     </form>
+                                    <script>
+                                        document.querySelectorAll('.deleteTransac').forEach(button => {
+                                            button.addEventListener('click', function (event) {
+                                                event.preventDefault();
+                                                const form = this.closest('form');
+                                                const url = form.action;
+                                            
+                                                if (confirm('Are you sure you want to delete this product?')) {
+                                                    fetch(url, {
+                                                        method: 'DELETE',
+                                                        headers: {
+                                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                                        },
+                                                    })
+                                                    .then(response => response.json())
+                                                    .then(data => {
+                                                        if (data.success) {
+                                                            location.reload(); // Reload the page to reflect the changes
+                                                        } else {
+                                                            alert('Error deleting product.');
+                                                        }
+                                                    })
+                                                    .catch(error => console.error('Error:', error));
+                                                }
+                                            });
+                                        });
+                                    </script>
                                 </td>
                             </tr>
                             @php
@@ -654,38 +647,6 @@
                             .catch(error => console.error('Error:', error));
                         }
                     });
-                    // document.addEventListener('DOMContentLoaded', function () {
-                    //     // Attach event listener to all quantity input fields
-                    //     document.querySelectorAll('.quantity').forEach(input => {
-                    //         input.addEventListener('change', function () {
-                    //             const transactionId = this.getAttribute('data-id'); // Get transaction ID
-                    //             const newQuantity = this.value; // Get the new quantity
-                            
-                    //             // Send AJAX request to update the quantity in the database
-                    //             updateQuantity(transactionId, newQuantity);
-                    //         });
-                    //     });
-                    
-                    //     function updateQuantity(transactionId, quantity) {
-                    //         fetch(`/transactions/${transactionId}`, {
-                    //             method: 'PUT', // Use PUT for updating
-                    //             headers: {
-                    //                 'Content-Type': 'application/json',
-                    //                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    //             },
-                    //             body: JSON.stringify({ quantity: quantity }),
-                    //         })
-                    //         .then(response => response.json())
-                    //         .then(data => {
-                    //             if (data.success) {
-                    //                 console.log('Quantity updated successfully!');
-                    //             } else {
-                    //                 alert('Error updating quantity.');
-                    //             }
-                    //         })
-                    //         .catch(error => console.error('Error:', error));
-                    //     }
-                    // });
                 </script>     
                 </div>         
             </div>
@@ -704,8 +665,33 @@
                 <form action="{{ route('transactions.deleteAll') }}#sec2" method="POST">
                     {{ csrf_field() }}
                     {{ method_field('DELETE') }}
-                    <button type="submit" class="deleteAll btn-danger" onclick="return confirm('Are you sure you want to clear all products?');"">Clear All</button>
+                    <button type="submit" class="deleteAllTransac btn-danger">Clear All</button>
                 </form>
+                <script>
+                    document.querySelector('.deleteAllTransac').addEventListener('click', function (event) {
+                        event.preventDefault();
+                        const form = this.closest('form');
+                        const url = form.action;
+
+                        if (confirm('Are you sure you want to clear all products?')) {
+                            fetch(url, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                },
+                            })
+                            .then(response => response.json())  // Expecting a JSON response
+                            .then(data => {
+                                if (data.success) {
+                                    location.reload(); // Reload the page to reflect the changes
+                                } else {
+                                    alert('Error clearing all products.');
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                        }
+                    });
+                </script>
             </div>
             <div class="sub-tot">
                 <div>
