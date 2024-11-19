@@ -55,6 +55,9 @@ Route::post('/saveReceipt', 'ProductController@saveReceipt')->name('saveReceipt'
 //ROUTE FOR RETRIEVING THE SALES HISTORY IN THE HISTORIES TABLE
 Route::get('/transaction-history', 'ProductController@getTransactionHistory')->name('transaction.history');
 
+//ROUTE FOR FILTERING THE PRODUCTS BASED ON THEIR CATEGORIES
+Route::get('products/filter', 'ProductController@filterByCategory')->name('products.filter');
+
 
 
 

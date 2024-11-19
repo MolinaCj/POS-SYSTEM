@@ -187,7 +187,6 @@ class ProductController extends Controller
 
 
 
-
     //ADD TO TRANSACTION CONTROLLER
     public function addToTransac(TransactionRequest $request)
     {
@@ -401,25 +400,29 @@ class ProductController extends Controller
         $products = $productsQuery->paginate(12);
     
         return response()->json(['products' => $products]);
-        // $search = $request->get('searchProducts');
-    
-        // if ($search) {
-        //     $products = Product::where('item_name', 'LIKE', "%$search%")
-        //                         ->orWhere('barcode', 'LIKE', "%$search%")
-        //                         ->get();
-        // } else {
-        //     $products = Product::paginate(12); // Return all products if no search term is provided
-        // }
-    
-        // return response()->json(['products' => $products]);
+    }
 
+    public function filterByCategory(Request $request)
+    {
+        $category = $request->get('category');
 
-        // $query = $request->input('searchProducts');
-        // $products = Product::where('item_name', 'like', "%{$query}%")
-        //                 ->orWhere('barcode', 'like', "%{$query}%")
-        //                 ->get();
-    
-        // return response()->json(['products' => $products]);
+        // Check if category is provided
+        if (!$category) {
+            return redirect()->route('products.index')
+                ->with('error', 'Please select a valid category.');
+        }
+
+        // Filter products by category and paginate
+        $products = Product::where('category', $category)->paginate(12);
+
+        // Check if any products are found
+        if ($products->isEmpty()) {
+            return view('products', compact('products'))
+                ->with('category', $category)
+                ->with('message', 'No products found for the selected category.');
+        }
+
+        return view('products', compact('products'))->with('category', $category);
     }
 
     //This is the function for search

@@ -112,12 +112,7 @@
 
                 {{-- Products Search --}}
                 <div class="search-container">
-                    <form  
-                            action="{{ route('products.index') }}"  
-                            method="GET"
-                            id="searchProductsForm" 
-                            class="searchProducts" 
-                            style="display: flex;">
+                    <form  action="{{ route('products.index') }}"  method="GET" id="searchProductsForm" class="searchProducts" style="display: flex;">
                         <input class="search-input" 
                                 name="searchProducts" 
                                 value="{{ request()->query('searchProducts') }}"
@@ -199,28 +194,21 @@
                             }
                         });
                     </script>
-                    {{-- <script>
-                        // JavaScript function to auto-submit form when input is cleared
-                        function checkSearchInput(input) {
-                            if (input.value.trim() === '') {
-                                document.getElementById('searchProducts').submit();
-                            }
-                        }
-                    </script> --}}
-                    
-                    <!-- Search Input -->
-    {{-- <div class="d-flex justify-content-end my-3" >
-        <form action="{{ route('product.index') }}#section2" method="GET" class="d-flex" id="searchForm">
-            <input type="text" name="search" class="form-control"
-                   placeholder="Search products..."
-                   value="{{ request()->query('search') }}"
-                   oninput="checkSearchInput(this)"
-                   required>
-            <button type="submit" class="btn btn-primary ms-2">Search</button>
-        </form>
-    </div> --}}
+                    <div class="filter-container">
+                        <label style="margin-top: 20px" for="categoryFilter">Filter by Category:</label>
+                        <form id="categoryForm" name="categoryForm" action="{{ route('products.filter') }}" method="GET" style="display: flex;">
+                            <select id="categoryFilter" name="category" onchange="this.form.submit()">
+                                <option value="" {{ request('category') == '' ? 'selected' : '' }}>Select a Category</option>
+                                <option value="bread" {{ request('category') == 'bread' ? 'selected' : '' }}>Bread</option>
+                                <option value="noodles" {{ request('category') == 'noodles' ? 'selected' : '' }}>Noodles</option>
+                                <option value="canned_goods" {{ request('category') == 'canned_goods' ? 'selected' : '' }}>Canned Goods</option>
+                                <option value="hygiene" {{ request('category') == 'hygiene' ? 'selected' : '' }}>Hygiene</option>
+                            </select>
+                        </form>
+                    </div>
                 </div>
             </div>
+
             <div class="cont-1">
                 <div class="tbl-1">
                     <div class="add-container" style="display: flex; justify-content: space-between">
@@ -398,7 +386,7 @@
             <h1 class="cashier-1">{{ auth()->check() ? auth()->user()->username : 'Guest' }}</h1>
             <form action="sales-search-form" method="GET">
                 <div class="ewan">
-                    <input id="searchSales" class="srch-2" type="text" name="query" placeholder="Search by code or product" required>
+                    <input id="searchSales" class="srch-2" type="text" name="query" placeholder="Scan using BARCODE" required>
                     <div id="results" class="dropdown-results"></div>
                 </div>
             </form>
@@ -476,10 +464,7 @@
                     // Add to transaction when "Add" button is clicked
                     $('#add-to-transaction-table').on('click', function() {
                         let quantity = $('#quantity-input').val();
-
-                        console.log("Add button clicked"); // Debugging
-                        console.log("Quantity: " + quantity); // Debugging
-                    
+                                        
                         if (!selectedProductId || quantity <= 0) {
                             alert('Invalid product or quantity!');
                             return;
@@ -497,14 +482,22 @@
                                 if (response.success) {
                                     alert('Product added to transaction!');
                                     $('#quantity-modal').fadeOut();
-                                    $('#modal-overlay').fadeOut();
+                                    $('#quanity-modal-overlay').fadeOut();
                                     $('#results').empty().hide();
                                     $('#searchSales').val('');
-                                    // Refresh the page
+
                                     location.reload();
+                                
+                                    // Update displayed totals dynamically
+                                    $('.price').text(`₱${response.net_amount.toFixed(2)}`);
+                                    $('.taxx').text(`₱${response.tax.toFixed(2)}`);
+                                    $('.tot').text(`₱${response.amount_payable.toFixed(2)}`);
                                 } else {
                                     alert('Failed to add product: ' + response.message);
                                 }
+                            },
+                            error: function() {
+                                alert('An error occurred while adding the product.');
                             }
                         });
                     });
@@ -600,6 +593,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                {{-- SCRIPT TO READ THE CHANGES IN THE QUANTITY --}}
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
                         // Attach event listener to all quantity input fields
@@ -667,6 +661,7 @@
                     {{ method_field('DELETE') }}
                     <button type="submit" class="deleteAllTransac btn-danger">Clear All</button>
                 </form>
+                {{-- SCRIPT FOR DELETING A PRODUCT INSRTED IN THE TRANSACTION --}}
                 <script>
                     document.querySelector('.deleteAllTransac').addEventListener('click', function (event) {
                         event.preventDefault();

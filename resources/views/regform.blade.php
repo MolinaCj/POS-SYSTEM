@@ -48,7 +48,7 @@
         </ul>
     </div>
 @endif
-<script>
+{{-- <script>
     window.onload = function() {
     let notification = document.querySelector('.notification');
     if (notification) {
@@ -56,7 +56,7 @@
             notification.classList.add('fade-out');
         }, 5000); // 5 seconds before it fades out
     }
-}
+} --}}
 </script>
 
 </div>

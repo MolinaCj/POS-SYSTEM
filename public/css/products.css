@@ -240,12 +240,9 @@ body{
 /* Search container */
 .search-container {
     display: flex;
-    justify-content: space-between; /* Align input and button next to each other */
-    max-width: 400px;
-    margin: 20px auto;
-    padding: 10px;
-    margin-right: -20px;
-    margin-top: 30px;
+    max-width: 800;
+    margin-left: 50px;
+    margin-bottom: 30px;
 }
 
 /* Search input field */
@@ -845,6 +842,38 @@ cont-3{
     background-color: #f0f0f0;
 }
 
+/*CSS for CATEGORY FILTER*/
+/* Basic reset and layout styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Filter container */
+.filter-container {
+    display: flex;
+    margin-left: 50px;
+    padding: 5px;
+    background-color: none;
+    margin-top: -20px;
+    /* border-bottom: 2px solid #ddd; */
+}
+
+.filter-container label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+#categoryFilter {
+    padding: 10px;
+    font-size: 14px;
+    width: 200px;
+    margin-top: 10px;
+}
+
+
 
 
 /*SECTION 2*/
@@ -1213,6 +1242,89 @@ tr:hover td:nth-child(-n+6) {
 .sales-table td:nth-child(5) {
     width: 100px;
 } */
+
+/*QUANTITY MODAL CSS*/
+/* Modal Overlay */
+#quanity-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+/* Modal Container */
+#quantity-modal {
+    display: none;
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -30%);
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px; /* Rounded corners for a modern look */
+    padding: 20px;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    width: 300px; /* Set a fixed width for consistency */
+    text-align: center; /* Center-align text inside the modal */
+}
+
+/* Modal Header */
+#quantity-modal h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Input Field */
+#quantity-input {
+    width: 100px;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+/* Buttons */
+#add-to-transaction-table,
+#quantity-close-modal {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px;
+    transition: all 0.3s ease;
+}
+
+/* Add Button */
+#add-to-transaction-table {
+    background-color: #007bff;
+    color: white;
+}
+
+#add-to-transaction-table:hover {
+    background-color: #0056b3;
+}
+
+/* Close Button */
+#quantity-close-modal {
+    background-color: #f8f9fa;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+#quantity-close-modal:hover {
+    background-color: #e2e6ea;
+    color: #007bff;
+}
 
 
 
