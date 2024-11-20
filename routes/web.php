@@ -99,6 +99,8 @@ Route::put('/transactions/{transaction_id}', 'TransactionController@updateSalesQ
 //Add to transaction route
 // Route::post('/transactions', 'TransactionController@transfer')->name('transactions.store');
 
+Route::get('/test', 'TestController@showTest')->name('test.show');
+
 
 
 
