@@ -23,6 +23,14 @@ class TransactionController extends Controller
             return response()->json(['success' => false, 'message' => 'Product not found.']);
         }
 
+        // Check if the requested quantity exceeds available stock
+        if ($quantity > $product->stocks) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Quantity exceeds available stock. Only ' . $product->stocks . ' units available.'
+            ]);
+        }
+
         // Calculate total price
         $total = $product->price * $request->quantity;
 
@@ -76,7 +84,7 @@ class TransactionController extends Controller
         $product = Product::where('id', $transaction->product_id)->firstOrFail();
         $product->stocks -= $quantityDifference;
         $product->save();
-    
+
         // Update transaction quantity
         $transaction->quantity = $request->quantity;
         $transaction->total_price = $transaction->quantity * $transaction->unit_price;
@@ -86,6 +94,13 @@ class TransactionController extends Controller
         $netAmount = Transaction::sum('total_price');
         $tax = $netAmount * 0.01;
         $amountPayable = $netAmount + $tax;
+
+        session([
+            'net_amount' => $netAmount,
+            'tax' => $tax,
+            'amount_payable' => $amountPayable,
+        ]);
+        
     
         // Return updated stock value
         return response()->json([

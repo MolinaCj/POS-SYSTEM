@@ -348,7 +348,7 @@
                                         <input type="text" name="barcode" id="barcode">
                                     </div>
                                     <div>
-                                        <label for="item_namep">Product Name:</label>
+                                        <label for="item_name">Product Name:</label>
                                         <input type="text" name="item_name" id="item_namep">
                                     </div>
                                     <div>
@@ -602,13 +602,11 @@
                 {{-- SCRIPT TO READ THE CHANGES IN THE QUANTITY --}}
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
-                        // Attach event listener to all quantity input fields
                         document.querySelectorAll('.quantity').forEach(input => {
                             input.addEventListener('change', function () {
                                 const transactionId = this.getAttribute('data-id'); // Get transaction ID
                                 const newQuantity = this.value; // Get the new quantity
-
-                                // Send AJAX request to update the quantity in the database
+                            
                                 updateQuantity(transactionId, newQuantity, this);
                             });
                         });
@@ -622,29 +620,35 @@
                                 },
                                 body: JSON.stringify({ quantity: quantity }),
                             })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    console.log('Quantity updated successfully!');
-
-                                     // Dynamically update the total price and stock on the page
-                                    const totalPriceElement = document.querySelector(`#total-price-${transactionId}`);
-                                    if (totalPriceElement) {
-                                        totalPriceElement.textContent = `₱${data.new_total_price.toFixed(2)}`;
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        console.log('Quantity updated successfully!');
+                                    
+                                        // Dynamically update the total price for the transaction
+                                        const totalPriceElement = document.querySelector(`#total-price-${transactionId}`);
+                                        if (totalPriceElement) {
+                                            totalPriceElement.textContent = `₱${parseFloat(data.new_total_price).toFixed(2)}`;
+                                        }
+                                    
+                                        // Dynamically update stock values
+                                        const stockElement = document.querySelector(`#stocks-${data.product_id}`);
+                                        if (stockElement) {
+                                            stockElement.textContent = data.new_stock;
+                                        }
+                                    
+                                        // Dynamically update Net Amount, Tax, and Amount Payable
+                                        document.querySelector('.price').textContent = `₱${parseFloat(data.net_amount).toFixed(2)}`;
+                                        document.querySelector('.taxx').textContent = `₱${parseFloat(data.tax).toFixed(2)}`;
+                                        document.querySelector('.tot').textContent = `₱${parseFloat(data.amount_payable).toFixed(2)}`;
+                                    
+                                        // Reflect the updated quantity in the input field
+                                        inputElement.value = quantity;
+                                    } else {
+                                        alert(data.message || 'Error updating quantity.');
                                     }
-                                
-                                    // Optionally update stock values or other UI elements dynamically
-                                    const stockElement = document.querySelector(`#stocks-${data.product_id}`);
-                                    if (stockElement) {
-                                        stockElement.textContent = data.new_stock; // Update stock display
-                                    }
-                                
-                                    inputElement.value = quantity; // Reflect the updated quantity
-                                } else {
-                                    alert(data.message || 'Error updating quantity.');
-                                }
-                            })
-                            .catch(error => console.error('Error:', error));
+                                })
+                                .catch(error => console.error('Error:', error));
                         }
                     });
                 </script>     
@@ -726,38 +730,126 @@
     <script>
         // Function to show the checkout modal
         function showCheckoutModal() {
-            const amountPayable = "₱{{ number_format($amount_payable, 2) }}";
-          document.getElementById('amountPayable').value = amountPayable; // Set dynamic value here
-          document.getElementById('checkoutModal').style.display = 'flex';
+            // Fetch the latest amount payable dynamically
+            const amountPayableElement = document.querySelector('.tot');
+            const amountPayable = amountPayableElement ? amountPayableElement.textContent : '₱0.00';
+
+            // Set the amount payable in the modal
+            document.getElementById('amountPayable').value = amountPayable.trim();
+            document.getElementById('checkoutModal').style.display = 'flex';
         }
 
         // Function to handle payment mode change
         function handlePaymentModeChange() {
-        const paymentMode = document.getElementById('paymentMode').value;
+            const paymentMode = document.getElementById('paymentMode').value;
+
             if (paymentMode === 'cash') {
-                document.getElementById('totalAmount').value = document.getElementById('amountPayable').value;
+                // Set the total amount dynamically for the cash payment modal
+                const totalAmountElement = document.getElementById('totalAmount');
+                if (totalAmountElement) {
+                    totalAmountElement.value = document.getElementById('amountPayable').value;
+                }
+
                 closeModal('checkoutModal');
                 document.getElementById('cashPaymentModal').style.display = 'flex';
-            } else if (paymentMode === 'e-wallet') {
-                // Logic for e-wallet payment (if needed)
+            } else if (paymentMode === 'e_wallet') {
+                // Logic for e-wallet payment
                 closeModal('checkoutModal');
-                // Display e-wallet modal here
-            } else if (paymentMode === 'credit card') {
-                // Logic for credit card payment (if needed)
+                // Show e-wallet modal here (if implemented)
+            } else if (paymentMode === 'credit_card') {
+                // Logic for credit card payment
                 closeModal('checkoutModal');
-                // Display credit card modal here
+                // Show credit card modal here (if implemented)
             }
-        }  
-        
+        }
+
         // Function to process payment
         function processPayment() {
             handlePaymentModeChange();
         }
 
-        // Function to close the checkout modal
+        // Function to close a modal
         function closeModal(modalId) {
-          document.getElementById(modalId).style.display = 'none';
+            document.getElementById(modalId).style.display = 'none';
         }
+        // Attach event listener to dynamically update Net Amount, Tax, and Amount Payable
+        document.addEventListener('DOMContentLoaded', function () {
+            // Listen for quantity changes and update the checkout modal dynamically
+            document.querySelectorAll('.quantity').forEach(input => {
+                input.addEventListener('change', function () {
+                    const transactionId = this.getAttribute('data-id');
+                    const newQuantity = this.value;
+
+                    // Update quantity using AJAX
+                    updateQuantity(transactionId, newQuantity, this);
+                });
+            });
+
+            function updateQuantity(transactionId, quantity, inputElement) {
+                fetch(`/transactions/${transactionId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify({ quantity: quantity }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update UI dynamically
+                            document.querySelector('.price').textContent = `₱${parseFloat(data.net_amount).toFixed(2)}`;
+                            document.querySelector('.taxx').textContent = `₱${parseFloat(data.tax).toFixed(2)}`;
+                            document.querySelector('.tot').textContent = `₱${parseFloat(data.amount_payable).toFixed(2)}`;
+
+                            // Also update the modal's amount payable if it's open
+                            const amountPayableInput = document.getElementById('amountPayable');
+                            if (amountPayableInput) {
+                                amountPayableInput.value = `₱${parseFloat(data.amount_payable).toFixed(2)}`;
+                            }
+                        } else {
+                            alert(data.message || 'Error updating quantity.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+        // // Function to show the checkout modal
+        // function showCheckoutModal() {
+        //     // Fetch the latest amount payable dynamically
+        //     const amountPayableElement = document.querySelector('.tot');
+        //     const amountPayable = "₱{{ number_format($amount_payable, 2) }}";
+        //   document.getElementById('amountPayable').value = amountPayable; // Set dynamic value here
+        //   document.getElementById('checkoutModal').style.display = 'flex';
+        // }
+
+        // // Function to handle payment mode change
+        // function handlePaymentModeChange() {
+        // const paymentMode = document.getElementById('paymentMode').value;
+        //     if (paymentMode === 'cash') {
+        //         document.getElementById('totalAmount').value = document.getElementById('amountPayable').value;
+        //         closeModal('checkoutModal');
+        //         document.getElementById('cashPaymentModal').style.display = 'flex';
+        //     } else if (paymentMode === 'e-wallet') {
+        //         // Logic for e-wallet payment (if needed)
+        //         closeModal('checkoutModal');
+        //         // Display e-wallet modal here
+        //     } else if (paymentMode === 'credit card') {
+        //         // Logic for credit card payment (if needed)
+        //         closeModal('checkoutModal');
+        //         // Display credit card modal here
+        //     }
+        // }  
+        
+        // // Function to process payment
+        // function processPayment() {
+        //     handlePaymentModeChange();
+        // }
+
+        // // Function to close the checkout modal
+        // function closeModal(modalId) {
+        //   document.getElementById(modalId).style.display = 'none';
+        // }
     </script>
 
     <!-- Cash Payment Modal -->
