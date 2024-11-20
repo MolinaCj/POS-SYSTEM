@@ -561,10 +561,16 @@
                                         document.querySelectorAll('.deleteTransac').forEach(button => {
                                             button.addEventListener('click', function (event) {
                                                 event.preventDefault();
+
                                                 const form = this.closest('form');
                                                 const url = form.action;
-                                            
-                                                if (confirm('Are you sure you want to delete this product?')) {
+
+                                                // Use confirm only once, ensuring no duplicate prompts
+                                                if (!this.dataset.confirmed) {
+                                                    this.dataset.confirmed = confirm('Are you sure you want to delete this product?');
+                                                }
+
+                                                if (this.dataset.confirmed === 'true') {
                                                     fetch(url, {
                                                         method: 'DELETE',
                                                         headers: {
