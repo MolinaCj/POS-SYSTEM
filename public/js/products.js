@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
             methodField.value = "PUT"; // Set method to PUT for editing
             productForm.action = `/products/${id}`; // Set the action URL
             document.getElementById("barcode").value = barcode;
-            document.getElementById("item_namep").value = name;
+            document.getElementById("item_name").value = name;
             document.getElementById("category").value = category;
             document.getElementById("stocks").value = stocks;
             document.getElementById("pricep").value = price;

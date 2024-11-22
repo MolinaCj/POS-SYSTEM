@@ -8,15 +8,46 @@ body{
     position: fixed; /* Ensures it doesn't affect other elements */
     top: 20px;
     right: 20px;
-    background-color: #007bff !important; /* Primary color */
-    color: rgb(107, 138, 67) !important;
+    /* background-color: #007bff !important; Primary color */
+    color: rgb(255, 255, 255) !important;
     padding: 15px 25px;
     border-radius: 5px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     opacity: 0; /* Start invisible for fade-in */
     transform: translateY(-20px); /* Start slightly off-screen */
     animation: slideInFadeOut 3s ease forwards;
-    z-index: 1; /* Stays on top of other elements */
+    z-index: 1000; /* Stays on top of other elements */
+}
+/* .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    color: #fff;
+    font-size: 16px;
+    border-radius: 5px;
+    z-index: 1000;
+} */
+
+.addtotransacnotification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    z-index: 9999;
+    background-color: rgba(0, 0, 0, 0.8);
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    display: none;
+    transition: opacity 0.3s ease-in-out;
+    opacity: 0;
+}
+.notification.show {
+    display: block;
+    opacity: 1;
 }
 
 @keyframes slideInFadeOut {
@@ -335,10 +366,10 @@ body{
 
 /* Disable state (if you need to disable the button) */
 .productSearch:disabled {
-    background-color: #ccc;             /* Grey background when disabled */
-    color: #666;                        /* Greyed-out text */
-    cursor: not-allowed;                /* Change cursor to indicate the button is disabled */
-    box-shadow: none;                   /* Remove shadow when disabled */
+    background-color: #ccc;          
+    color: #666;                     
+    cursor: not-allowed;              
+    box-shadow: none;                 
 }
 
 /*Table CSS*/

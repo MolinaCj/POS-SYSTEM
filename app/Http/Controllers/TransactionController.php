@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Transaction;
 use App\Product;
+use App\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\TransactionRequest;
 
 
 class TransactionController extends Controller
@@ -15,9 +17,25 @@ class TransactionController extends Controller
     }
 
     public function addToTransaction(Request $request){
+        // Check if the reference number is already set in the session
+        if (!session()->has('reference_no')) {
+            // If not, generate a new reference number
+            $datePart = date('ymdHi'); // Generates a 10-character string: YYMMDDHHMM
+            $randomPart = mt_rand(100, 999); // Generates a 3-digit random number
+            $referenceNo = $datePart . $randomPart; // Combine parts
+            $referenceNo = substr($referenceNo, 0, 13); // Ensure it's 13 digits
+
+            // Store the reference number in the session
+            session(['reference_no' => $referenceNo]);
+        } else {
+            // Retrieve the reference number from the session
+            $referenceNo = session('reference_no');
+        }
+
        // Retrieve the product
         $product = Product::find($request->product_id);
         $quantity = $request->quantity;
+        // $transactions = $request->employee_name;
         
         if (!$product) {
             return response()->json(['success' => false, 'message' => 'Product not found.']);
@@ -42,6 +60,8 @@ class TransactionController extends Controller
             'unit_price' => $product->price,
             'total_price' => $total,
             'employee_id' => $request->employee_id,
+            'employee_name' => $request->employee_name,
+            'reference_no' => $referenceNo, // Use the same reference number
         ]);
 
         // Update the product stock after the transaction

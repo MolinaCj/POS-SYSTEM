@@ -16,11 +16,9 @@ Route::get('/', function () {
     return view('loginform');
 });
 
-Route::get('/products', function () {
-    return view('loginform');
-})->middleware('auth');
+// Route::get('/products', 'ProductController@index')->middleware('auth');
 
-Auth::user(); // This will return the authenticated user
+//  
 
 //Connecting the route and controller
 Route::resource('products', 'ProductController');

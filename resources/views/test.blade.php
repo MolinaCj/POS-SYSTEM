@@ -8,5 +8,6 @@
 </head>
 <body>
     <h1>THIS IS TEST</h1>
+    <p>Welcome, {{ Auth::user()->username }}</p>
 </body>
 </html>

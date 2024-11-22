@@ -14,6 +14,10 @@
     <script src="js/products.js"></script>
 </head>
 <body>
+    {{-- @php
+    // auth()->login($user); // Correct way to log in a user
+    dd(auth()->check(), auth()->user()); // Check if user is logged in immediately after login
+    @endphp --}}
     <header class="header">
         @if(session('success'))
         <div class="alert alert-success"  id="successAlert">
@@ -216,11 +220,12 @@
                         <a href="javascript:void(0)#sec1;" id="addProductButton">
                             <button class="add-product">Add Product</button>
                         </a>
-                        <form action="{{ route('products.clear') }}#sec1" method="POST">
+                        {{-- <form action="{{ route('products.clear') }}#sec1" method="POST">
                             {{ csrf_field() }}
                             <button type="submit" class="clear btn-danger" onclick="return confirm('Are you sure you want to clear all products?');"">Clear All</button>
-                        </form>
+                        </form> --}}
                     </div>
+                    <div id="notification" class="notification" style="display: none;"></div>
                     <div class="products-container">
                         <table id="productsTable">
                             <thead>
@@ -240,10 +245,13 @@
                                 <td>{{ $product->id }}</td>
                                 <td>{{ $product->barcode }}</td>
                                 <td>{{ $product->item_name }}</td>
-                                <td id="stocks-{{ $product->id }}">{{ $product->stocks }}</td>
+                                {{-- <td id="stocks-{{ $product->id }}">{{ $product->stocks }}</td> --}}
+                                <td id="stocks-{{ $product->id }}" style="{{ $product->stocks == 0 ? 'border: 2px solid red; color: red' : '' }}">
+                                    {{ $product->stocks == 0 ? 'Out of Stock' : $product->stocks }}
+                                </td>
                                 <td>
                                     {{-- <input class="quantity" type="number" name="quantity[{{ $product->id }}]" value="1" min="1" style="width: 50px;" onchange="updateHiddenQuantity(this)"> --}}
-                                    <input class="quantity" type="number" name="quantity[{{ $product->id }}]" value="1" min="1" style="width: 50px;" onchange="updateHiddenQuantity(this, {{ $product->id }})">
+                                    <input class="quantity" type="number" name="quantity[{{ $product->id }}]" value="1" min="0" style="width: 50px;" onchange="updateHiddenQuantity(this, {{ $product->id }})">
                                 </td>
                                 {{-- <td>{{ $product->quantity}}</td> --}}
                                 <td>₱{{ $product->price }}</td>
@@ -264,11 +272,30 @@
                                         {{ method_field('DELETE') }}
                                         <button class="delete" type="submit" onclick="return confirm('Are you sure you want to delete this product?');"><img class="delIcon" src="images/delete.png" alt=""></button>
                                     </form>
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            const notification = document.getElementById('notification');
+                                    
+                                            @if (session('deleteError'))
+                                                notification.textContent = '{{ session('deleteError') }}';
+                                                notification.style.backgroundColor = 'red';
+                                                notification.style.display = 'block';
+                                                setTimeout(() => notification.style.display = 'none', 3000); // Hide after 3 seconds
+                                            @endif
+                                    
+                                            @if (session('deleteSuccess'))
+                                                notification.textContent = '{{ session('deleteSuccess') }}';
+                                                notification.style.backgroundColor = 'green';
+                                                notification.style.display = 'block';
+                                                setTimeout(() => notification.style.display = 'none', 3000); // Hide after 3 seconds
+                                            @endif
+                                        });
+                                    </script>
                                     <form action="{{ route('addToTransac') }}" method="POST">
                                         {{ csrf_field() }}
                                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                                         <input type="hidden" name="item_name" value="{{ $product->item_name }}">
-                                        <input type="hidden" name="quantity" value="1" min="1" data-product-id="{{ $product->id }}">
+                                        <input type="hidden" name="quantity" value="1" min="0" data-product-id="{{ $product->id }}">
                                         <input type="hidden" name="unit_price" value="{{ $product->price }}">
                                     
                                         <button class="insert-to-sales" type="submit">Add to Sales</button>
@@ -343,34 +370,68 @@
                                     <input type="hidden" name="product_id" id="product_id" value="">
                                     {{ csrf_field() }}
                                     <input type="hidden" name="_method" id="methodField" value="POST">
+
                                     <div>
                                         <label for="barcode" >Barcode:</label>
-                                        <input type="text" name="barcode" id="barcode">
+                                        <input id="barcode" type="text" name="barcode" readonly placeholder="Generating barcode">
                                     </div>
+
                                     <div>
                                         <label for="item_name">Product Name:</label>
-                                        <input type="text" name="item_name" id="item_namep">
+                                        <input id="item_name" type="text" name="item_name">
                                     </div>
+
                                     <div>
                                         <label for="category">Category:</label>
                                         <select name="category" id="category">
+                                            <option value="">Select Product Category</option>
                                             <option value="noodles">Noodles</option>
                                             <option value="bread">Bread</option>
                                             <option value="canned_goods">Canned Goods</option>
                                             <option value="hygiene">Hygiene</option>
                                         </select>
                                     </div>
+
                                     <div>
                                         <label for="stocks">Stocks:</label>
                                         <input type="number" name="stocks" id="stocks" required min="0">
                                     </div>
+
                                     <div>
                                         <label for="pricep" >Price:</label>
                                         <input type="number" name="price" id="pricep" step="0.01" min="0" max="10000">
                                     </div>
+
                                     <button type="submit" id="submitProduct" form="productForm">Save</button>
                                     <button type="button" class="cancel" id="cancelButton">Cancel</button>
                                 </form>
+                                <script>
+                                    // Function to generate a 12-character barcode based on the selected category
+                                    function generateBarcode(category) {
+                                        const timestamp = Date.now().toString(); // Unique timestamp
+                                        const categoryCode = {
+                                            noodles: "NOOD",      // 4 characters
+                                            bread: "BRD",         // 3 characters
+                                            canned_goods: "CNDG", // 4 characters
+                                            hygiene: "HYG"        // 3 characters
+                                        };
+                                    
+                                        // Check if the selected category exists
+                                        const prefix = categoryCode[category] || "UNKN"; // Default prefix if unknown category
+                                        const uniqueCode = timestamp.slice(-8); // Take the last 8 digits of the timestamp
+                                    
+                                        // Combine prefix and unique code to ensure the total length is 12
+                                        const barcode = (prefix + uniqueCode).slice(0, 12); // Ensure the final length is 12
+                                        return barcode;
+                                    }
+                                
+                                    // Add event listener to the category dropdown
+                                    document.getElementById("category").addEventListener("change", function () {
+                                        const selectedCategory = this.value;
+                                        const barcodeField = document.getElementById("barcode");
+                                        barcodeField.value = generateBarcode(selectedCategory);
+                                    });
+                                </script>
                             </div>
                         </div>               
             </div>
@@ -383,7 +444,7 @@
     <section id="sec2" class="section-2">
         <div class="item-list">
         <div class="cashier">
-            <h1 class="cashier-1">{{ auth()->check() ? auth()->user()->username : 'Guest' }}</h1>
+            <h1 class="cashier-1">Cashier Username</h1>
             <form action="sales-search-form" method="GET">
                 <div class="ewan">
                     <input id="searchSales" class="srch-2" type="text" name="query" placeholder="Scan using BARCODE" required>
@@ -719,8 +780,8 @@
       <select id="paymentMode" onchange="handlePaymentModeChange()">
         <option value="">Select Payment Method</option>
         <option value="cash">Cash</option>
-        <option value="e_wallet">E-Wallet</option>
-        <option value="credit_card">Credit Card</option>
+        {{-- <option value="e_wallet">E-Wallet</option>
+        <option value="credit_card">Credit Card</option> --}}
       </select>
       <button onclick="closeModal('checkoutModal')">Cancel</button>
       <button onclick="processPayment()">Proceed to Cash Payment</button> 
@@ -1208,13 +1269,13 @@
                                 const selectedDate = document.getElementById('searchDate').value; // Get selected date in YYYY-MM-DD format
                                 const searchQuery = document.getElementById('searchReference').value.toLowerCase(); // Get search reference text
                                 const rows = document.querySelectorAll('.transaction-row');
-                            
+
                                 rows.forEach(row => {
                                     const transactionDate = row.querySelector('td:nth-child(2)').textContent.trim(); // Get the timestamp (date) from the second column
                                     const rowDate = transactionDate.split(' ')[0]; // Extract the date (ignore time)
-                                
+
                                     const referenceNo = row.querySelector('td:nth-child(1)').textContent.trim().toLowerCase(); // Get the reference number from the first column
-                                
+
                                     // Apply both filters: date and reference number
                                     if ((selectedDate === '' || rowDate === selectedDate) && (searchQuery === '' || referenceNo.includes(searchQuery))) {
                                         row.style.display = ''; // Show row if both conditions match
@@ -1294,40 +1355,47 @@
                                                 See Details
                                             </button>
                                             <script>
-                                                document.querySelectorAll('.see-details-btn').forEach(button => {
-                                                    button.addEventListener('click', function() {
-                                                        var referenceNo = this.getAttribute('data-reference-no');
-                                                    
-                                                        // Make an AJAX request to get the transaction details for the clicked reference number
+                                                let isModalOpen = false;    
+                                                document.addEventListener('click', function(event) {
+                                                    // Check if the clicked element is a "See Details" button and the modal is not already open
+                                                    if (event.target.classList.contains('see-details-btn')) {
+                                                        var referenceNo = event.target.getAttribute('data-reference-no');
+
+                                                        // Fetch transaction details for the clicked reference number
                                                         fetch(`/get-transaction-details/${referenceNo}`)
-                                                            .then(response => response.json())
+                                                            .then(response => {
+                                                                if (!response.ok) {
+                                                                    throw new Error('Failed to fetch transaction details');
+                                                                }
+                                                                return response.json();
+                                                            })
                                                             .then(data => {
-                                                                // Populate modal with the transaction details
+                                                                // Populate modal with transaction details
                                                                 var modal = document.getElementById('transactionDetailsModal');
                                                                 var transactionDetailsContainer = document.getElementById('historyDetails');
                                                                 var productDetailsTable = document.getElementById('productDetailsTable').getElementsByTagName('tbody')[0];
-                                                            
+
                                                                 // Clear previous details
                                                                 transactionDetailsContainer.innerHTML = '';
                                                                 productDetailsTable.innerHTML = '';
-                                                            
-                                                                // Populate transaction details
+
+                                                                // Add transaction details
                                                                 transactionDetailsContainer.innerHTML = `
-                                                                        <div class="historydetailscolumn">
-                                                                            <p><strong>Reference ID:</strong> ${data.reference_no}</p>
-                                                                            <p><strong>Timestamp:</strong> ${data.timestamp}</p>
-                                                                            <p><strong>Net Amount:</strong> ₱${data.net_amount}</p>
-                                                                            <p><strong>Tax:</strong> ₱${data.tax}</p>
-                                                                        </div>
-                                                                        <div class="historydetailscolumn2">
-                                                                            <p><strong>Amount Payable:</strong> ₱${data.amount_payable}</p>
-                                                                            <p><strong>Cash Amount:</strong> ₱${data.cash_amount}</p>
-                                                                            <p><strong>Change:</strong> ₱${data.change_amount}</p>
-                                                                            <p><strong>Employee Name:</strong> ${data.employee_name}</p>
-                                                                        </div>
+                                                                    <div class="historydetailscolumn">
+                                                                        <p><strong>Reference ID:</strong> ${data.reference_no}</p>
+                                                                        <p><strong>Timestamp:</strong> ${data.timestamp}</p>
+                                                                        <p><strong>Net Amount:</strong> ₱${data.net_amount}</p>
+                                                                        <p><strong>Tax:</strong> ₱${data.tax}</p>
+                                                                    </div>
+                                                                    <div class="historydetailscolumn2">
+                                                                        <p><strong>Amount Payable:</strong> ₱${data.amount_payable}</p>
+                                                                        <p><strong>Cash Amount:</strong> ₱${data.cash_amount}</p>
+                                                                        <p><strong>Change:</strong> ₱${data.change_amount}</p>
+                                                                        <p><strong>Cashier Name:</strong> ${data.employee_name}</p>
+                                                                    </div>
                                                                 `;
-                                                            
-                                                                // Populate product details table
+
+                                                                // Add product details to the table
                                                                 data.products.forEach(product => {
                                                                     var row = productDetailsTable.insertRow();
                                                                     row.innerHTML = `
@@ -1337,28 +1405,29 @@
                                                                         <td style="border: 1px solid #ccc; padding: 8px;">₱${product.total_price}</td>
                                                                     `;
                                                                 });
-                                                            
+
                                                                 // Show the modal
                                                                 modal.style.display = 'block';
                                                             })
                                                             .catch(error => {
                                                                 console.error('Error fetching transaction details:', error);
+                                                                alert('Failed to fetch transaction details. Please try again.');
                                                             });
-                                                    });
+                                                    }
                                                 });
 
-                                                // Close the modal when the user clicks on the close button
+                                                // Close modal when clicking the 'X' button
                                                 document.querySelector('.close-btn').addEventListener('click', function() {
                                                     document.getElementById('transactionDetailsModal').style.display = 'none';
                                                 });
 
-                                                // Close the modal if the user clicks outside of it
-                                                window.onclick = function(event) {
+                                                // Close modal if user clicks outside of it
+                                                window.addEventListener('click', function(event) {
                                                     var modal = document.getElementById('transactionDetailsModal');
                                                     if (event.target === modal) {
                                                         modal.style.display = 'none';
                                                     }
-                                                };
+                                                });
                                             </script>
                                         </td>
                                     </tr>

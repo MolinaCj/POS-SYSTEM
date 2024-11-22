@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Employee;
 use App\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use App\Http\Requests\RegisterRequest;
 use Illuminate\Support\Facades\Hash; 
+use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
@@ -26,7 +26,6 @@ class RegisterController extends Controller
 
         // Create the new employee
         $user = User::create([
-            'employee_id' => $request->input('employee_id'),
             'employee_name' => $request->input('employee_name'),
             'username' => $request->input('username'),
             'email' => $request->input('email'),

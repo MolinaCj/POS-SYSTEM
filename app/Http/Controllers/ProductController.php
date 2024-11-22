@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Employee;
 use Illuminate\Support\Facades\Log;
 
 use App\Http\Requests\StoreProductRequest;
@@ -11,6 +10,7 @@ use App\Http\Requests\SaveReceiptRequest;
 use App\Product;
 use App\SalesHistory;
 use App\Transaction;
+use App\User;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -34,7 +34,10 @@ class ProductController extends Controller
     //MAIN VIEW 
     public function index(Request $request)
     {
-    
+        //CHECK IF THE USER IS LOGGED IN
+        // if (!auth()->check()) {
+        //     return redirect()->route('loginForm')->with('error', 'You must be logged in to view this page.');
+        // }
         // Get the search term from the request
         $search = $request->query('searchProducts');
         
@@ -80,7 +83,7 @@ class ProductController extends Controller
               'tax', 
               'amount_payable',
                'cash_amount', 
-               'change'));
+               'change'))->with('user', auth()->user());
     }
 
     //SHOWING ADD FOR FOR CREATE PRODUCT
@@ -149,14 +152,30 @@ class ProductController extends Controller
 
     public function destroy($id)
     {
+        // Check if the product exists in any transactions
+        $existsInTransactions = DB::table('transactions')->where('product_id', $id)->exists();
+        
+        if ($existsInTransactions) {
+            // Pass an error message to the session
+            return redirect()->route('products.index')->with('deleteError', 'Cannot delete product. It is part of an active transaction.');
+        }
+    
         // Find the product by ID
-        $product = Product::findOrFail($id); 
-
+        $product = Product::findOrFail($id);
+    
         // Delete the product
-        $product->delete(); 
+        $product->delete();
+    
+        // Pass a success message to the session
+        return redirect()->route('products.index')->with('deleteSuccess', 'Product deleted successfully.');
+        // // Find the product by ID
+        // $product = Product::findOrFail($id); 
 
-        // Redirect with a success message
-        return redirect()->route('products.index')->with('success', 'Product deleted successfully'); 
+        // // Delete the product
+        // $product->delete(); 
+
+        // // Redirect with a success message
+        // return redirect()->route('products.index')->with('success', 'Product deleted successfully'); 
     }
 
     //Controller for clear all

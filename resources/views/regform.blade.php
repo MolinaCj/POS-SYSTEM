@@ -13,8 +13,8 @@
         {{ csrf_field() }}
         <p class="form-title">Create your account</p>
         <div class="input-container">
-            <label for="name">Full Name</label>
-            <input id="name" type="text" placeholder="Full Name" name="employee_name" autocomplete="name" required>
+            <label for="employee_name">Full Name</label>
+            <input id="employee_name" type="text" placeholder="Full Name" name="employee_name" autocomplete="employee_name" required>
         </div>
         <div class="input-container">
             <label for="username">Username</label>
@@ -39,26 +39,6 @@
             <a href="{{ route('loginForm') }}">Sign in</a>
         </p>
     </form>
-    @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-{{-- <script>
-    window.onload = function() {
-    let notification = document.querySelector('.notification');
-    if (notification) {
-        setTimeout(function() {
-            notification.classList.add('fade-out');
-        }, 5000); // 5 seconds before it fades out
-    }
-} --}}
-</script>
-
 </div>
 </body>
 </html>

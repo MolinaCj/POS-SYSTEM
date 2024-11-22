@@ -6,10 +6,10 @@ use Illuminate\Http\Request;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Controllers\ProductController;
+use App\User;
 use Illuminate\Support\Facades\Auth; // Ensure this line is included
 
 class AuthController extends Controller
@@ -22,27 +22,19 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
+       // Validation is handled automatically by LoginRequest
         $credentials = $request->only('username', 'password');
-
+        
         if (Auth::attempt($credentials)) {
-            // Redirect to the intended route or to the products view
-            return redirect()->intended('/products');
+            // Login successful
+            return redirect()->route('products.index')->with('success', 'You are now logged in!');
+            dd(auth()->user());
+        } else {
+            // Login failed
+            return redirect()->route('loginForm')->withErrors([
+                'username' => 'The provided credentials do not match our records.',
+            ]);
         }
-
-        return back()->withErrors(['username' => 'Invalid username or password.']);
-
-        // $credentials = $request->only('username', 'password');
-    
-        // if (Auth::guard('users')->attempt($credentials)) {
-        //      [
-        //         'username' => Auth::guard('users')->user()->username,
-        //         'employee_name' => Auth::guard('users')->user()->employee_name
-        //     ];
-        //     // Redirect to the intended route or to the products view
-        //     return redirect()->intended('/products');
-        // }
-    
-        // return back()->withErrors(['username' => 'Invalid username or password.']);
     }
 
     // Show the registration form
@@ -53,20 +45,21 @@ class AuthController extends Controller
 
     // Handle registration submission
     public function register(RegisterRequest $request)
-{
-    // The validation is automatically handled by the RegisterRequest class
+    {
+        // Create a new user
+        $user = User::create([
+            'employee_name' => $request->employee_name,
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
 
-    // Create the user
-    User::create([
-        'employee_name' => $request->input('employee_name'),
-        'username' => $request->input('username'),
-        'email' => $request->input('email'),
-        'password' => Hash::make($request->input('password')),
-    ]);
+        // Log the user in
+        auth()->login($user);
 
-    // Redirect to the login page after successful registration
-    return redirect()->route('loginForm')->with('status', 'Registration successful. Please login.');
-}
+        // Redirect to a desired route
+        return redirect()->route('loginForm')->with('success', 'Registration successful!');
+    }
 
     // Handle logout
     public function logout()

@@ -14,14 +14,11 @@ class Authenticate
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    protected function redirectTo($request)
     {
-        // Check if the user is authenticated using the default guard
-        if (Auth::check()) {
-            return $next($request); // Proceed to the next request if authenticated
+        if (! $request->expectsJson()) {
+            return route('loginForm'); // Ensure this matches your login route
         }
-
-        // Redirect to the login page if not authenticated
-        return redirect()->route('login');
     }
+
 }

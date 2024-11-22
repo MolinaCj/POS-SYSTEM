@@ -24,7 +24,6 @@ class RegisterRequest extends FormRequest
     public function rules()
     {
         return [
-            //'employee_id' => 'required|string|max:255|unique:employees,employee_id', // Unique employee_id
             'employee_name' => 'required|string|max:255', // Employee name
             'username' => 'required|string|max:191|unique:users,username',
             'email' => 'required|string|email|max:255|unique:users,email', // Unique email
@@ -37,8 +36,6 @@ class RegisterRequest extends FormRequest
     public function messages()
     {
         return [
-            // 'employee_id.required' => 'The employee ID is required.',
-            'employee_id.unique' => 'This employee ID is already taken.',
             'employee_name.required' => 'The employee name is required.',
             'username.unique' => 'The username already exist',
             'email.required' => 'The email address is required.',
