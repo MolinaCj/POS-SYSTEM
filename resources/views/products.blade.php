@@ -56,19 +56,19 @@
             <div class="options">
                 <div class="opt">
                     <img class="img" src="images/itemlist.png" alt="">
-                    <a class="txt-1" href="#sec1">ITEM LIST</a>
+                    <a class="txt-1 nav-link" data-target="#sec1">ITEM LIST</a>
                 </div>
                 <div class="opt">
                     <img class="img" src="images/transac.png" alt="">
-                    <a class="txt-1" href="#sec2">SALES</a>
+                    <a class="txt-1 nav-link" data-target="#sec2">SALES</a>
                 </div>
                 <div class="opt">
                     <img class="img" src="images/settings.png" alt="">
-                    <a class="txt-1" href="#sec3">SALES HISTORY</a>
+                    <a class="txt-1 nav-link" data-target="#sec3">SALES HISTORY</a>
                 </div>
                 <div class="opt">
                     <img class="img" src="images/dashboard.png" alt="">
-                    <a class="txt-1" href="#sec4">SETTINGS</a>
+                    <a class="txt-1 nav-link" data-target="#sec4">SETTINGS</a>
                 </div>
                 <div class="functions">
                     <div class="func">
@@ -109,7 +109,7 @@
     {{--------------------------------------------------------- THIS --------------------------------------------------------------------}}
     {{---------------------------------------------------------- IS ---------------------------------------------------------------------}}
     {{------------------------------------------------------- SECTION 1 -----------------------------------------------------------------}}
-    <section id="sec1" class="section-1">
+    <section id="sec1" class="product-section">
         <div class="item-list">
             <div class="cashier">
                 <h1 class="cashier-1">List of Products</h1>
@@ -441,10 +441,10 @@
     {{--------------------------------------------------------- THIS --------------------------------------------------------------------}}
     {{---------------------------------------------------------- IS ---------------------------------------------------------------------}}
     {{------------------------------------------------------- SECTION 2 -----------------------------------------------------------------}}
-    <section id="sec2" class="section-2">
+    <section id="sec2" class="product-section">
         <div class="item-list">
         <div class="cashier">
-            <h1 class="cashier-1">Cashier {{ session('employee_id') }} {{ session('cashier_name') ? session('cashier_name') : 'Guest' }}</h1>
+            <h1 class="cashier-1">Cashier {{ session('cashier_id') }} {{ session('cashier_name') ? session('cashier_name') : 'Guest' }}</h1>
             {{-- <h1 class="cashier-1">Cashier Username</h1> --}}
             <form action="sales-search-form" method="GET">
                 <div class="ewan">
@@ -1268,7 +1268,7 @@
     {{--------------------------------------------------------- THIS --------------------------------------------------------------------}}
     {{---------------------------------------------------------- IS ---------------------------------------------------------------------}}
     {{------------------------------------------------------- SECTION 3 -----------------------------------------------------------------}}
-    <section id="sec3" class="section-3">
+    <section id="sec3" class="product-section">
         <div class="history">
             <!-- Header Section -->
                 <div class="history-header" style="margin-top: 20px;">
@@ -1418,7 +1418,7 @@
                                                                         <p><strong>Amount Payable:</strong> ₱${data.amount_payable}</p>
                                                                         <p><strong>Cash Amount:</strong> ₱${data.cash_amount}</p>
                                                                         <p><strong>Change:</strong> ₱${data.change_amount}</p>
-                                                                        <p><strong>Cashier Name:</strong> ${data.employee_name}</p>
+                                                                        <p><strong>Cashier Name:</strong> ${data.cashier_name}</p>
                                                                     </div>
                                                                 `;
 
@@ -1474,7 +1474,7 @@
     {{--------------------------------------------------------- THIS --------------------------------------------------------------------}}
     {{---------------------------------------------------------- IS ---------------------------------------------------------------------}}
     {{------------------------------------------------------- SECTION 4 -----------------------------------------------------------------}}
-    <section id="sec4" class="section-4">
+    <section id="sec4" class="product-section">
         <div class="settings">
             <p class="dash">This is the SETTINGS</p>
             <div class="sec4-div">
@@ -1587,6 +1587,30 @@ $(document).ready(function() {
 
 
 {{-- /////////////////////=========SEARCH PRODUCTS SCRIPT=========///////////////////// --}}
+
+{{-- /////////////////////=========PREVENT EVERY SECTION FROM SCROLLING SCRIPT=========///////////////////// --}}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    // Disable scrolling by setting body overflow to hidden
+    document.body.style.overflow = "hidden";
+
+    // Get all navigation links
+    const navLinks = document.querySelectorAll(".nav-link");
+
+    // Add click event listener to each link
+    navLinks.forEach(link => {
+        link.addEventListener("click", function (event) {
+            event.preventDefault(); // Prevent default anchor behavior
+
+            // Get the target section from the data attribute
+            const target = document.querySelector(this.dataset.target);
+
+            // Scroll to the target section
+            target.scrollIntoView({ behavior: "smooth" });
+        });
+    });
+});
+</script>
 
 </body>
 </html>
