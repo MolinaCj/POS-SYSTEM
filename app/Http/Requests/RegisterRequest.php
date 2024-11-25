@@ -24,7 +24,7 @@ class RegisterRequest extends FormRequest
     public function rules()
     {
         return [
-            'employee_name' => 'required|string|max:255', // Employee name
+            'cashier_name' => 'required|string|max:255', // Employee name
             'username' => 'required|string|max:191|unique:users,username',
             'email' => 'required|string|email|max:255|unique:users,email', // Unique email
             'email_verified_at' => 'nullable|date', // Nullable date for email verification
@@ -36,7 +36,7 @@ class RegisterRequest extends FormRequest
     public function messages()
     {
         return [
-            'employee_name.required' => 'The employee name is required.',
+            'cashier_name.required' => 'The employee name is required.',
             'username.unique' => 'The username already exist',
             'email.required' => 'The email address is required.',
             'email.unique' => 'This email is already registered.',

@@ -15,7 +15,7 @@ class TransactionRequest extends FormRequest
     {
         return [
             'product_id' => 'required|integer',
-            //'employee_name' => 'required|string',
+            //'cashier_name' => 'required|string',
             //'employee_id' => 'required|interger',
             'item_name' => 'required|string|max:255',
             'quantity' => 'required|integer|min:1',

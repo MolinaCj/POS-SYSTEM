@@ -7,17 +7,33 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\TransactionRequest;
 use App\Http\Requests\SaveReceiptRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\LoginRequest;
 use App\Product;
 use App\SalesHistory;
 use App\Transaction;
 use App\User;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 
 class ProductController extends Controller
 {
+    // Constructor to apply middleware
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            // Exclude login routes to avoid redirect loop
+            if (!session()->has('employee_id') && !in_array($request->route()->getName(), ['loginForm', 'login'])) {
+                return redirect()->route('loginForm')->with('error', 'You must log in first.');
+            }
+    
+            return $next($request);
+        });
+    }
     //  public function index(Request $request)
     //  {
     //      // Get the search query from the request
@@ -211,18 +227,42 @@ class ProductController extends Controller
     {
         // Check if the reference number is already set in the session
         if (!session()->has('reference_no')) {
-            // Generate a new reference number
-            $datePart = date('ymdHi'); // Generates a 10-character string: YYMMDDHHMM
-            $randomPart = mt_rand(100, 999); // Generates a 3-digit random number
-            $referenceNo = $datePart . $randomPart; // Combine parts
-            $referenceNo = substr($referenceNo, 0, 13); // Ensure it's 13 digits
-    
-            // Store the reference number in the session
+            // Initialize the reference number with a starting value (e.g., 1000)
+            $startingValue = 10;
+
+            // Retrieve the last reference number from the session, or use the starting value
+            $lastReferenceNo = session('last_reference_no', $startingValue);
+        
+            // Increment the reference number by 1
+            $referenceNo = $lastReferenceNo + 1;
+        
+            // Pad the reference number to ensure it is 13 digits long (e.g., 000000010001)
+            $referenceNo = str_pad($referenceNo, 13, '0', STR_PAD_LEFT);
+        
+            // Store the new reference number in the session
             session(['reference_no' => $referenceNo]);
+        
+            // Also store the updated last reference number for future increments
+            session(['last_reference_no' => $referenceNo]);
         } else {
             // Retrieve the reference number from the session
             $referenceNo = session('reference_no');
         }
+
+        // // Check if the reference number is already set in the session
+        // if (!session()->has('reference_no')) {
+        //     // Generate a new reference number
+        //     $datePart = date('ymdHi'); // Generates a 10-character string: YYMMDDHHMM
+        //     $randomPart = mt_rand(100, 999); // Generates a 3-digit random number
+        //     $referenceNo = $datePart . $randomPart; // Combine parts
+        //     $referenceNo = substr($referenceNo, 0, 13); // Ensure it's 13 digits
+    
+        //     // Store the reference number in the session
+        //     session(['reference_no' => $referenceNo]);
+        // } else {
+        //     // Retrieve the reference number from the session
+        //     $referenceNo = session('reference_no');
+        // }
     
         // Process the product ID from the request
         $productId = $request->input('product_id');
@@ -491,5 +531,76 @@ class ProductController extends Controller
 
     // If no history is found for the given reference number
     return response()->json(['message' => 'Transaction not found'], 404);
+    }
+
+
+
+
+
+    //LOGIN AND REGISTRATION METHOD
+
+    //FOW SHOWING THE LOG IN FORM
+    public function showLoginForm()
+    {
+        return view('loginform'); // Ensure you have a view for this form
+    }
+
+    //FOR PROCESSING THE LOG IN
+    public function login(LoginRequest $request)
+    {
+        // Retrieve the user by username
+        $user = \App\User::where('username', $request->username)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            // If user not found or password is incorrect, redirect back with an error
+            return back()->withErrors([
+                'username' => 'The provided credentials do not match our records.',
+            ])->withInput($request->except('password'));
+        }
+
+        // Log in the user by setting session data
+        session([
+            'employee_id' => $user->employee_id,
+            'username' => $user->username,
+            'cashier_name' => $user->cashier_name,
+        ]);
+        Log::info(session()->all());
+
+        // Redirect to the desired route
+        return redirect()->route('products.index')->with('success', 'Logged in successfully!');
+    }
+
+    //FOR SHOWING THE REGISTRATION FORM
+    public function showRegistrationForm()
+    {
+        return view('regform'); // Ensure you have a view for this form
+    }
+
+    //PROCESS THE REGISTRATION
+    public function register(RegisterRequest $request)
+    {
+        // Create a new user
+        $user = User::create([
+            'cashier_name' => $request->cashier_name,
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        // Log the user in
+        auth()->login($user);
+
+        // Redirect to a desired route
+        return redirect()->route('loginForm')->with('success', 'Registration successful!');
+    }
+
+    // Handle logout
+    public function logout()
+    {
+        Auth::logout();
+        session()->flush();
+
+        // Redirect to the login page after logout
+        return redirect()->route('loginForm');
     }
 }

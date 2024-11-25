@@ -15,59 +15,47 @@ use Illuminate\Support\Facades\Auth; // Ensure this line is included
 class AuthController extends Controller
 {
     // Show the login form
-    public function showLoginForm()
-    {
-        return view('loginform'); // Ensure you have a view for this form
-    }
+    // public function showLoginForm()
+    // {
+    //     return view('loginform'); // Ensure you have a view for this form
+    // }
 
     public function login(LoginRequest $request)
     {
-       // Validation is handled automatically by LoginRequest
-        $credentials = $request->only('username', 'password');
-        
-        if (Auth::attempt($credentials)) {
-            // Login successful
-            return redirect()->route('products.index')->with('success', 'You are now logged in!');
-            dd(auth()->user());
-        } else {
-            // Login failed
-            return redirect()->route('loginForm')->withErrors([
-                'username' => 'The provided credentials do not match our records.',
-            ]);
-        }
+        //
     }
 
     // Show the registration form
     public function showRegistrationForm()
     {
-        return view('regform'); // Ensure you have a view for this form
+        //return view('regform'); // Ensure you have a view for this form
     }
 
     // Handle registration submission
     public function register(RegisterRequest $request)
     {
-        // Create a new user
-        $user = User::create([
-            'employee_name' => $request->employee_name,
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        // // Create a new user
+        // $user = User::create([
+        //     'employee_name' => $request->employee_name,
+        //     'username' => $request->username,
+        //     'email' => $request->email,
+        //     'password' => Hash::make($request->password),
+        // ]);
 
-        // Log the user in
-        auth()->login($user);
+        // // Log the user in
+        // auth()->login($user);
 
-        // Redirect to a desired route
-        return redirect()->route('loginForm')->with('success', 'Registration successful!');
+        // // Redirect to a desired route
+        // return redirect()->route('loginForm')->with('success', 'Registration successful!');
     }
 
     // Handle logout
     public function logout()
     {
-        Auth::logout();
-        session()->flush();
+        // Auth::logout();
+        // session()->flush();
 
-        // Redirect to the login page after logout
-        return redirect()->route('loginForm');
+        // // Redirect to the login page after logout
+        // return redirect()->route('loginForm');
     }
 }

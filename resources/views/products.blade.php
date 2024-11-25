@@ -444,7 +444,8 @@
     <section id="sec2" class="section-2">
         <div class="item-list">
         <div class="cashier">
-            <h1 class="cashier-1">Cashier Username</h1>
+            <h1 class="cashier-1">Cashier {{ session('employee_id') }} {{ session('cashier_name') ? session('cashier_name') : 'Guest' }}</h1>
+            {{-- <h1 class="cashier-1">Cashier Username</h1> --}}
             <form action="sales-search-form" method="GET">
                 <div class="ewan">
                     <input id="searchSales" class="srch-2" type="text" name="query" placeholder="Scan using BARCODE" required>
@@ -717,9 +718,35 @@
             </div>
         <div class="cont-3" style="display: flex; flex-direction: column;">
             <div class="date-time">
-                <p><input class="date" type="date"></p>
-                <p><input class="time" type="time"></p>
+                <input class="date" id="date" type="date">
+                <input class="time" id="time" type="time">
             </div>
+            <script>
+                function formatTime(date) {
+                    let hours = date.getHours().toString().padStart(2, '0');
+                    let minutes = date.getMinutes().toString().padStart(2, '0');
+                    let seconds = date.getSeconds().toString().padStart(2, '0');
+                    return `${hours}:${minutes}:${seconds}`;
+                }
+
+                window.onload = function() {
+                    // Get the current date
+                    const currentDate = new Date();
+                
+                    // Format the date as YYYY-MM-DD for the date input
+                    const dateString = currentDate.toISOString().split('T')[0];
+                
+                    // Set the value of the date and time input fields to the current date and time
+                    document.getElementById('date').value = dateString;
+                    document.getElementById('time').value = formatTime(currentDate);
+                
+                    // Update the time every second to keep it live
+                    setInterval(function() {
+                        const updatedTime = formatTime(new Date());
+                        document.getElementById('time').value = updatedTime;
+                    }, 1000);
+                };
+            </script>
             <div class="button">
                 <button class="payment2" onclick="showCheckoutModal()">Proceed to Payment</button>
 

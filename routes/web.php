@@ -64,19 +64,19 @@ Route::get('products/filter', 'ProductController@filterByCategory')->name('produ
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //Showing login form
-Route::get('/loginForm', 'Auth\AuthController@showLoginForm')->name('loginForm');
+Route::get('/loginForm', 'ProductController@showLoginForm')->name('loginForm');
 
 //Processing the login
-Route::post('/login','Auth\AuthController@login')->name('login');
+Route::post('/login','ProductController@login')->name('login');
 
 //SHowing the registration form
-Route::get('/regForm', 'Auth\AuthController@showRegistrationForm')->name('regForm');
+Route::get('/regForm', 'ProductController@showRegistrationForm')->name('regForm');
 
 //Route for processing the registration
-Route::post('/register', 'Auth\AuthController@register')->name('register');
+Route::post('/register', 'ProductController@register')->name('register');
 
 //Route for logout
-Route::post('/logout', 'Auth\AuthController@logout')->name('logout');
+Route::post('/logout', 'ProductController@logout')->name('logout');
 
 //SEE TRANSACTION DETAILS ROUTE
 Route::get('/get-transaction-details/{referenceNo}', 'ProductController@getTransactionDetails');

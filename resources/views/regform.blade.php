@@ -13,8 +13,8 @@
         {{ csrf_field() }}
         <p class="form-title">Create your account</p>
         <div class="input-container">
-            <label for="employee_name">Full Name</label>
-            <input id="employee_name" type="text" placeholder="Full Name" name="employee_name" autocomplete="employee_name" required>
+            <label for="cashier_name">Full Name</label>
+            <input id="cashier_name" type="text" placeholder="Full Name" name="employee_name" autocomplete="employee_name" required>
         </div>
         <div class="input-container">
             <label for="username">Username</label>

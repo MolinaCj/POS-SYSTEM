@@ -17,20 +17,45 @@ class TransactionController extends Controller
     }
 
     public function addToTransaction(Request $request){
+
         // Check if the reference number is already set in the session
         if (!session()->has('reference_no')) {
-            // If not, generate a new reference number
-            $datePart = date('ymdHi'); // Generates a 10-character string: YYMMDDHHMM
-            $randomPart = mt_rand(100, 999); // Generates a 3-digit random number
-            $referenceNo = $datePart . $randomPart; // Combine parts
-            $referenceNo = substr($referenceNo, 0, 13); // Ensure it's 13 digits
+            // Initialize the reference number with a starting value (e.g., 1000000)
+            $startingValue = 10;
 
-            // Store the reference number in the session
+            // Retrieve the last reference number from the session, or use the starting value
+            $lastReferenceNo = session('last_reference_no', $startingValue);
+        
+            // Increment the reference number by 1
+            $referenceNo = $lastReferenceNo + 1;
+        
+            // Ensure the reference number is padded to 13 digits, e.g., 000000010001
+            $referenceNo = str_pad($referenceNo, 13, '0', STR_PAD_LEFT);
+        
+            // Store the new reference number in the session
             session(['reference_no' => $referenceNo]);
+        
+            // Also store the updated last reference number for future increments
+            session(['last_reference_no' => $referenceNo]);
         } else {
             // Retrieve the reference number from the session
             $referenceNo = session('reference_no');
         }
+
+        // // Check if the reference number is already set in the session
+        // if (!session()->has('reference_no')) {
+        //     // If not, generate a new reference number
+        //     $datePart = date('ymdHi'); // Generates a 10-character string: YYMMDDHHMM
+        //     $randomPart = mt_rand(100, 999); // Generates a 3-digit random number
+        //     $referenceNo = $datePart . $randomPart; // Combine parts
+        //     $referenceNo = substr($referenceNo, 0, 13); // Ensure it's 13 digits
+
+        //     // Store the reference number in the session
+        //     session(['reference_no' => $referenceNo]);
+        // } else {
+        //     // Retrieve the reference number from the session
+        //     $referenceNo = session('reference_no');
+        // }
 
        // Retrieve the product
         $product = Product::find($request->product_id);
