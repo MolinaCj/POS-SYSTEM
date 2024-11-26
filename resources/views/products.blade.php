@@ -818,12 +818,20 @@
     <script>
         // Function to show the checkout modal
         function showCheckoutModal() {
-            // Check if the transaction table has any rows (indicating there are products)
-            const transactionTable = document.getElementById('transaction-tbl');
-            const transactionRows = transactionTable ? transactionTable.rows.length : 0;
+            // Get all product rows in the table body (excluding the header)
+            const transactionTable = document.getElementById('transaction-tbl border-collapse: collapse; border-spacing: 0; width: 750px');
+            
+            // Ensure transactionTable is not null
+            if (!transactionTable) {
+                alert('Transaction table not found.');
+                return;
+            }
         
-            // If there are no products in the transaction table, do not show the modal
-            if (transactionRows <= 1) { // Assuming the first row is the header
+            // Get all the rows inside tbody (this should be product rows)
+            const transactionRows = transactionTable.querySelectorAll('tbody tr');
+        
+            // If there are no rows in the tbody (no products added), do not show the modal
+            if (transactionRows.length === 0) {
                 alert('No products in the transaction. Please add products before proceeding.');
                 return;
             }
@@ -834,6 +842,8 @@
         
             // Set the amount payable in the modal
             document.getElementById('amountPayable').value = amountPayable.trim();
+        
+            // Show the checkout modal
             document.getElementById('checkoutModal').style.display = 'flex';
         }
 
