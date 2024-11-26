@@ -8,8 +8,8 @@ class Transaction extends Model
 {
     // The attributes that are mass assignable
     protected $fillable = [
-        'employee_id',
-        'employee_name',
+        'cashier_id',
+        'cashier_name',
         'product_id',
         'item_name',
         'quantity',

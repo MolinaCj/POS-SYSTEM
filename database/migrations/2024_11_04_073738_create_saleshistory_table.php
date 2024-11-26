@@ -15,7 +15,7 @@ class CreateSaleshistoryTable extends Migration
     {
         Schema::create('histories', function (Blueprint $table) {
             $table->increments('id')->unique();
-            $table->string('employee_name');
+            $table->string('cashier_name');
             $table->string('item_name');
             $table->integer('quantity');
             $table->decimal('unit_price', 10, 2);

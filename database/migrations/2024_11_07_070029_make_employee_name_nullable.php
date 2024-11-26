@@ -14,7 +14,7 @@ class MakeEmployeeNameNullable extends Migration
     public function up()
     {
         Schema::table('histories', function (Blueprint $table) {
-            $table->string('employee_name')->nullable()->change();
+            $table->string('cashier_name')->nullable()->change();
         });
     }
 
@@ -26,7 +26,7 @@ class MakeEmployeeNameNullable extends Migration
     public function down()
     {
         Schema::table('histories', function (Blueprint $table) {
-            $table->string('employee_name')->nullable(false)->change();
+            $table->string('cashier_name')->nullable(false)->change();
         });
     }
 }

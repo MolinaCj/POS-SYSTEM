@@ -542,7 +542,7 @@
                             },
                             success: function(response) {
                                 if (response.success) {
-                                    alert('Product added to transaction!');
+                                    // alert('Product added to transaction!');
                                     $('#quantity-modal').fadeOut();
                                     $('#quanity-modal-overlay').fadeOut();
                                     $('#results').empty().hide();

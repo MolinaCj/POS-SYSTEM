@@ -15,7 +15,7 @@ class CreateTransactionsTable extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->increments('transaction_id')->unique(); // Transaction ID
-            $table->unsignedBigInteger('employee_id')->nullable(); // Employee ID
+            $table->unsignedBigInteger('cashier_id')->nullable(); // Employee ID
             $table->unsignedBigInteger('product_id'); // Product ID
             $table->string('item_name');
             $table->integer('quantity'); // Quantity

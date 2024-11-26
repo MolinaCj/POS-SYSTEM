@@ -27,7 +27,7 @@ class ProductController extends Controller
     {
         $this->middleware(function ($request, $next) {
             // Exclude login routes to avoid redirect loop
-            if (!session()->has('employee_id') && !in_array($request->route()->getName(), ['loginForm', 'login'])) {
+            if (!session()->has('cashier_id') && !in_array($request->route()->getName(), ['loginForm', 'login'])) {
                 return redirect()->route('loginForm')->with('error', 'You must log in first.');
             }
     
@@ -225,44 +225,20 @@ class ProductController extends Controller
     //ADD TO TRANSACTION CONTROLLER
     public function addToTransac(TransactionRequest $request)
     {
-        // Check if the reference number is already set in the session
+        //Check if the reference number is already set in the session
         if (!session()->has('reference_no')) {
-            // Initialize the reference number with a starting value (e.g., 1000)
-            $startingValue = 10;
-
-            // Retrieve the last reference number from the session, or use the starting value
-            $lastReferenceNo = session('last_reference_no', $startingValue);
-        
-            // Increment the reference number by 1
-            $referenceNo = $lastReferenceNo + 1;
-        
-            // Pad the reference number to ensure it is 13 digits long (e.g., 000000010001)
-            $referenceNo = str_pad($referenceNo, 13, '0', STR_PAD_LEFT);
-        
-            // Store the new reference number in the session
+            // Generate a new reference number
+            $datePart = date('ymdHi'); // Generates a 10-character string: YYMMDDHHMM
+            $randomPart = mt_rand(100, 999); // Generates a 3-digit random number
+            $referenceNo = $datePart . $randomPart; // Combine parts
+            $referenceNo = substr($referenceNo, 0, 13); // Ensure it's 13 digits
+    
+            // Store the reference number in the session
             session(['reference_no' => $referenceNo]);
-        
-            // Also store the updated last reference number for future increments
-            session(['last_reference_no' => $referenceNo]);
         } else {
             // Retrieve the reference number from the session
             $referenceNo = session('reference_no');
         }
-
-        // // Check if the reference number is already set in the session
-        // if (!session()->has('reference_no')) {
-        //     // Generate a new reference number
-        //     $datePart = date('ymdHi'); // Generates a 10-character string: YYMMDDHHMM
-        //     $randomPart = mt_rand(100, 999); // Generates a 3-digit random number
-        //     $referenceNo = $datePart . $randomPart; // Combine parts
-        //     $referenceNo = substr($referenceNo, 0, 13); // Ensure it's 13 digits
-    
-        //     // Store the reference number in the session
-        //     session(['reference_no' => $referenceNo]);
-        // } else {
-        //     // Retrieve the reference number from the session
-        //     $referenceNo = session('reference_no');
-        // }
     
         // Process the product ID from the request
         $productId = $request->input('product_id');
@@ -524,7 +500,7 @@ class ProductController extends Controller
             'amount_payable' => $history->amount_payable,
             'cash_amount' => $history->cash_amount,
             'change_amount' => $history->change_amount,
-            'employee_name' => $history->employee_name,
+            'cashier_name' => $history->cashier_name,
             'products' => $products,
         ]);
     }
@@ -560,7 +536,7 @@ class ProductController extends Controller
 
         // Log in the user by setting session data
         session([
-            'employee_id' => $user->employee_id,
+            'cashier_id' => $user->cashier_id,
             'username' => $user->username,
             'cashier_name' => $user->cashier_name,
         ]);

@@ -9,13 +9,13 @@ class MakeUserIdNullable extends Migration
     public function up()
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->string('employee_id')->nullable()->change();
+            $table->string('cashier_id')->nullable()->change();
         });
     }
     public function down()
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->string('employee_id')->nullable(false)->change();
+            $table->string('cashier_id')->nullable(false)->change();
         });
     }
 }
