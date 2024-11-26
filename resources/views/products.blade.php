@@ -968,8 +968,11 @@
         <p>Total Amount:</p>
         <input type="text" id="totalAmount" readonly>
 
-        <p>Discount:</p>
+        <p>Discount %:</p>
         <input type="number" id="discount" placeholder="Enter discount (%)" step="0.01">
+
+        <p>Discounted Amount</p>
+        <input type="text" id="discountedAmount" readonly>
 
         <p>Cash Amount:</p>
         <input type="number" id="cashAmount" placeholder="Enter cash amount">
@@ -986,17 +989,35 @@
     </div>
 
     <script>
+        // Function to calculate and display the discounted amount
+        function updateDiscountedAmount() {
+            const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, ''));
+            const discount = parseFloat(document.getElementById('discount').value) || 0; // Default to 0 if discount is not entered
+        
+            // Check if totalAmount is a valid number
+            if (!isNaN(totalAmount)) {
+                // Apply the discount as a decimal (e.g., 10 becomes 0.10)
+                const discountedAmount = totalAmount - (totalAmount * (discount / 100));
+            
+                // Update the discounted amount field
+                document.getElementById('discountedAmount').value = "₱" + discountedAmount.toFixed(2);
+            } else {
+                document.getElementById('discountedAmount').value = "₱0.00"; // Default value if input is invalid
+            }
+        }
+        
         // Function to update customer change automatically
         function updateCustomerChange() {
             const cashAmount = parseFloat(document.getElementById('cashAmount').value);
             const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, ''));
-            const discount = parseFloat(document.getElementById('discount').value) || 0; // Get the discount value, default to 0 if not entered
+            const discount = parseFloat(document.getElementById('discount').value) || 0; // Default to 0 if discount is not entered
         
-            // Check if both values are valid numbers
+            // Check if values are valid numbers
             if (!isNaN(cashAmount) && !isNaN(totalAmount)) {
-                // Apply the discount as a decimal (e.g., 10 becomes 0.10)
+                // Calculate the discounted amount
                 const discountedAmount = totalAmount - (totalAmount * (discount / 100));
-            
+                
+                // Calculate the change
                 const change = cashAmount - discountedAmount;
             
                 // Update the customer change field
@@ -1005,9 +1026,39 @@
                 document.getElementById('customerChange').value = "₱0.00"; // Default value if input is invalid
             }
         }
-
-        // Add event listener to update change when cash amount changes
+        
+        // Add event listeners to update the fields when relevant inputs change
+        document.getElementById('discount').addEventListener('input', () => {
+            updateDiscountedAmount();
+            updateCustomerChange();
+        });
         document.getElementById('cashAmount').addEventListener('input', updateCustomerChange);
+        document.getElementById('totalAmount').addEventListener('input', () => {
+            updateDiscountedAmount();
+            updateCustomerChange();
+        });
+        // // Function to update customer change automatically
+        // function updateCustomerChange() {
+        //     const cashAmount = parseFloat(document.getElementById('cashAmount').value);
+        //     const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, ''));
+        //     const discount = parseFloat(document.getElementById('discount').value) || 0; // Get the discount value, default to 0 if not entered
+        
+        //     // Check if both values are valid numbers
+        //     if (!isNaN(cashAmount) && !isNaN(totalAmount)) {
+        //         // Apply the discount as a decimal (e.g., 10 becomes 0.10)
+        //         const discountedAmount = totalAmount - (totalAmount * (discount / 100));
+            
+        //         const change = cashAmount - discountedAmount;
+            
+        //         // Update the customer change field
+        //         document.getElementById('customerChange').value = change >= 0 ? "₱" + change.toFixed(2) : "₱0.00";
+        //     } else {
+        //         document.getElementById('customerChange').value = "₱0.00"; // Default value if input is invalid
+        //     }
+        // }
+
+        // // Add event listener to update change when cash amount changes
+        // document.getElementById('cashAmount').addEventListener('input', updateCustomerChange);
 
         // Function to return to the checkout modal from the cash payment modal
         function returnToCheckoutModal() {
