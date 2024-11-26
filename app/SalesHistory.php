@@ -8,7 +8,7 @@ class SalesHistory extends Model
 {
     protected $table = 'histories';
     protected $fillable = [
-        'employee_name',
+        'cashier_name',
         'item_name',
         'quantity',
         'unit_price',
@@ -18,6 +18,6 @@ class SalesHistory extends Model
         'payment_amount',
         'change_amount',
         'timestamp',
-        'reference_id',
+        'reference_no',
     ];
 }

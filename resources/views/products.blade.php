@@ -27,7 +27,7 @@
 
         <div class="top-container">
             <div class="comp-name">
-                <h2 class="abc">ABC Company</h2>
+                <h2 class="abc">SBC SuperMart</h2>
                 <p><Address class="address">Address: xxxxx, xxxxxxx</Address></p>
             </div>
             <form id="logout-form" action="{{ route('logout') }}" method="POST">

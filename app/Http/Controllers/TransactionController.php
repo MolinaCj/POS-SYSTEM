@@ -7,7 +7,7 @@ use App\Product;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\TransactionRequest;
-
+use App\SalesHistory;
 
 class TransactionController extends Controller
 {
@@ -32,18 +32,41 @@ class TransactionController extends Controller
 
         // Check if the reference number is already set in the session
         if (!session()->has('reference_no')) {
-            // If not, generate a new reference number
-            $datePart = date('ymdHi'); // Generates a 10-character string: YYMMDDHHMM
-            $randomPart = mt_rand(100, 999); // Generates a 3-digit random number
-            $referenceNo = $datePart . $randomPart; // Combine parts
-            $referenceNo = substr($referenceNo, 0, 13); // Ensure it's 13 digits
-
+            // Retrieve the last reference number from the histories table
+            $lastReferenceNo = SalesHistory::latest('id')->value('reference_no');
+        
+            if ($lastReferenceNo) {
+                // Increment the last reference number
+                $referenceNo = intval($lastReferenceNo) + 1;
+            } else {
+                // If the histories table is empty, start with a default value
+                $referenceNo = 1000000000001; // Example: Starting point
+            }
+        
+            // Ensure the reference number is always 13 digits
+            $referenceNo = str_pad($referenceNo, 13, '0', STR_PAD_LEFT);
+        
             // Store the reference number in the session
             session(['reference_no' => $referenceNo]);
         } else {
             // Retrieve the reference number from the session
             $referenceNo = session('reference_no');
         }
+
+        // // Check if the reference number is already set in the session
+        // if (!session()->has('reference_no')) {
+        //     // If not, generate a new reference number
+        //     $datePart = date('ymdHi'); // Generates a 10-character string: YYMMDDHHMM
+        //     $randomPart = mt_rand(100, 999); // Generates a 3-digit random number
+        //     $referenceNo = $datePart . $randomPart; // Combine parts
+        //     $referenceNo = substr($referenceNo, 0, 13); // Ensure it's 13 digits
+
+        //     // Store the reference number in the session
+        //     session(['reference_no' => $referenceNo]);
+        // } else {
+        //     // Retrieve the reference number from the session
+        //     $referenceNo = session('reference_no');
+        // }
 
        // Retrieve the product
         $product = Product::find($request->product_id);
@@ -62,6 +85,17 @@ class TransactionController extends Controller
             ]);
         }
 
+        // Retrieve cashier details from the session
+        $cashierId = session('cashier_id');
+        $cashierName = session('cashier_name');
+
+        if (!$cashierId || !$cashierName) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cashier details are missing. Please log in again.'
+            ]);
+        }
+
         // Calculate total price
         $total = $product->price * $request->quantity;
 
@@ -73,6 +107,8 @@ class TransactionController extends Controller
             'unit_price' => $product->price,
             'total_price' => $total,
             'reference_no' => $referenceNo, // Use the same reference number
+            'cashier_id' => $cashierId,        // Save cashier ID
+            'cashier_name' => $cashierName,    // Save cashier name
         ]);
 
         // Update the product stock after the transaction

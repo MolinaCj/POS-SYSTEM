@@ -14,7 +14,7 @@ class AddEmployeeNameToTransactionsTable extends Migration
     public function up()
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->string('employee_name')->nullable()->after('employee_id'); // replace 'column_name' with the column after which you want to place employee_name
+            $table->string('cashier_name')->nullable()->after('cashier_id'); // replace 'column_name' with the column after which you want to place employee_name
         });
     }
 
@@ -26,7 +26,7 @@ class AddEmployeeNameToTransactionsTable extends Migration
     public function down()
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->dropColumn('employee_name');
+            $table->dropColumn('cashier_name');
         });
     }
 }

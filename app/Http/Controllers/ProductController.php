@@ -225,20 +225,42 @@ class ProductController extends Controller
     //ADD TO TRANSACTION CONTROLLER
     public function addToTransac(TransactionRequest $request)
     {
-        //Check if the reference number is already set in the session
+        // Check if the reference number is already set in the session
         if (!session()->has('reference_no')) {
-            // Generate a new reference number
-            $datePart = date('ymdHi'); // Generates a 10-character string: YYMMDDHHMM
-            $randomPart = mt_rand(100, 999); // Generates a 3-digit random number
-            $referenceNo = $datePart . $randomPart; // Combine parts
-            $referenceNo = substr($referenceNo, 0, 13); // Ensure it's 13 digits
-    
+            // Retrieve the last transaction's reference number from the database
+            $lastReferenceNo = SalesHistory::latest('id')->value('reference_no');
+        
+            if ($lastReferenceNo) {
+                // Increment the last reference number
+                $referenceNo = intval($lastReferenceNo) + 1;
+            } else {
+                // If no previous reference number exists, start with a default value
+                $referenceNo = 1000000000001; // Example: Starting point
+            }
+        
+            // Ensure the reference number is always 13 digits
+            $referenceNo = str_pad($referenceNo, 13, '0', STR_PAD_LEFT);
+        
             // Store the reference number in the session
             session(['reference_no' => $referenceNo]);
         } else {
             // Retrieve the reference number from the session
             $referenceNo = session('reference_no');
         }
+        // //Check if the reference number is already set in the session
+        // if (!session()->has('reference_no')) {
+        //     // Generate a new reference number
+        //     $datePart = date('ymdHi'); // Generates a 10-character string: YYMMDDHHMM
+        //     $randomPart = mt_rand(100, 999); // Generates a 3-digit random number
+        //     $referenceNo = $datePart . $randomPart; // Combine parts
+        //     $referenceNo = substr($referenceNo, 0, 13); // Ensure it's 13 digits
+    
+        //     // Store the reference number in the session
+        //     session(['reference_no' => $referenceNo]);
+        // } else {
+        //     // Retrieve the reference number from the session
+        //     $referenceNo = session('reference_no');
+        // }
     
         // Process the product ID from the request
         $productId = $request->input('product_id');
@@ -258,7 +280,14 @@ class ProductController extends Controller
         $product->stocks -= $request->input('quantity');
         $product->save();
 
-    
+        // Retrieve cashier details from the session
+        $cashierId = session('cashier_id');
+        $cashierName = session('cashier_name');
+
+        if (!$cashierId || !$cashierName) {
+            return redirect()->back()->with('error', 'Cashier details are missing. Please log in again.');
+        }
+
         // Create transaction
         $transaction = new Transaction();
         $transaction->product_id   = $productId;
@@ -267,6 +296,8 @@ class ProductController extends Controller
         $transaction->unit_price   = $product->price;
         $transaction->total_price  = $transaction->quantity * $transaction->unit_price;
         $transaction->reference_no = $referenceNo; // Use the same reference number
+        $transaction->cashier_id   = $cashierId;
+        $transaction->cashier_name = $cashierName; // Save cashier details to the transaction
     
         // Save transaction
         $transaction->save();
