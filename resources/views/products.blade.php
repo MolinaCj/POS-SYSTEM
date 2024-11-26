@@ -818,10 +818,20 @@
     <script>
         // Function to show the checkout modal
         function showCheckoutModal() {
+            // Check if the transaction table has any rows (indicating there are products)
+            const transactionTable = document.getElementById('transaction-tbl');
+            const transactionRows = transactionTable ? transactionTable.rows.length : 0;
+        
+            // If there are no products in the transaction table, do not show the modal
+            if (transactionRows <= 1) { // Assuming the first row is the header
+                alert('No products in the transaction. Please add products before proceeding.');
+                return;
+            }
+        
             // Fetch the latest amount payable dynamically
             const amountPayableElement = document.querySelector('.tot');
             const amountPayable = amountPayableElement ? amountPayableElement.textContent : '₱0.00';
-
+        
             // Set the amount payable in the modal
             document.getElementById('amountPayable').value = amountPayable.trim();
             document.getElementById('checkoutModal').style.display = 'flex';
