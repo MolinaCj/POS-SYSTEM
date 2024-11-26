@@ -418,7 +418,10 @@ class ProductController extends Controller
             $amount_payable = $request->input('amount_payable');
             $change_amount = $request->input('change_amount');
             $cash_amount = $request->input('cash_amount');
+            $discount = $request->input('discount');
             
+            $cashierName = session('cashier_name');
+
             foreach ($items as $item) {
                 DB::table('histories')->insert([
                     'reference_no' => $reference_no,
@@ -431,6 +434,8 @@ class ProductController extends Controller
                     'amount_payable' => $amount_payable,
                     'change_amount' => $change_amount,
                     'cash_amount' => $cash_amount,
+                    'discount' => $discount,
+                    'cashier_name' => $cashierName,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
                 ]);

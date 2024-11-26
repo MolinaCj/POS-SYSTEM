@@ -964,10 +964,16 @@
     <div id="cashPaymentModal" class="modal">
     <div class="modal-content">
         <h2>Cash Payment</h2>
+
         <p>Total Amount:</p>
         <input type="text" id="totalAmount" readonly>
+
+        <p>Discount:</p>
+        <input type="number" id="discount" placeholder="Enter discount (%)" step="0.01">
+
         <p>Cash Amount:</p>
         <input type="number" id="cashAmount" placeholder="Enter cash amount">
+
         <p>Customer Change:</p>
         <input type="text" id="customerChange" readonly>
 
@@ -980,15 +986,19 @@
     </div>
 
     <script>
-
-       // Function to update customer change automatically
+        // Function to update customer change automatically
         function updateCustomerChange() {
             const cashAmount = parseFloat(document.getElementById('cashAmount').value);
             const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, ''));
-
+            const discount = parseFloat(document.getElementById('discount').value) || 0; // Get the discount value, default to 0 if not entered
+        
             // Check if both values are valid numbers
             if (!isNaN(cashAmount) && !isNaN(totalAmount)) {
-                const change = cashAmount - totalAmount;
+                // Apply the discount as a decimal (e.g., 10 becomes 0.10)
+                const discountedAmount = totalAmount - (totalAmount * (discount / 100));
+            
+                const change = cashAmount - discountedAmount;
+            
                 // Update the customer change field
                 document.getElementById('customerChange').value = change >= 0 ? "₱" + change.toFixed(2) : "₱0.00";
             } else {
@@ -1008,31 +1018,35 @@
         // Function to confirm cash payment and display receipt modal
         function confirmCashPayment() {
             console.log("confirmCashPayment called"); // Check if this logs
-
+        
             const cashAmount = parseFloat(document.getElementById('cashAmount').value);
             const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/₱|,/g, '')); // Remove currency symbol and commas
-
+            const discount = parseFloat(document.getElementById('discount').value) || 0; // Get the discount value, default to 0 if not entered
+        
             // Validate if the cash amount is valid and sufficient
             if (isNaN(cashAmount) || cashAmount < 0) {
                 alert("Please enter a valid cash amount.");
                 return;
             }
+
+            // Apply the discount as a decimal (e.g., 10 becomes 0.10)
+            const discountedAmount = totalAmount - (totalAmount * (discount / 100));
         
-            if (cashAmount < totalAmount) {
+            if (cashAmount < discountedAmount) {
                 alert("Insufficient cash amount. Please enter a valid amount.");
                 return;
             }
         
-            const change = cashAmount - totalAmount;
+            const change = cashAmount - discountedAmount;
             alert("Payment successful with cash amount: ₱" + cashAmount.toFixed(2) + ". Change: ₱" + change.toFixed(2));
-
+        
             // Hide the cash payment modal and show the receipt modal
             document.getElementById('cashPaymentModal').style.display = 'none';
         
             // Populate the receipt modal with transaction data
             console.log("Populating receipt modal...");
             populateReceiptModal();
-
+        
             // Show the receipt modal
             console.log("Showing receipt modal...");
             document.getElementById('receiptModal').style.display = 'flex';
@@ -1041,16 +1055,16 @@
         // Function to populate the receipt modal with transaction data
         function populateReceiptModal() {
             console.log("Populating receipt modal...");
-
+        
             // Make an AJAX request to get the transaction data
             fetch('/api/getTransaction')  // Assuming an endpoint that returns transaction data
                 .then(response => response.json())
                 .then(data => {
                     const receiptItemsTableBody = document.getElementById('receiptItems');
-
+                
                     if (receiptItemsTableBody) {
                         receiptItemsTableBody.innerHTML = ''; // Clear existing rows
-
+                    
                         // Loop through the transactions and add them to the table
                         data.transactions.forEach(transaction => {
                             const row = document.createElement('tr');
@@ -1065,17 +1079,19 @@
                     } else {
                         console.error("Receipt items table body element not found.");
                     }
-
+                
                     // Totals Calculation
                     const netAmount = data.transactions.reduce((acc, transaction) => acc + parseFloat(transaction.total_price), 0);
                     const tax = 0.01 * netAmount; // 1% tax
-                    const amountPayable = netAmount + tax;
+                    const discount = parseFloat(document.getElementById('discount').value) || 0;
+                    const amountPayable = (netAmount + tax) - (netAmount * (discount / 100)); // Apply discount as decimal
                     const cashAmount = parseFloat(document.getElementById('cashAmount').value);
                     const change = cashAmount - amountPayable;
-
+                
                     // Populate receipt totals
                     document.getElementById('receiptNetAmount').textContent = `₱${netAmount.toFixed(2)}`;
                     document.getElementById('receiptTax').textContent = `₱${tax.toFixed(2)}`;
+                    document.getElementById('receiptDiscount').textContent = `${(discount).toFixed(2)}%`; // Display discount as percentage
                     document.getElementById('receiptAmountPayable').textContent = `₱${amountPayable.toFixed(2)}`;
                     document.getElementById('receiptCashAmount').textContent = `₱${cashAmount.toFixed(2)}`;
                     document.getElementById('receiptChange').textContent = `₱${change.toFixed(2)}`;
@@ -1100,7 +1116,7 @@
                     <p>123 Main St, City, Country</p>
                     <p>Reference No: <span id="receiptReferenceNo">{{ isset($reference_no) ? $reference_no : 'N/A' }}</span></p>
                     <p>Date: <span id="receiptDateTime">{{ $currentDate }}</span></p>
-                    <p>Cashier: <span id="receiptCashierName">{{ Auth::user() ? Auth::user()->username : 'N/A' }}</span></p>
+                    <p>Cashier: <span id="receiptCashierName">{{ session('cashier_name') ? session('cashier_name') : 'Guest' }}</span></p>
                 </div>
             
                 <!-- Receipt Table -->
@@ -1122,6 +1138,7 @@
                 <div class="receipt-totals">
                     <p>Net Amount: <span id="receiptNetAmount">₱0.00</span></p>
                     <p>Tax: <span id="receiptTax">₱0.00</span></p>
+                    <p>Discount: <span id="receiptDiscount">0.00</span></p>
                     <p>Amount Payable: <span id="receiptAmountPayable">₱0.00</span></p>
                     <p>Cash Amount: <span id="receiptCashAmount">₱0.00</span></p>
                     <p>Change: <span id="receiptChange">₱0.00</span></p>
@@ -1185,8 +1202,10 @@
                 return; // Stop execution if no items are found
             }
             const referenceNo = document.getElementById('receiptReferenceNo').textContent.trim();
+            const cashierName = document.getElementById('receiptCashierName').textContent.trim();
             const netAmount = parseFloat(document.getElementById('receiptNetAmount').textContent.replace('₱', ''));
             const tax = parseFloat(document.getElementById('receiptTax').textContent.replace('₱', ''));
+            const discount = parseFloat(document.getElementById('receiptDiscount').textContent.replace('₱', ''));
             const amountPayable = parseFloat(document.getElementById('receiptAmountPayable').textContent.replace('₱', ''));
             const changeAmount = parseFloat(document.getElementById('receiptChange').textContent.replace('₱', ''));
             const cashAmount = parseFloat(document.getElementById('receiptCashAmount').textContent.replace('₱', ''));
@@ -1194,8 +1213,10 @@
             // Log the values before sending to the server
             console.log("Receipt details:");
             console.log("Reference No:", referenceNo);
+            console.log("Cashier:"), cashierName;
             console.log("Net Amount:", netAmount);
             console.log("Tax:", tax);
+            console.log("Discount:", discount);
             console.log("Amount Payable:", amountPayable);
             console.log("Change Amount:", changeAmount);
             console.log("Cash Amount:", cashAmount);
@@ -1209,9 +1230,11 @@
                 },
                 body: JSON.stringify({
                     reference_no: referenceNo,
+                    cashier_name: cashierName,
                     items: items,
                     net_amount: netAmount,
                     tax: tax,
+                    discount: discount,
                     amount_payable: amountPayable,
                     change_amount: changeAmount,
                     cash_amount: cashAmount,

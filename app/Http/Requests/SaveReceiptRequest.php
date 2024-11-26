@@ -25,6 +25,7 @@ class SaveReceiptRequest extends FormRequest
             'amount_payable' => ['regex:/^\d+(\.\d{1,2})?$/', 'min:0'],
             'cash_amount' => 'required|numeric',
             'change_amount' => ['regex:/^\d+(\.\d{1,2})?$/', 'min:0'],
+            'discount' => ['regex:/^\d+(\.\d{1,2})?$/', 'min:0'],
         ];
     }
 }
