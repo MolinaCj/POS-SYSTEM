@@ -49,7 +49,7 @@
     color: red;
 }
 
-table {
+#productDetailsTable {
     border: 1px solid #ddd;
     width: 100%;
     border-radius: 4px;
@@ -58,29 +58,29 @@ table {
     display: block;
 }
 
-table th, table td {
+#productDetailsTable th, #productDetailsTable td {
     text-align: left;
     padding: 10px;
     border: 1px solid #ddd;
 }
 
-table th {
+#productDetailsTable th {
     background-color: #f1f1f1;
     font-weight: bold;
 }
 
-table tr:nth-child(even) {
+#productDetailsTable tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
 /* Scrollable table body */
-table tbody {
+#productDetailsTable tbody {
     display: block;
     max-height: 200px; /* Set max height for the table body */
     overflow-y: auto; /* Enable vertical scrolling */
 }
 
-table thead, table tbody tr {
+#productDetailsTable thead, #productDetailsTable tbody tr {
     display: table;
     width: 100%;
     table-layout: fixed;
