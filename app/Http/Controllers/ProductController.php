@@ -533,6 +533,7 @@ class ProductController extends Controller
             'timestamp' => $history->timestamp,
             'net_amount' => $history->net_amount,
             'tax' => $history->tax,
+            'discount' => $history->discount,
             'amount_payable' => $history->amount_payable,
             'cash_amount' => $history->cash_amount,
             'change_amount' => $history->change_amount,
@@ -639,6 +640,45 @@ class ProductController extends Controller
     
         // Return grouped by day
         return view('salesperday', compact('histories'));
+    }
+
+    //POPULATING THE TRANSACTION DETAILS IN SALES PER DAY
+    public function retrieveTransactionDetails($referenceNo)
+    {
+        // Retrieve all records with the same reference number
+        $transactionRecords = SalesHistory::where('reference_no', $referenceNo)->get();
+    
+        // Check if any records exist
+        if ($transactionRecords->isNotEmpty()) {
+            // Fetch the first record for general transaction details
+            $history = $transactionRecords->first();
+        
+            // Extract product-specific details
+            $products = $transactionRecords->map(function ($record) {
+                return [
+                    'item_name' => $record->item_name,
+                    'quantity' => $record->quantity,
+                    'unit_price' => $record->unit_price,
+                    'total_price' => $record->total_price,
+                ];
+            });
+        
+            // Return the transaction details along with products as a JSON response
+            return response()->json([
+                'reference_no' => $history->reference_no,
+                'timestamp' => $history->timestamp,
+                'net_amount' => $history->net_amount,
+                'tax' => $history->tax,
+                'amount_payable' => $history->amount_payable,
+                'cash_amount' => $history->cash_amount,
+                'change_amount' => $history->change_amount,
+                'cashier_name' => $history->cashier_name,
+                'products' => $products,
+            ]);
+        }
+    
+        // If no history is found for the given reference number
+        return response()->json(['message' => 'Transaction not found'], 404);
     }
 
 }

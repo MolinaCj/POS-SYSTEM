@@ -105,6 +105,9 @@ Route::get('/cashiersales', 'ProductController@cashierSales')->name('cashiersale
 
 Route::get('/salesperday', 'ProductController@salesGroupPerDay')->name('sales.per.day');
 
+//ROUTE TO GET THE DETAILS OF TRANSACTION PER DAY
+Route::get('/fetch-transaction-details/{referenceNo}', 'ProductController@retrieveTransactionDetails');
+
 
 
 

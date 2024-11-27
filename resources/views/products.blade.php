@@ -1339,20 +1339,6 @@
                 // Restore the visibility of the page after printing
                 document.body.style.visibility = 'visible';
             }
-        // function printReceipt() {
-        //     console.log("Printing receipt...");
-        //     const receiptContent = document.querySelector('#receiptModal .receipt-scrollable').innerHTML;
-        //     const newWindow = window.open('', '_blank', 'width=600,height=800');
-        //     newWindow.document.write(`
-        //         <html>
-        //         <head><title>Print Receipt</title></head>
-        //         <body onload="window.print(); window.close();">
-        //         ${receiptContent}
-        //         </body>
-        //         </html>
-        //     `);
-        //     newWindow.document.close();
-        // }
         function receiptcloseModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
@@ -1507,6 +1493,7 @@
                                                                         <p><strong>Timestamp:</strong> ${data.timestamp}</p>
                                                                         <p><strong>Net Amount:</strong> ₱${data.net_amount}</p>
                                                                         <p><strong>Tax:</strong> ₱${data.tax}</p>
+                                                                        <p><strong>Discount %:</strong>${data.discount}</p>
                                                                     </div>
                                                                     <div class="historydetailscolumn2">
                                                                         <p><strong>Amount Payable:</strong> ₱${data.amount_payable}</p>
