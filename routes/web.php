@@ -99,6 +99,12 @@ Route::put('/transactions/{transaction_id}', 'TransactionController@updateSalesQ
 
 Route::get('/test', 'TestController@showTest')->name('test.show');
 
+//NAVIGATING TO MY SALES
+Route::get('/salesperday', 'ProductController@salesPerDay')->name('salesperday.show');
+Route::get('/cashiersales', 'ProductController@cashierSales')->name('cashiersales.show');
+
+Route::get('/salesperday', 'ProductController@salesGroupPerDay')->name('sales.per.day');
+
 
 
 

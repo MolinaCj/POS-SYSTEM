@@ -615,4 +615,30 @@ class ProductController extends Controller
         // Redirect to the login page after logout
         return redirect()->route('loginForm');
     }
+
+
+    //NAVIGATING TO SALES PER DAY AND SALES PER CASHIER
+    //showing the sales per day view
+    public function salesPerDay(){
+
+        return view ('salesperday');
+
+    }
+
+    //showing the sales per cashier view
+    public function cashierSales(){
+
+        return view ('cashiersales');
+        
+    }
+
+    //SALES GROUP BY DAY
+    public function salesGroupPerDay()
+    {
+        $histories = SalesHistory::all();
+    
+        // Return grouped by day
+        return view('salesperday', compact('histories'));
+    }
+
 }

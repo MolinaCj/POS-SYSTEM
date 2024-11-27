@@ -1750,24 +1750,67 @@ tr:hover td:nth-child(-n+6) {
     margin-left: 350px;
     background-color:   rgb(209, 208, 208);
   }
+.sec4-div{
+    margin-top: 150px;
+}
 .dash{
     margin-top: 100px;
     color: blue;
 }
 .div-1{
+    display: flex;
     margin-left: 70px;
     margin-top: 30px;
     width: 1400px;
-    height: 320px;
+    height: 680px;
     background-color: white;
 }
-.div-2{
-    margin-left: 70px;
-    margin-top: 50px;
-    width: 1400px;
-    height: 320px;
-    background-color: black;
+.salesperday-btn {
+    margin-top: 20px;
+    margin-left: 20px;
+    text-align: center; /* Center-aligns the button */
+    margin-bottom: 20px; /* Adds spacing between buttons */
 }
+
+.salesperday-btn a {
+    display: inline-block; /* Ensures consistent button size */
+    padding: 15px 50px; /* Creates a large, clickable area */
+    font-size: 18px; /* Adjusts the text size */
+    font-weight: bold; /* Makes the text bold for emphasis */
+    text-decoration: none; /* Removes the underline from links */
+    color: white; /* White text for contrast */
+    border-radius: 8px; /* Rounds the corners slightly */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effect */
+}
+
+/* Styles for the "Sales Per Day" button */
+.salesperday-btn a[href="/salesperday"] {
+    background-color: #007bff; /* Bootstrap Primary color */
+}
+
+/* Styles for the "Sales Per Cashier" button */
+.salesperday-btn a[href="/cashiersales"] {
+    background-color: #28a745; /* Bootstrap Success color */
+}
+
+/* Hover effects */
+.salesperday-btn a:hover {
+    background-color: #0056b3; /* Darker shade for hover */
+    transform: scale(1.05); /* Slight zoom on hover */
+}
+
+.salesperday-btn a[href="/cashiersales"]:hover {
+    background-color: #218838; /* Darker success shade */
+}
+
+
+
+
+
+
+
+
+
 
 /* General Modal Styles for Checkout and Cash Payment Modals */
 #checkoutModal.modal, #cashPaymentModal.modal {

@@ -68,7 +68,7 @@
                 </div>
                 <div class="opt">
                     <img class="img" src="images/dashboard.png" alt="">
-                    <a class="txt-1 nav-link" data-target="#sec4">SETTINGS</a>
+                    <a class="txt-1 nav-link" data-target="#sec4">MORE</a>
                 </div>
                 <div class="functions">
                     <div class="func">
@@ -1570,13 +1570,15 @@
     {{------------------------------------------------------- SECTION 4 -----------------------------------------------------------------}}
     <section id="sec4" class="product-section">
         <div class="settings">
-            <p class="dash">This is the SETTINGS</p>
+            {{-- <p class="dash">SALE</p> --}}
             <div class="sec4-div">
                 <div class="div-1">
-                    <p>cont 1</p>
-                </div>
-                <div class="div-2">
-                    <p>cont 2</p>
+                    <div class="salesperday-btn">
+                        <a href="/salesperday">Sale per Day</a>
+                    </div>
+                    <div class="salesperday-btn">
+                        <a href="/cashiersales">Sales per Cashier</a>
+                    </div>
                 </div>
             </div>
         </div>
