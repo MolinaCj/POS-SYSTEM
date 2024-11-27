@@ -80,9 +80,9 @@
                     <div class="func">
                         <p class="txt-2">F5     Payment</p>
                     </div>
-                    <div class="func">
+                    {{-- <div class="func">
                         <p class="txt-2">F12    Clear All</p>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
         </div>
@@ -126,6 +126,18 @@
                                 required>
                         <i class="fas fa-search search-icon"></i>
                         <button id="searchButton" class="productSearch" type="submit">Search</button>
+                        <script>
+                            document.addEventListener('keydown', function(event) {
+                                if (event.key === "F2") {
+                                    // Prevent the default action of F1 (which typically opens help)
+                                    event.preventDefault();
+                                    
+                                    // Focus on the search input field
+                                    document.getElementById('searchInput').focus();
+                                }
+                            });
+                        </script>
+                        
                     </form>
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
@@ -450,6 +462,18 @@
                 <div class="ewan">
                     <input id="searchSales" class="srch-2" type="text" name="query" placeholder="Scan using BARCODE" required>
                     <div id="results" class="dropdown-results"></div>
+                    <script>
+                        document.addEventListener('keydown', function(event) {
+                            if (event.key === "F1") {
+                                // Prevent the default action of F1 (which typically opens help)
+                                event.preventDefault();
+                                
+                                // Focus on the search input field
+                                document.getElementById('searchSales').focus();
+                            }
+                        });
+                    </script>
+                    
                 </div>
             </form>
 
@@ -748,11 +772,38 @@
                 };
             </script>
             <div class="button">
-                <button class="payment2" onclick="showCheckoutModal()">Proceed to Payment</button>
+                <button id="payment2" class="payment2" onclick="showCheckoutModal()">Proceed to Payment</button>
+                <script>
+                    document.addEventListener('keydown', function(event) {
+                        if (event.key === "F5") {
+                            // Prevent the default action of F1 (which typically opens help)
+                            event.preventDefault();
+                            
+                            // Focus on the search input field
+                            document.getElementById('payment2').click();
+                        }
+                    });
+                </script>
+                
 
                 <button class="scanProduct btn-default">SCAN</button>
 
-                <button class="seeHistory btn-default">See History</button>
+                <button id="seeHistory" class="seeHistory btn-default">See History</button>
+                <script>
+                    // Wait for the document to be fully loaded
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const seeHistoryBtn = document.getElementById('seeHistory');
+                        
+                        // Add click event listener to the button
+                        seeHistoryBtn.addEventListener('click', function() {
+                            // Find the section with id "sec3" and scroll to it
+                            const sec3 = document.getElementById('sec3');
+                            if (sec3) {
+                                sec3.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        });
+                    });
+                </script>
                 
                 <form action="{{ route('transactions.deleteAll') }}#sec2" method="POST">
                     {{ csrf_field() }}
@@ -984,7 +1035,7 @@
         <input type="hidden" id="transactionId" value="{{ csrf_token() }}">
 
         <button onclick="returnToCheckoutModal()">Return</button>
-        <button onclick="confirmCashPayment()">Confirm Cash Payment</button>
+        <button id="confirmPayment" onclick="confirmCashPayment()">Confirm Cash Payment</button>   
     </div>
     </div>
 
@@ -1101,6 +1152,14 @@
             // Show the receipt modal
             console.log("Showing receipt modal...");
             document.getElementById('receiptModal').style.display = 'flex';
+
+            // Event listener for Enter key
+            document.getElementById('cashAmount').addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {  // Check if Enter key is pressed
+                    event.preventDefault();  // Prevent the default action (form submission, etc.)
+                    confirmCashPayment();    // Call the confirmCashPayment function
+                }
+            });
         }
 
         // Function to populate the receipt modal with transaction data
