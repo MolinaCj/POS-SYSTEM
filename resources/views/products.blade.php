@@ -1620,7 +1620,7 @@
             <div class="sec4-div">
                 <div class="div-1">
                     <div class="salesperday-btn">
-                        <a href="/salesperday">Sale per Day</a>
+                        <a href="/salesperday">Sales per Day</a>
                     </div>
                     <div class="salesperday-btn">
                         <a href="/cashiersales">Sales per Cashier</a>

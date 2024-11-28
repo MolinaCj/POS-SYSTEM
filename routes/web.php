@@ -108,6 +108,11 @@ Route::get('/salesperday', 'ProductController@salesGroupPerDay')->name('sales.pe
 //ROUTE TO GET THE DETAILS OF TRANSACTION PER DAY
 Route::get('/fetch-transaction-details/{referenceNo}', 'ProductController@retrieveTransactionDetails');
 
+//ROUTE FOR FILTERING THE SALES PER DAY 
+// Route::get('/salesperday','ProductController@');
+// Route::get('/salesperday', [ProductController::class, 'index'])->name('salesperday.index');
+// Route::get('/salesperday/searcy', 'ProductController@salesPerDaySearch')->name('salesperday.search');
+
 
 
 

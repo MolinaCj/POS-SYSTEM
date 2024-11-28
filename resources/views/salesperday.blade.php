@@ -20,12 +20,44 @@
         <!-- Filters Section -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <!-- Search Bar -->
-            <form class="d-flex" method="GET" action="">
-                {{-- {{ route('sales.history') }} --}}
-                <input type="text" class="form-control me-2" name="search" placeholder="Search transactions..." value="{{ request('search') }}">
-                <input type="date" class="form-control me-2" name="date" value="{{ request('date') }}">
-                <button type="submit" class="btn btn-primary">Filter</button>
-            </form>
+                <input type="text" id="searchReference" class="form-control me-2" placeholder="Search by Reference No...">
+                <input type="date" id="searchDate" class="form-control me-2" name="date">
+                {{-- <input type="text" class="form-control me-2" name="search" placeholder="Search using reference no..." value="{{ request('findsales') }}">
+                <input type="date" class="form-control me-2" name="date" value="{{ request('findbydate') }}"> --}}
+                <script>
+                    document.getElementById('searchDate').addEventListener('input', filterTransactions);
+                    document.getElementById('searchReference').addEventListener('input', filterTransactions);
+                                    
+                    function filterTransactions() {
+                        const selectedDate = document.getElementById('searchDate').value; // Get the selected date
+                        const searchQuery = document.getElementById('searchReference').value.toLowerCase(); // Get the reference number search query
+                    
+                        const groups = document.querySelectorAll('.transaction-group'); // Get all transaction groups (cards)
+                    
+                        groups.forEach(group => {
+                            const groupDate = group.dataset.date; // Date of the transaction group
+                            const rows = group.querySelectorAll('.transaction-row'); // Rows inside the group
+                            let groupMatches = false; // Flag to determine if the group matches the filters
+                        
+                            rows.forEach(row => {
+                                const referenceNo = row.dataset.reference.toLowerCase(); // Reference number for the row
+                                const rowMatchesDate = !selectedDate || groupDate === selectedDate; // Check if row matches the selected date
+                                const rowMatchesReference = !searchQuery || referenceNo.includes(searchQuery); // Check if row matches the search query
+                            
+                                // Show or hide the row based on the filters
+                                if (rowMatchesDate && rowMatchesReference) {
+                                    row.style.display = '';
+                                    groupMatches = true; // Set group flag if any row matches
+                                } else {
+                                    row.style.display = 'none';
+                                }
+                            });
+                        
+                            // Show or hide the group based on whether any row matched
+                            group.style.display = groupMatches ? '' : 'none';
+                        });
+                    }
+                </script>                
 
             <!-- Return Button -->
             <a href="{{ route('products.index') }}" class="btn btn-secondary">Return</a>
@@ -38,14 +70,14 @@
                     return \Carbon\Carbon::parse($item->timestamp)->format('Y-m-d');
                 });
             @endphp
-
+        
             @foreach ($groupedHistories as $date => $transactions)
-                <div class="card mb-4">
+                <div class="card mb-4 transaction-group" data-date="{{ $date }}">
                     <!-- Card Header with Date -->
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">Transactions on {{ \Carbon\Carbon::parse($date)->format('F d, Y') }}</h5>
                     </div>
-
+        
                     <!-- Card Body with Table -->
                     <div class="card-body p-0">
                         <table class="table table-bordered mb-0">
@@ -64,13 +96,13 @@
                                     $dailyTotalAmount = 0;
                                     $dailyTotalItems = 0;
                                 @endphp
-
+        
                                 @foreach ($transactions->groupBy('reference_no') as $referenceNo => $transactionProducts)
                                     @php
                                         $dailyTotalAmount += $transactionProducts->first()->amount_payable;
                                         $dailyTotalItems += $transactionProducts->sum('quantity');
                                     @endphp
-                                    <tr>
+                                    <tr class="transaction-row" data-reference="{{ $referenceNo }}">
                                         <td>{{ $referenceNo }}</td>
                                         <td>
                                             <ul class="list-unstyled mb-0 scrollable-items">
@@ -89,7 +121,7 @@
                                         </td>
                                     </tr>
                                 @endforeach
-
+        
                                 <!-- Daily Totals -->
                                 <tr class="table-secondary font-weight-bold">
                                     <td colspan="2" class="text-end">Total for {{ \Carbon\Carbon::parse($date)->format('F d, Y') }}</td>
@@ -101,37 +133,36 @@
                     </div>
                 </div>
             @endforeach
-        </div>
-    </div>
+        </div>        
 
     <!-- Modal HTML Structure -->
-<div id="transactionDetailsModal" class="modal custom-modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2 style="text-align: center; margin-bottom: 20px;">Transaction Details</h2>
+    <div id="transactionDetailsModal" class="modal custom-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 style="text-align: center; margin-bottom: 20px;">Transaction Details</h2>
 
-        <!-- General Transaction Information -->
-        <div id="historyDetails" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
-            <!-- Details will be dynamically loaded here -->
+            <!-- General Transaction Information -->
+            <div id="historyDetails" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
+                <!-- Details will be dynamically loaded here -->
+            </div>
+
+            <!-- Product Details Section -->
+            <h3 style="text-align: center; margin-bottom: 10px; border-bottom: 2px solid #ccc; padding-bottom: 5px;">Detailed Product List</h3>
+            <table id="productDetailsTable" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="background-color: #f8f9fa; text-align: left;">
+                        <th style="border: 1px solid #ddd; padding: 10px;">Product Name</th>
+                        <th style="border: 1px solid #ddd; padding: 10px;">Quantity</th>
+                        <th style="border: 1px solid #ddd; padding: 10px;">Unit Price</th>
+                        <th style="border: 1px solid #ddd; padding: 10px;">Total Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Product details will be dynamically loaded here -->
+                </tbody>
+            </table>
         </div>
-
-        <!-- Product Details Section -->
-        <h3 style="text-align: center; margin-bottom: 10px; border-bottom: 2px solid #ccc; padding-bottom: 5px;">Detailed Product List</h3>
-        <table id="productDetailsTable" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-            <thead>
-                <tr style="background-color: #f8f9fa; text-align: left;">
-                    <th style="border: 1px solid #ddd; padding: 10px;">Product Name</th>
-                    <th style="border: 1px solid #ddd; padding: 10px;">Quantity</th>
-                    <th style="border: 1px solid #ddd; padding: 10px;">Unit Price</th>
-                    <th style="border: 1px solid #ddd; padding: 10px;">Total Price</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Product details will be dynamically loaded here -->
-            </tbody>
-        </table>
     </div>
-</div>
 
     <script>
         document.addEventListener('click', function(event) {
