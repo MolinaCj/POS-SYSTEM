@@ -11,6 +11,7 @@ use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\CategoryRequest;
 use App\Http\Requests\UpdateTaxRateRequest;
+use App\Http\Requests\AddStockRequest;
 use App\Product;
 use App\SalesHistory;
 use App\Transaction;
@@ -783,4 +784,46 @@ class ProductController extends Controller
 
     //     return redirect()->back()->with('error', 'Tax rate record not found.');
     // }
+
+    //Show stock status view
+    public function showStockStatus(){
+        return view('/stockstatus');
+    }
+
+    // Method to fetch low stock and out of stock products
+    public function getStockStatus()
+    {
+        // Fetch products with low stock (below 50) but excluding products with 0 stock
+        $lowStockProducts = Product::where('stocks', '<', 50)
+        ->where('stocks', '>', 0)
+        ->get();
+
+        // Fetch products that are out of stock
+        $outOfStockProducts = Product::where('stocks', '=', 0)->get();
+
+        // Pass data to the view
+        return view('stockstatus', compact('lowStockProducts', 'outOfStockProducts'));
+    }
+
+    public function addStock(Request $request, $id)
+    {
+        // No need to manually validate as it's handled by AddStockRequest
+
+        // Find the product by ID
+        $product = Product::find($id);
+        
+        if ($product) {
+            // Add the specified quantity to the product's stock
+            $product->stocks += $request->quantity;
+        
+            // Save the updated product
+            $product->save();
+        
+            // Return a success response
+            return response()->json(['message' => 'Stock updated successfully.']);
+        }
+    
+        // Return an error response if the product was not found
+        return response()->json(['message' => 'Product not found.'], 404);
+    }
 }

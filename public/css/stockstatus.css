@@ -1,0 +1,88 @@
+/* Custom styling for scrollable tables */
+.table-container {
+    max-height: 500px;  /* Set max height for both tables */
+    overflow-y: auto;   /* Add vertical scrolling */
+}
+section {
+    margin-bottom: 40px; /* Space between sections */
+}
+/* Custom modal styles */
+/* Style for the stock modal */
+#stockModal {
+    display: none; /* Hidden by default, will be shown when triggered */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 1000; /* Ensure it's on top of other content */
+    justify-content: center;
+    align-items: center;
+    /* display: flex; Flexbox to center content, will be activated in JS */
+}
+
+/* Modal content */
+#stockModal .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 400px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+    margin: auto; /* Center the modal content */
+}
+
+/* Close button style */
+#stockModal .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #444;
+}
+
+/* Heading inside modal */
+#stockModal h4 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Input field styling */
+#stockModal #quantity {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+/* Button styling */
+#stockModal #submitStock {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745; /* Bootstrap success color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#stockModal #submitStock:hover {
+    background-color: #218838;
+}
+
+/* Add a slight hover effect on the modal when the user interacts with it */
+#stockModal .modal-content:hover {
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+
+

@@ -521,7 +521,7 @@
                                         const barcode = (categoryPrefix + uniqueCode).slice(0, 12); // Ensure the final length is 12
                                         return barcode;
                                     }
-                                    
+
                                     // Method to handle the change event on the category dropdown and update the barcode field
                                     function handleCategoryChange() {
                                         const selectedCategory = document.getElementById("categoryFilter").value; // Get the selected category
@@ -535,7 +535,7 @@
                                             barcodeField.value = "";
                                         }
                                     }
-                                    
+
                                     // Add event listener to the category dropdown
                                     document.getElementById("categoryFilter").addEventListener("change", handleCategoryChange);
                                 </script>
@@ -1721,6 +1721,9 @@
                         <a href="/cashiersales">Sales per Cashier</a>
                     </div>
                     <div class="salesperday-btn">
+                        <a href="/stockstatus">Stocks Status</a>
+                    </div>
+                    <div class="salesperday-btn">
                         <button class="addCategory">Add Category</button>
                     </div>
                     <script>
@@ -1748,9 +1751,9 @@
                             });
                         });
                     </script>
-                    <div class="salesperday-btn">
+                    {{-- <div class="salesperday-btn">
                         <button class="editTaxRate">Edit Tax</button>
-                    </div>
+                    </div> --}}
                     {{-- <script>
                         document.addEventListener('DOMContentLoaded', function () {
                             // Get elements

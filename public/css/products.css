@@ -1809,6 +1809,9 @@ tr:hover td:nth-child(-n+6) {
 .salesperday-btn a[href="/cashiersales"]:hover {
     background-color: #218838; /* Darker success shade */
 }
+.salesperday-btn a[href="/stockstatus"] {
+    background-color: #007bff; /* Bootstrap Primary color */
+}
 
 
 /* Styles for the "Add Category" button */
@@ -1840,27 +1843,27 @@ tr:hover td:nth-child(-n+6) {
 
 
 .salesperday-btn .editTaxRate {
-    background-color: #2f78ff; /* Bootstrap warning color */
-    border: none; /* Remove default border */ 
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s, transform 0.2s; /* Smooth transition for hover effects */
+    background-color: #2f78ff; 
+    border: none; 
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s; 
 }
 
 /* Hover effects */
 .salesperday-btn .editTaxRate:hover {
-    background-color: #1a68fa; /* Darker shade of warning color */
-    transform: scale(1.05); /* Slight zoom on hover */
+    background-color: #1a68fa; 
+    transform: scale(1.05); 
 }
 
 /* Optional: Active state for when the button is pressed */
 .salesperday-btn .editTaxRate:active {
-    background-color: #0056f5; /* Even darker shade for active state */
+    background-color: #0056f5; 
 }
 
 /* Focus styles (optional) */
 .salesperday-btn .editTaxRate:focus {
-    outline: none; /* Remove default outline */
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Subtle shadow effect */
+    outline: none; 
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
 

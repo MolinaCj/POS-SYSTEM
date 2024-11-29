@@ -124,6 +124,17 @@ Route::post('/category/save','ProductController@saveCategory')->name('category.s
 Route::put('/tax/update', 'ProductController@taxRateUpdate')->name('tax.rate.update');
 
 
+//SHOW STOCKS STATUS VIEW
+Route::get('/stockstatus', 'ProductController@showStockStatus')->name('stockStatus.show');
+
+//FETCHING THE LOW AND OUT OF STOCKS PRODUCTS
+Route::get('/stockstatus', 'ProductController@getStockStatus')->name('stockstatus');
+
+//ADDING STOCK 
+Route::post('/add-stock/{id}', 'ProductController@addStock')->name('add.stock');
+
+
+
 
 
 
