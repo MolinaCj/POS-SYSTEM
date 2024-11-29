@@ -140,20 +140,14 @@
                         
                     </form>
                     <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const modal = document.getElementById("productModal");
-                            const closeModal = document.getElementById("closeModal");
-                            const addButton = document.getElementById("addProductButton");
-                            const cancelButton = document.getElementById("cancelButton");
-                            const productForm = document.getElementById("productForm");
-                            const methodField = document.getElementById("methodField");
+                        document.addEventListener('DOMContentLoaded', function () {
                             const searchInput = document.getElementById('searchInput');
                             const searchButton = document.getElementById('searchButton');
                             const productTableBody = document.querySelector('#productsTable tbody');
                             const paginationContainer = document.getElementById('pagination');
                             let currentPage = 1;
                             let currentQuery = '';
-                        
+                                            
                             // Add an event listener to the search button
                             searchButton.addEventListener('click', function (event) {
                                 event.preventDefault();
@@ -174,7 +168,7 @@
                             function fetchProducts(query = '', page = 1) {
                                 currentPage = page;
                                 productTableBody.innerHTML = ''; // Clear existing rows
-                        
+                            
                                 fetch(`/search-products?searchProducts=${query}&page=${page}`)
                                     .then(response => response.json())
                                     .then(data => {
@@ -191,27 +185,6 @@
                                                     </td>
                                                     <td>${product.price}</td>
                                                     <td style="display: flex;">
-                                                        <!-- Edit Button -->
-                                                        <a href="javascript:void(0);" class="edit-button"
-                                                            data-id="${product.id}" 
-                                                            data-barcode="${product.barcode}" 
-                                                            data-name="${product.item_name}" 
-                                                            data-stocks="${product.stocks}" 
-                                                            data-price="${product.price}"
-                                                            data-category="${product.category}">
-                                                            <button class="edit">Edit</button>
-                                                        </a>
-                        
-                                                        <!-- Delete Form -->
-                                                        <form action="{{ route('products.destroy', '') }}/${product.id}" method="POST" style="display:inline;">
-                                                            {{ csrf_field() }}
-                                                            {{ method_field('DELETE') }}
-                                                            <button class="delete" type="submit" onclick="return confirm('Are you sure you want to delete this product?');">
-                                                                <img class="delIcon" src="images/delete.png" alt="Delete">
-                                                            </button>
-                                                        </form>
-                        
-                                                        <!-- Add to Sales Form -->
                                                         <form action="{{ route('addToTransac') }}" method="POST">
                                                             {{ csrf_field() }}
                                                             <input type="hidden" name="product_id" value="${product.id}">
@@ -230,65 +203,11 @@
                                             row.innerHTML = '<td colspan="7">No products found</td>';
                                             productTableBody.appendChild(row);
                                         }
-                        
-                                        // Rebind the edit buttons after the products are loaded
-                                        bindEditButtons();  // Ensure edit functionality works
                                     })
                                     .catch(error => {
                                         console.error('Error fetching products:', error);
                                     });
                             }
-                        
-                            // Modal for Add and Edit Product
-                            addButton.onclick = function() {
-                                document.getElementById("modalTitle").innerText = "Add Product";
-                                methodField.value = "POST"; // Set method to POST for adding
-                                productForm.reset(); // Clear form fields
-                                productForm.action = '/products'; // Set the action URL for adding
-                                modal.style.display = "block"; // Show the modal
-                            };
-                        
-                            // Show the modal for editing a product
-                            function bindEditButtons() {
-                                document.querySelectorAll('.edit-button').forEach(button => {
-                                    button.onclick = function() {
-                                        const id = this.getAttribute('data-id');
-                                        const barcode = this.getAttribute('data-barcode');
-                                        const name = this.getAttribute('data-name');
-                                        const category = this.getAttribute('data-category');
-                                        const stocks = this.getAttribute('data-stocks');
-                                        const price = this.getAttribute('data-price');
-                        
-                                        document.getElementById("modalTitle").innerText = "Edit Product";
-                                        methodField.value = "PUT"; // Set method to PUT for editing
-                                        productForm.action = `/products/${id}`; // Set the action URL
-                                        document.getElementById("barcode").value = barcode;
-                                        document.getElementById("item_name").value = name;
-                                        document.getElementById("category").value = category;
-                                        document.getElementById("stocks").value = stocks;
-                                        document.getElementById("pricep").value = price;
-                        
-                                        modal.style.display = "block"; // Show the modal
-                                    };
-                                });
-                            }
-                        
-                            // Close modal function
-                            closeModal.onclick = function() {
-                                modal.style.display = "none"; // Hide the modal
-                            };
-                        
-                            // Cancel button functionality
-                            cancelButton.onclick = function() {
-                                modal.style.display = "none"; // Hide the modal
-                            };
-                        
-                            // Close modal when clicking outside of it
-                            window.onclick = function(event) {
-                                if (event.target == modal) {
-                                    modal.style.display = "none"; // Hide the modal
-                                }
-                            };
                         });
                         </script>
                         
@@ -399,7 +318,7 @@
                 <div class="tbl-1">
                     <div class="add-container" style="display: flex; justify-content: space-between">
                         <!-- Add Product Button -->
-                        <a href="javascript:void(0)#sec1;" id="addProductButton">
+                        <a href="javascript:void(0)#sec1" id="addProductButton">
                             <button class="add-product">Add Product</button>
                         </a>
                         {{-- <form action="{{ route('products.clear') }}#sec1" method="POST">
@@ -554,22 +473,22 @@
                                     <input type="hidden" name="_method" id="methodField" value="POST">
 
                                     <div>
-                                        <label for="category">Category:</label>
+                                        <label for="categoryFilter">Category:</label>
                                         <form id="categoryForm" name="categoryForm" style="display: flex;">
                                             <select id="categoryFilter" name="category">
                                                 <option value="">Select a Category</option>
                                         
                                                 @foreach ($categories as $category)
                                                     <option value="{{ $category->category }}">
-                                                        {{ ($category->category) }}
+                                                        {{ $category->category }}
                                                     </option>
                                                 @endforeach
                                             </select>
                                         </form>
                                     </div>
-
+                                    
                                     <div>
-                                        <label for="barcode" >Barcode:</label>
+                                        <label for="barcode">Barcode:</label>
                                         <input id="barcode" type="text" name="barcode" placeholder="Generating barcode">
                                     </div>
 
@@ -595,28 +514,30 @@
                                     // Function to generate a 12-character barcode based on the selected category
                                     function generateBarcode(category) {
                                         const timestamp = Date.now().toString(); // Unique timestamp
-                                        const categoryCode = {
-                                            noodles: "NOOD",      // 4 characters
-                                            bread: "BRD",         // 3 characters
-                                            canned_goods: "CNDG", // 4 characters
-                                            hygiene: "HYG"        // 3 characters
-                                        };
-                                    
-                                        // Check if the selected category exists
-                                        const prefix = categoryCode[category] || "UNKN"; // Default prefix if unknown category
+                                        const categoryPrefix = category.substring(0, 3).toUpperCase(); // Get first 3 chars of category
                                         const uniqueCode = timestamp.slice(-8); // Take the last 8 digits of the timestamp
                                     
                                         // Combine prefix and unique code to ensure the total length is 12
-                                        const barcode = (prefix + uniqueCode).slice(0, 12); // Ensure the final length is 12
+                                        const barcode = (categoryPrefix + uniqueCode).slice(0, 12); // Ensure the final length is 12
                                         return barcode;
                                     }
-                                
+                                    
+                                    // Method to handle the change event on the category dropdown and update the barcode field
+                                    function handleCategoryChange() {
+                                        const selectedCategory = document.getElementById("categoryFilter").value; // Get the selected category
+                                        const barcodeField = document.getElementById("barcode"); // Get the barcode input field
+                                    
+                                        if (selectedCategory) {
+                                            // Generate and set the barcode value if a category is selected
+                                            barcodeField.value = generateBarcode(selectedCategory);
+                                        } else {
+                                            // Clear the barcode field if no category is selected
+                                            barcodeField.value = "";
+                                        }
+                                    }
+                                    
                                     // Add event listener to the category dropdown
-                                    document.getElementById("category").addEventListener("change", function () {
-                                        const selectedCategory = this.value;
-                                        const barcodeField = document.getElementById("barcode");
-                                        barcodeField.value = generateBarcode(selectedCategory);
-                                    });
+                                    document.getElementById("categoryFilter").addEventListener("change", handleCategoryChange);
                                 </script>
                             </div>
                         </div>               
