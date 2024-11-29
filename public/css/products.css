@@ -1782,7 +1782,16 @@ tr:hover td:nth-child(-n+6) {
     border-radius: 8px; /* Rounds the corners slightly */
     transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effect */
 }
-
+.salesperday-btn button {
+    display: inline-block; /* Ensures consistent button size */
+    padding: 15px 50px; /* Creates a large, clickable area */
+    font-size: 18px; /* Adjusts the text size */
+    font-weight: bold; /* Makes the text bold for emphasis */
+    text-decoration: none; /* Removes the underline from links */
+    color: white; /* White text for contrast */
+    border-radius: 8px; /* Rounds the corners slightly */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effect */
+}
 /* Styles for the "Sales Per Day" button */
 .salesperday-btn a[href="/salesperday"] {
     background-color: #007bff; /* Bootstrap Primary color */
@@ -1792,16 +1801,157 @@ tr:hover td:nth-child(-n+6) {
 .salesperday-btn a[href="/cashiersales"] {
     background-color: #28a745; /* Bootstrap Success color */
 }
-
 /* Hover effects */
 .salesperday-btn a:hover {
     background-color: #0056b3; /* Darker shade for hover */
     transform: scale(1.05); /* Slight zoom on hover */
 }
-
 .salesperday-btn a[href="/cashiersales"]:hover {
     background-color: #218838; /* Darker success shade */
 }
+
+
+/* Styles for the "Add Category" button */
+.salesperday-btn .addCategory {
+    background-color: #ffc107; /* Bootstrap warning color */
+    border: none; /* Remove default border */ 
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition for hover effects */
+}
+
+/* Hover effects */
+.salesperday-btn .addCategory:hover {
+    background-color: #e0a800; /* Darker shade of warning color */
+    transform: scale(1.05); /* Slight zoom on hover */
+}
+
+/* Optional: Active state for when the button is pressed */
+.salesperday-btn .addCategory:active {
+    background-color: #c69500; /* Even darker shade for active state */
+}
+
+/* Focus styles (optional) */
+.salesperday-btn .addCategory:focus {
+    outline: none; /* Remove default outline */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Subtle shadow effect */
+}
+
+
+
+
+.salesperday-btn .editTaxRate {
+    background-color: #2f78ff; /* Bootstrap warning color */
+    border: none; /* Remove default border */ 
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition for hover effects */
+}
+
+/* Hover effects */
+.salesperday-btn .editTaxRate:hover {
+    background-color: #1a68fa; /* Darker shade of warning color */
+    transform: scale(1.05); /* Slight zoom on hover */
+}
+
+/* Optional: Active state for when the button is pressed */
+.salesperday-btn .editTaxRate:active {
+    background-color: #0056f5; /* Even darker shade for active state */
+}
+
+/* Focus styles (optional) */
+.salesperday-btn .editTaxRate:focus {
+    outline: none; /* Remove default outline */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Subtle shadow effect */
+}
+
+
+
+
+/*STYLE FOR ADD CATEGORY MODAL*/
+#addCategoryModal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* display: flex; */
+    justify-content: center;
+    align-items: center;
+}
+
+#addCategoryModal .modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#addCategoryModal .closeAddCategory {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+#editTaxRateModal .closeEditTaxRate {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+#addCategoryModal .closeAddCategory:hover,
+#addCategoryModal .closeAddCategory:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#addCategoryModal form input,
+#addCategoryModal form button {
+    width: 90%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+#addCategoryModal form input {
+    font-size: 16px;
+}
+
+#addCategoryModal form button {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    border: none;
+}
+
+#addCategoryModal form button:hover {
+    background-color: #0056b3;
+}
+
+#addCategoryModal h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 20px;
+    color: #333;
+}
+
+
+
+
+
+
+
 
 
 

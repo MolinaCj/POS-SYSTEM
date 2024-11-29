@@ -140,14 +140,20 @@
                         
                     </form>
                     <script>
-                        document.addEventListener('DOMContentLoaded', function () {
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const modal = document.getElementById("productModal");
+                            const closeModal = document.getElementById("closeModal");
+                            const addButton = document.getElementById("addProductButton");
+                            const cancelButton = document.getElementById("cancelButton");
+                            const productForm = document.getElementById("productForm");
+                            const methodField = document.getElementById("methodField");
                             const searchInput = document.getElementById('searchInput');
                             const searchButton = document.getElementById('searchButton');
                             const productTableBody = document.querySelector('#productsTable tbody');
                             const paginationContainer = document.getElementById('pagination');
                             let currentPage = 1;
                             let currentQuery = '';
-                                            
+                        
                             // Add an event listener to the search button
                             searchButton.addEventListener('click', function (event) {
                                 event.preventDefault();
@@ -168,7 +174,7 @@
                             function fetchProducts(query = '', page = 1) {
                                 currentPage = page;
                                 productTableBody.innerHTML = ''; // Clear existing rows
-                            
+                        
                                 fetch(`/search-products?searchProducts=${query}&page=${page}`)
                                     .then(response => response.json())
                                     .then(data => {
@@ -185,6 +191,27 @@
                                                     </td>
                                                     <td>${product.price}</td>
                                                     <td style="display: flex;">
+                                                        <!-- Edit Button -->
+                                                        <a href="javascript:void(0);" class="edit-button"
+                                                            data-id="${product.id}" 
+                                                            data-barcode="${product.barcode}" 
+                                                            data-name="${product.item_name}" 
+                                                            data-stocks="${product.stocks}" 
+                                                            data-price="${product.price}"
+                                                            data-category="${product.category}">
+                                                            <button class="edit">Edit</button>
+                                                        </a>
+                        
+                                                        <!-- Delete Form -->
+                                                        <form action="{{ route('products.destroy', '') }}/${product.id}" method="POST" style="display:inline;">
+                                                            {{ csrf_field() }}
+                                                            {{ method_field('DELETE') }}
+                                                            <button class="delete" type="submit" onclick="return confirm('Are you sure you want to delete this product?');">
+                                                                <img class="delIcon" src="images/delete.png" alt="Delete">
+                                                            </button>
+                                                        </form>
+                        
+                                                        <!-- Add to Sales Form -->
                                                         <form action="{{ route('addToTransac') }}" method="POST">
                                                             {{ csrf_field() }}
                                                             <input type="hidden" name="product_id" value="${product.id}">
@@ -203,24 +230,167 @@
                                             row.innerHTML = '<td colspan="7">No products found</td>';
                                             productTableBody.appendChild(row);
                                         }
+                        
+                                        // Rebind the edit buttons after the products are loaded
+                                        bindEditButtons();  // Ensure edit functionality works
                                     })
                                     .catch(error => {
                                         console.error('Error fetching products:', error);
                                     });
                             }
+                        
+                            // Modal for Add and Edit Product
+                            addButton.onclick = function() {
+                                document.getElementById("modalTitle").innerText = "Add Product";
+                                methodField.value = "POST"; // Set method to POST for adding
+                                productForm.reset(); // Clear form fields
+                                productForm.action = '/products'; // Set the action URL for adding
+                                modal.style.display = "block"; // Show the modal
+                            };
+                        
+                            // Show the modal for editing a product
+                            function bindEditButtons() {
+                                document.querySelectorAll('.edit-button').forEach(button => {
+                                    button.onclick = function() {
+                                        const id = this.getAttribute('data-id');
+                                        const barcode = this.getAttribute('data-barcode');
+                                        const name = this.getAttribute('data-name');
+                                        const category = this.getAttribute('data-category');
+                                        const stocks = this.getAttribute('data-stocks');
+                                        const price = this.getAttribute('data-price');
+                        
+                                        document.getElementById("modalTitle").innerText = "Edit Product";
+                                        methodField.value = "PUT"; // Set method to PUT for editing
+                                        productForm.action = `/products/${id}`; // Set the action URL
+                                        document.getElementById("barcode").value = barcode;
+                                        document.getElementById("item_name").value = name;
+                                        document.getElementById("category").value = category;
+                                        document.getElementById("stocks").value = stocks;
+                                        document.getElementById("pricep").value = price;
+                        
+                                        modal.style.display = "block"; // Show the modal
+                                    };
+                                });
+                            }
+                        
+                            // Close modal function
+                            closeModal.onclick = function() {
+                                modal.style.display = "none"; // Hide the modal
+                            };
+                        
+                            // Cancel button functionality
+                            cancelButton.onclick = function() {
+                                modal.style.display = "none"; // Hide the modal
+                            };
+                        
+                            // Close modal when clicking outside of it
+                            window.onclick = function(event) {
+                                if (event.target == modal) {
+                                    modal.style.display = "none"; // Hide the modal
+                                }
+                            };
                         });
-                    </script>
+                        </script>
+                        
+                      
                     <div class="filter-container">
                         <label style="margin-top: 20px" for="categoryFilter">Filter by Category:</label>
-                        <form id="categoryForm" name="categoryForm" action="{{ route('products.filter') }}" method="GET" style="display: flex;">
-                            <select id="categoryFilter" name="category" onchange="this.form.submit()">
-                                <option value="" {{ request('category') == '' ? 'selected' : '' }}>Select a Category</option>
-                                <option value="bread" {{ request('category') == 'bread' ? 'selected' : '' }}>Bread</option>
-                                <option value="noodles" {{ request('category') == 'noodles' ? 'selected' : '' }}>Noodles</option>
-                                <option value="canned_goods" {{ request('category') == 'canned_goods' ? 'selected' : '' }}>Canned Goods</option>
-                                <option value="hygiene" {{ request('category') == 'hygiene' ? 'selected' : '' }}>Hygiene</option>
+                        <form id="categoryForm" name="categoryForm" style="display: flex;">
+                            <select id="categoryFilter" name="category">
+                                <option value="">Select a Category</option>
+                        
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->category }}">
+                                        {{ ($category->category) }}
+                                    </option>
+                                @endforeach
                             </select>
                         </form>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const categoryFilter = document.getElementById('categoryFilter');
+                                const productsTableBody = document.getElementById('products-table-body');
+
+                                categoryFilter.addEventListener('change', function () {
+                                    const selectedCategory = this.value;
+                                
+                                    // Clear the table before updating
+                                    productsTableBody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
+                                
+                                    // Send AJAX request to get filtered products
+                                    fetch(`/products/filter?category=${selectedCategory}`)
+                                        .then(response => {
+                                            if (!response.ok) {
+                                                throw new Error(`HTTP error! status: ${response.status}`);
+                                            }
+                                            return response.json();
+                                        })
+                                        .then(data => {
+                                            console.log(data);
+                                            // Clear the table body
+                                            productsTableBody.innerHTML = '';
+                                        
+                                            if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+                                                // Loop through products and populate the table
+                                                data.products.forEach((product, index) => {
+                                                    productsTableBody.innerHTML += `
+                                                        <tr>
+                                                            <td>${index + 1}</td>
+                                                            <td>${product.barcode}</td>
+                                                            <td>${product.item_name}</td>
+                                                            <td style="${product.stocks === 0 ? 'border: 2px solid red; color: red' : ''}">
+                                                                ${product.stocks === 0 ? 'Out of Stock' : product.stocks}
+                                                            </td>
+                                                            <td>
+                                                                <input class="quantity" type="number" name="quantity[${product.id}]" value="1" min="0" style="width: 50px;">
+                                                            </td>
+                                                            <td>₱${product.price}</td>
+                                                            <td style="display: flex;">
+                                                                <!-- Edit Button -->
+                                                                <a href="javascript:void(0);" class="edit-button"
+                                                                    data-id="${product.id}" 
+                                                                    data-barcode="${product.barcode}" 
+                                                                    data-name="${product.item_name}" 
+                                                                    data-stocks="${product.stocks}" 
+                                                                    data-price="${product.price}" 
+                                                                    data-category="${product.category}">
+                                                                    <button class="edit">Edit</button>
+                                                                </a>
+                                                                <!-- Delete Form -->
+                                                                <form action="/products/${product.id}/destroy" method="POST" style="display:inline;">
+                                                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                                    <input type="hidden" name="_method" value="DELETE">
+                                                                    <button class="delete" type="submit" onclick="return confirm('Are you sure you want to delete this product?');">
+                                                                        <img class="delIcon" src="images/delete.png" alt="">
+                                                                    </button>
+                                                                </form>
+                                                            
+                                                                <!-- Add to Sales Form -->
+                                                                <form action="{{ route('addToTransac') }}" method="POST">
+                                                                    {{ csrf_field() }}
+                                                                    <input type="hidden" name="product_id" value="${product.id}">
+                                                                    <input type="hidden" name="item_name" value="${product.item_name}">
+                                                                    <input type="hidden" name="quantity" value="1">
+                                                                    <input type="hidden" name="unit_price" value="${product.price}">
+                                                                    <button class="insert-to-sales" type="submit">Add to Sales</button>
+                                                                </form>
+                                                            </td>
+                                                        </tr>
+                                                    `;
+                                                });
+                                            } else {
+                                                // No products in the selected category or success is false
+                                                const message = data.message || 'No products available in this category.';
+                                                productsTableBody.innerHTML = `<tr><td colspan="7">${message}</td></tr>`;
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error('Error fetching filtered products:', error);
+                                            productsTableBody.innerHTML = '<tr><td colspan="7">Failed to load products.</td></tr>';
+                                        });
+                                });
+                            });
+                        </script>                        
                     </div>
                 </div>
             </div>
@@ -384,16 +554,6 @@
                                     <input type="hidden" name="_method" id="methodField" value="POST">
 
                                     <div>
-                                        <label for="barcode" >Barcode:</label>
-                                        <input id="barcode" type="text" name="barcode" readonly placeholder="Generating barcode">
-                                    </div>
-
-                                    <div>
-                                        <label for="item_name">Product Name:</label>
-                                        <input id="item_name" type="text" name="item_name">
-                                    </div>
-
-                                    <div>
                                         <label for="category">Category:</label>
                                         <select name="category" id="category">
                                             <option value="">Select Product Category</option>
@@ -402,6 +562,16 @@
                                             <option value="canned_goods">Canned Goods</option>
                                             <option value="hygiene">Hygiene</option>
                                         </select>
+                                    </div>
+
+                                    <div>
+                                        <label for="barcode" >Barcode:</label>
+                                        <input id="barcode" type="text" name="barcode" placeholder="Generating barcode">
+                                    </div>
+
+                                    <div>
+                                        <label for="item_name">Product Name:</label>
+                                        <input id="item_name" type="text" name="item_name">
                                     </div>
 
                                     <div>
@@ -1625,6 +1795,100 @@
                     <div class="salesperday-btn">
                         <a href="/cashiersales">Sales per Cashier</a>
                     </div>
+                    <div class="salesperday-btn">
+                        <button class="addCategory">Add Category</button>
+                    </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            // Get elements
+                            const modal = document.getElementById('addCategoryModal');
+                            const openModalBtn = document.querySelector('.addCategory');
+                            const closeModalBtn = document.querySelector('.closeAddCategory');
+
+                            // Open the modal when the button is clicked
+                            openModalBtn.addEventListener('click', function () {
+                                modal.style.display = 'flex';
+                            });
+                        
+                            // Close the modal when the close button is clicked
+                            closeModalBtn.addEventListener('click', function () {
+                                modal.style.display = 'none';
+                            });
+                        
+                            // Close the modal if the user clicks outside of the modal content
+                            window.addEventListener('click', function (event) {
+                                if (event.target === modal) {
+                                    modal.style.display = 'none';
+                                }
+                            });
+                        });
+                    </script>
+                    <div class="salesperday-btn">
+                        <button class="editTaxRate">Edit Tax</button>
+                    </div>
+                    {{-- <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            // Get elements
+                            const modal = document.getElementById('editTaxRateModal');
+                            const openModalBtn = document.querySelector('.editTaxRate');
+                            const closeModalBtn = document.querySelector('.closeEditTaxRate');
+
+                            // Open the modal when the button is clicked
+                            openModalBtn.addEventListener('click', function () {
+                                modal.style.display = 'flex';
+                            });
+                        
+                            // Close the modal when the close button is clicked
+                            closeModalBtn.addEventListener('click', function () {
+                                modal.style.display = 'none';
+                            });
+                        
+                            // Close the modal if the user clicks outside of the modal content
+                            window.addEventListener('click', function (event) {
+                                if (event.target === modal) {
+                                    modal.style.display = 'none';
+                                }
+                            });
+                        });
+                    </script> --}}
+
+
+
+
+
+
+
+                    
+                    <!-- Modal for Adding Category -->
+                    <div id="addCategoryModal" class="modal">
+                        <div class="modal-content">
+                            <span class="closeAddCategory">&times;</span>
+                            <h2>Add New Category</h2>
+                            <form id="categoryForm" action="{{ route('category.save') }}" method="POST">
+                                {{ csrf_field() }} <!-- CSRF Token -->
+                                <label for="categoryName">Category Name</label>
+                                <input type="text" id="categoryName" name="category" required>
+                                <button type="submit">Save Category</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Modal for Editing Tax -->
+                    {{-- <div id="editTaxRateModal" class="modal">
+                        <div class="modal-content">
+                            <span class="closeEditTaxRate">&times;</span>
+                            <h2>Edit Tax Rate Here</h2>
+                            <form id="taxRateForm" action="{{ route('tax.rate.update') }}" method="POST">
+                                {{ csrf_field() }} 
+                                <input type="hidden" name="_method" value="PUT">
+                                
+                                <label for="taxRateValue">Tax Value %</label>
+                                <input type="text" id="taxRateValue" name="taxRate" value="{{ old('taxRate', $currentTaxRate) }}" required>
+                                <button type="submit">Save Changes</button>
+                            </form>
+                        </div>
+                    </div> --}}
+
                 </div>
             </div>
         </div>

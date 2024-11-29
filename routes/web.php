@@ -54,7 +54,7 @@ Route::post('/saveReceipt', 'ProductController@saveReceipt')->name('saveReceipt'
 Route::get('/transaction-history', 'ProductController@getTransactionHistory')->name('transaction.history');
 
 //ROUTE FOR FILTERING THE PRODUCTS BASED ON THEIR CATEGORIES
-Route::get('products/filter', 'ProductController@filterByCategory')->name('products.filter');
+Route::get('/products/filter', 'ProductController@filterByCategory')->name('products.filter');
 
 
 
@@ -104,6 +104,8 @@ Route::get('/salesperday', 'ProductController@salesPerDay')->name('salesperday.s
 Route::get('/cashiersales', 'ProductController@cashierSales')->name('cashiersales.show');
 
 Route::get('/salesperday', 'ProductController@salesGroupPerDay')->name('sales.per.day');
+Route::get('/cashiersales', 'ProductController@salesGroupPerCashier')->name('sales.per.cashier');
+
 
 //ROUTE TO GET THE DETAILS OF TRANSACTION PER DAY
 Route::get('/fetch-transaction-details/{referenceNo}', 'ProductController@retrieveTransactionDetails');
@@ -112,6 +114,11 @@ Route::get('/fetch-transaction-details/{referenceNo}', 'ProductController@retrie
 // Route::get('/salesperday','ProductController@');
 // Route::get('/salesperday', [ProductController::class, 'index'])->name('salesperday.index');
 // Route::get('/salesperday/searcy', 'ProductController@salesPerDaySearch')->name('salesperday.search');
+
+
+//Saving the category
+Route::post('/category/save','ProductController@saveCategory')->name('category.save');
+Route::put('/tax/update', 'ProductController@taxRateUpdate')->name('tax.rate.update');
 
 
 

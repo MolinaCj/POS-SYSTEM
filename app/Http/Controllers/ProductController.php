@@ -9,10 +9,14 @@ use App\Http\Requests\TransactionRequest;
 use App\Http\Requests\SaveReceiptRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\CategoryRequest;
+use App\Http\Requests\UpdateTaxRateRequest;
 use App\Product;
 use App\SalesHistory;
 use App\Transaction;
 use App\User;
+use App\Category;
+use App\Tax;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -50,11 +54,7 @@ class ProductController extends Controller
     //MAIN VIEW 
     public function index(Request $request)
     {
-        //CHECK IF THE USER IS LOGGED IN
-        // if (!auth()->check()) {
-        //     return redirect()->route('loginForm')->with('error', 'You must be logged in to view this page.');
-        // }
-        // Get the search term from the request
+        // // Get the search term from the request
         $search = $request->query('searchProducts');
         
         // Fetch products, with optional search filtering
@@ -69,20 +69,18 @@ class ProductController extends Controller
         $currentDate = Carbon::now()->format('Y-m-d H:i:s');
 
         $histories = SalesHistory::all();
+        $categories = Category::all();
 
-        // Log key variables for debugging
-        // Log::info('Products:', ['products' => $products]);
-        // Log::info('Transactions:', ['transactions' => $transactions]);
-        // Log::info('Histories:', ['histories' => $histories->toArray()]); // Log as an array to see contents
-
-        
+        // Fetch the tax rate from the database
+        // $taxRate = Tax::first()->tax_rate;  // Assuming it's stored in the 'rate' column of the 'tax' table
+        $currentTaxRate = Tax::first()->tax_rate;
 
          // Get the first transaction
         $firstTransaction = $histories->first();
 
          // Sample values for net amount, tax, etc. Adjust according to your logic
         $net_amount = $histories->sum('total_price'); // Example calculation
-        $tax = $net_amount * 0.12; // Example tax calculation (12%)
+        $tax = $net_amount * .01; // Example tax calculation (12%)
         $amount_payable = $net_amount + $tax;
         // Retrieve the cash amount from the last transaction (or however you store it)
         $cash_amount = isset($firstTransaction) ? $firstTransaction->cash_amount : 0; // Assuming cash_amount is a field in your Transaction model
@@ -99,7 +97,10 @@ class ProductController extends Controller
               'tax', 
               'amount_payable',
                'cash_amount', 
-               'change'))->with('user', auth()->user());
+               'change',
+               'categories',
+               'taxRate',
+               'currentTaxRate'))->with('user', auth()->user());
     }
 
     //SHOWING ADD FOR FOR CREATE PRODUCT
@@ -475,25 +476,27 @@ class ProductController extends Controller
 
     public function filterByCategory(Request $request)
     {
-        $category = $request->get('category');
+        Log::info('filterByCategory method triggered');
+    
+        $category = $request->input('category');
+        Log::info('Selected category:', ['category' => $category]);
 
-        // Check if category is provided
-        if (!$category) {
-            return redirect()->route('products.index')
-                ->with('error', 'Please select a valid category.');
-        }
-
-        // Filter products by category and paginate
-        $products = Product::where('category', $category)->paginate(12);
-
-        // Check if any products are found
+        // Fetch products based on the category
+        $products = Product::where('category', $category)->get();
+        
+        // Check if products were found
         if ($products->isEmpty()) {
-            return view('products', compact('products'))
-                ->with('category', $category)
-                ->with('message', 'No products found for the selected category.');
+            Log::info('No products found for category:', ['category' => $category]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found',
+            ]);
         }
 
-        return view('products', compact('products'))->with('category', $category);
+        return response()->json([
+            'success' => true,
+            'products' => $products,
+        ]);
     }
 
     //This is the function for search
@@ -681,4 +684,56 @@ class ProductController extends Controller
         return response()->json(['message' => 'Transaction not found'], 404);
     }
 
+    public function salesGroupPerCashier(Request $request)
+    {
+        // Fetch all sales histories and apply search if provided
+    $histories = SalesHistory::when($request->search, function ($query) use ($request) {
+        return $query->where('cashier_name', 'LIKE', '%' . $request->search . '%')
+                     ->orWhere('reference_no', 'LIKE', '%' . $request->search . '%');
+    })->get();
+
+    // Group transactions by cashier name
+    $groupedHistories = $histories->groupBy(function ($transaction) {
+        return isset($transaction->cashier_name) ? $transaction->cashier_name : 'Guest';
+    });
+
+    return view('cashiersales', compact('groupedHistories'));
+    }
+
+
+
+
+
+
+
+    // Store new category
+    public function saveCategory(CategoryRequest $request)
+    {
+        // The category name is already validated by the CategoryRequest
+        $category = new Category();
+        $category->category = $request->category;  // This uses the 'category' field from the form
+        $category->save();
+
+        // Redirect back or return a response with a success message
+        return redirect()->back()->with('success', 'Category added successfully.');
+    }
+
+    // public function taxRateUpdate(UpdateTaxRateRequest $request)
+    // {
+    //     // Get the validated input directly from the request
+    //     $validated = $request->validated();
+
+    //     // Assuming there's only one tax record in the database
+    //     $tax = Tax::first(); 
+
+    //     if ($tax) {
+    //         // Update the tax rate in the database
+    //         $tax->rate = $validated['taxRate'];
+    //         $tax->save();  // Save the updated tax record
+
+    //         return redirect()->back()->with('success', 'Tax rate updated successfully!');
+    //     }
+
+    //     return redirect()->back()->with('error', 'Tax rate record not found.');
+    // }
 }
