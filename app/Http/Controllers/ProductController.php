@@ -639,10 +639,15 @@ class ProductController extends Controller
     //SALES GROUP BY DAY
     public function salesGroupPerDay()
     {
-        $histories = SalesHistory::all();
-    
-        // Return grouped by day
+        // Get all sales histories ordered by created_at in descending order (latest first)
+        $histories = SalesHistory::orderBy('created_at', 'desc')->get();
+        
+        // Return the view with the ordered histories
         return view('salesperday', compact('histories'));
+        // $histories = SalesHistory::all();
+    
+        // // Return grouped by day
+        // return view('salesperday', compact('histories'));
     }
 
     //POPULATING THE TRANSACTION DETAILS IN SALES PER DAY
@@ -685,20 +690,24 @@ class ProductController extends Controller
     }
 
     public function salesGroupPerCashier(Request $request)
-    {
-        // Fetch all sales histories and apply search if provided
+{
+    // Fetch all sales histories, apply search if provided, and order by latest first
     $histories = SalesHistory::when($request->search, function ($query) use ($request) {
         return $query->where('cashier_name', 'LIKE', '%' . $request->search . '%')
                      ->orWhere('reference_no', 'LIKE', '%' . $request->search . '%');
-    })->get();
+    })
+    // Order the histories by created_at in descending order (latest first)
+    ->orderBy('created_at', 'desc')
+    ->get();
 
     // Group transactions by cashier name
     $groupedHistories = $histories->groupBy(function ($transaction) {
         return isset($transaction->cashier_name) ? $transaction->cashier_name : 'Guest';
     });
 
+    // Return the grouped histories to the view
     return view('cashiersales', compact('groupedHistories'));
-    }
+}
 
 
 

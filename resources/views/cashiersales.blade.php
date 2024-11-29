@@ -12,7 +12,7 @@
 <!-- Title and Search Form with Return Button -->
 <div class="card mb-4">
     <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">Sales Per Cashier</h5>
+        <h5 class="mb-0 display-4">Sales Per Cashier</h5>
     </div>
     <div class="card-body">
         <form method="GET" action="{{ route('sales.per.cashier') }}" class="d-flex justify-content-between align-items-center">
@@ -34,10 +34,9 @@ $overallTotalProductsSold = 0;
 
 @foreach ($groupedHistories as $cashierName => $transactionsByCashier)
 @php
-    // Cashier-level totals: sum the amount_payable for unique reference numbers
-    $cashierTotalSales = $transactionsByCashier->groupBy('reference_no')->sum(function ($transactionGroup) {
-        return $transactionGroup->sum('amount_payable');
-    });
+    // Cashier-level totals
+    $appliedTax = $transactionsByCashier->sum('total_price') * .01;
+    $cashierTotalSales = $transactionsByCashier->sum('total_price') + $appliedTax;
     $cashierTotalProductsSold = $transactionsByCashier->sum('quantity');
     $overallTotalSales += $cashierTotalSales;
     $overallTotalProductsSold += $cashierTotalProductsSold;
@@ -117,7 +116,7 @@ $overallTotalProductsSold = 0;
 @endforeach
 
 <!-- Overall Totals -->
-<div class="card mt-4">
+<div class="card mt-4 fixed-bottom">
     <div class="card-header bg-dark text-white">
         <h5 class="mb-0">Overall Totals</h5>
         <p class="mb-0">
@@ -126,6 +125,7 @@ $overallTotalProductsSold = 0;
         </p>
     </div>
 </div>
+
 
 <!-- Modal (Details) with Return Button -->
 <div class="modal" id="detailsModal" style="display: none;">

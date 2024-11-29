@@ -45,3 +45,16 @@
     max-height: 500px;
     overflow-y: auto;
 }
+
+.card.fixed-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000; /* Ensure it's on top of other content */
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow for visibility */
+}
+
+.card.fixed-bottom .card-header {
+    background-color: #343a40; /* Keep the dark background for consistency */
+}
