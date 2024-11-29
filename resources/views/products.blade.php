@@ -555,13 +555,17 @@
 
                                     <div>
                                         <label for="category">Category:</label>
-                                        <select name="category" id="category">
-                                            <option value="">Select Product Category</option>
-                                            <option value="noodles">Noodles</option>
-                                            <option value="bread">Bread</option>
-                                            <option value="canned_goods">Canned Goods</option>
-                                            <option value="hygiene">Hygiene</option>
-                                        </select>
+                                        <form id="categoryForm" name="categoryForm" style="display: flex;">
+                                            <select id="categoryFilter" name="category">
+                                                <option value="">Select a Category</option>
+                                        
+                                                @foreach ($categories as $category)
+                                                    <option value="{{ $category->category }}">
+                                                        {{ ($category->category) }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </form>
                                     </div>
 
                                     <div>

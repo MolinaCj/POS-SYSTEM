@@ -58,3 +58,93 @@
 .card.fixed-bottom .card-header {
     background-color: #343a40; /* Keep the dark background for consistency */
 }
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 10; /* Ensure it stays above other content */
+    padding: 10px; /* Optional: Adjust padding to ensure content alignment */
+}
+
+/* Modal Styles */
+#transactionDetailsModal {
+    z-index: 10000;
+    display: none;
+}
+
+#transactionDetailsModal .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+}
+
+#transactionDetailsModal .modal-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 600px;
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+#transactionDetailsModal .close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #444;
+}
+
+#transactionDetailsModal h2 {
+    text-align: center;
+    font-size: 24px;
+    color: #444;
+    margin-bottom: 20px;
+}
+
+#transactionDetailsModal #historyDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+#transactionDetailsModal h3 {
+    text-align: center;
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+}
+
+#transactionDetailsModal table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    overflow-x: auto;
+}
+
+#transactionDetailsModal table th,
+#transactionDetailsModal table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+#transactionDetailsModal table th {
+    background-color: #f1f1f1;
+    color: #333;
+}

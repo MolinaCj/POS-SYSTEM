@@ -690,24 +690,62 @@ class ProductController extends Controller
     }
 
     public function salesGroupPerCashier(Request $request)
-{
-    // Fetch all sales histories, apply search if provided, and order by latest first
-    $histories = SalesHistory::when($request->search, function ($query) use ($request) {
-        return $query->where('cashier_name', 'LIKE', '%' . $request->search . '%')
-                     ->orWhere('reference_no', 'LIKE', '%' . $request->search . '%');
-    })
-    // Order the histories by created_at in descending order (latest first)
-    ->orderBy('created_at', 'desc')
-    ->get();
+    {
+        // Fetch all sales histories, apply search if provided, and order by latest first
+        $histories = SalesHistory::when($request->search, function ($query) use ($request) {
+            return $query->where('cashier_name', 'LIKE', '%' . $request->search . '%')
+                         ->orWhere('reference_no', 'LIKE', '%' . $request->search . '%');
+        })
+        // Order the histories by created_at in descending order (latest first)
+        ->orderBy('created_at', 'desc')
+        ->get();
+    
+        // Group transactions by cashier name
+        $groupedHistories = $histories->groupBy(function ($transaction) {
+            return isset($transaction->cashier_name) ? $transaction->cashier_name : 'Guest';
+        });
+    
+        // Return the grouped histories to the view
+        return view('cashiersales', compact('groupedHistories'));
+    }
 
-    // Group transactions by cashier name
-    $groupedHistories = $histories->groupBy(function ($transaction) {
-        return isset($transaction->cashier_name) ? $transaction->cashier_name : 'Guest';
-    });
-
-    // Return the grouped histories to the view
-    return view('cashiersales', compact('groupedHistories'));
-}
+    public function fetchCashierPerDayDetails($referenceNo)
+    {
+        // Retrieve all records with the same reference number
+        $transactionRecords = SalesHistory::where('reference_no', $referenceNo)->get();
+    
+        // Check if any records exist
+        if ($transactionRecords->isNotEmpty()) {
+            // Fetch the first record for general transaction details
+            $history = $transactionRecords->first();
+        
+            // Extract product-specific details
+            $products = $transactionRecords->map(function ($record) {
+                return [
+                    'item_name' => $record->item_name,
+                    'quantity' => $record->quantity,
+                    'unit_price' => $record->unit_price,
+                    'total_price' => $record->total_price,
+                ];
+            });
+        
+            // Return the transaction details along with products as a JSON response
+            return response()->json([
+                'reference_no' => $history->reference_no,
+                'timestamp' => $history->timestamp,
+                'net_amount' => $history->net_amount,
+                'tax' => $history->tax,
+                'amount_payable' => $history->amount_payable,
+                'cash_amount' => $history->cash_amount,
+                'change_amount' => $history->change_amount,
+                'cashier_name' => $history->cashier_name,
+                'products' => $products,
+            ]);
+        }
+    
+        // If no history is found for the given reference number
+        return response()->json(['message' => 'Transaction not found'], 404);
+    }
 
 
 

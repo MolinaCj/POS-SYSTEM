@@ -181,5 +181,4 @@ class TransactionController extends Controller
             'amount_payable' => $amountPayable,
         ]);
     }
-
 }
