@@ -145,33 +145,20 @@
                             const searchButton = document.getElementById('searchButton');
                             const productTableBody = document.querySelector('#productsTable tbody');
                             const paginationContainer = document.getElementById('pagination');
+                            const modal = document.getElementById("productModal");
+                            const productForm = document.getElementById("productForm");
+                            const closeModal = document.getElementById("closeModal");
+                            const cancelButton = document.getElementById("cancelButton");
                             let currentPage = 1;
                             let currentQuery = '';
-                                            
-                            // Add an event listener to the search button
-                            searchButton.addEventListener('click', function (event) {
-                                event.preventDefault();
-                                currentQuery = searchInput.value.trim(); // Update current query
-                                fetchProducts(currentQuery, 1); // Reset to page 1 for new search
-                            });
                         
-                            // Event listener for clearing the search input
-                            searchInput.addEventListener('input', function () {
-                                const query = searchInput.value.trim();
-                                if (!query) {
-                                    currentQuery = ''; // Reset query
-                                    fetchProducts('', 1); // Fetch all products on page 1
-                                }
-                            });
-                        
-                            // Function to fetch products based on the search query and page
+                            // Fetch products for search or pagination
                             function fetchProducts(query = '', page = 1) {
-                                currentPage = page;
-                                productTableBody.innerHTML = ''; // Clear existing rows
-                            
                                 fetch(`/search-products?searchProducts=${query}&page=${page}`)
                                     .then(response => response.json())
                                     .then(data => {
+                                        // Update table rows
+                                        productTableBody.innerHTML = '';
                                         if (data.products && data.products.data.length > 0) {
                                             data.products.data.forEach(product => {
                                                 const row = document.createElement('tr');
@@ -184,7 +171,7 @@
                                                         <input class="quantity" type="number" name="quantity[${product.id}]" value="1" min="1" style="width: 50px;">
                                                     </td>
                                                     <td>${product.price}</td>
-                                                    <td style="display: flex;">
+                                                    <td style="display: flex; gap: 8px;">
                                                         <form action="{{ route('addToTransac') }}" method="POST">
                                                             {{ csrf_field() }}
                                                             <input type="hidden" name="product_id" value="${product.id}">
@@ -193,21 +180,116 @@
                                                             <input type="hidden" name="unit_price" value="${product.price}">
                                                             <button class="insert-to-sales" type="submit">Add to Sales</button>
                                                         </form>
+                                                        <button class="edit-button"
+                                                            data-id="${product.id}"
+                                                            data-barcode="${product.barcode}"
+                                                            data-name="${product.item_name}"
+                                                            data-stocks="${product.stocks}"
+                                                            data-price="${product.price}"
+                                                            data-category="${product.category}">
+                                                            Edit
+                                                        </button>
                                                     </td>
                                                 `;
                                                 productTableBody.appendChild(row);
                                             });
-                                            renderPaginationButtons(data.products); // Render pagination buttons
+                                        
+                                            // Attach edit button listeners
+                                            attachEditButtonListeners();
+                                        
+                                            // Update pagination without affecting design
+                                            updatePagination(data.products);
                                         } else {
-                                            const row = document.createElement('tr');
-                                            row.innerHTML = '<td colspan="7">No products found</td>';
-                                            productTableBody.appendChild(row);
+                                            productTableBody.innerHTML = '<tr><td colspan="7">No products found</td></tr>';
+                                            paginationContainer.innerHTML = ''; // Clear pagination if no products
                                         }
                                     })
                                     .catch(error => {
                                         console.error('Error fetching products:', error);
                                     });
                             }
+                        
+                            // Attach click event listeners to dynamically added "Edit" buttons
+                            function attachEditButtonListeners() {
+                                document.querySelectorAll('.edit-button').forEach(button => {
+                                    button.addEventListener('click', handleEditButtonClick);
+                                });
+                            }
+                        
+                            // Handle "Edit" button click
+                            function handleEditButtonClick(event) {
+                                const button = event.target;
+                                const productId = button.getAttribute('data-id');
+                                const productBarcode = button.getAttribute('data-barcode');
+                                const productName = button.getAttribute('data-name');
+                                const productStocks = button.getAttribute('data-stocks');
+                                const productPrice = button.getAttribute('data-price');
+                                const productCategory = button.getAttribute('data-category');
+                            
+                                // Populate modal fields
+                                document.getElementById("barcode").value = productBarcode;
+                                document.getElementById("item_name").value = productName;
+                                document.getElementById("stocks").value = productStocks;
+                                document.getElementById("price").value = productPrice;
+                                document.getElementById("categoryFilter").value = productCategory;
+                                document.getElementById("methodField").value = "PUT";
+                                productForm.action = `/products/${productId}`;
+                            
+                                modal.style.display = "block"; // Show modal
+                            }
+                        
+                            // Update pagination without affecting existing design
+                            function updatePagination(data) {
+                                const { current_page, last_page, links } = data;
+                                paginationContainer.innerHTML = ''; // Clear old pagination
+                            
+                                links.forEach(link => {
+                                    const pageButton = document.createElement('button');
+                                    pageButton.innerHTML = link.label;
+                                    pageButton.classList.add('pagination-button');
+                                    if (link.active) pageButton.classList.add('active');
+                                    if (link.url) {
+                                        pageButton.addEventListener('click', (event) => {
+                                            event.preventDefault();
+                                            const urlParams = new URLSearchParams(link.url.split('?')[1]);
+                                            const newPage = urlParams.get('page');
+                                            fetchProducts(currentQuery, newPage);
+                                        });
+                                    }
+                                    paginationContainer.appendChild(pageButton);
+                                });
+                            }
+                        
+                            // Search products
+                            searchButton.addEventListener('click', function (event) {
+                                event.preventDefault();
+                                currentQuery = searchInput.value.trim();
+                                fetchProducts(currentQuery, 1);
+                            });
+                        
+                            // Fetch all products when search input is cleared
+                            searchInput.addEventListener('input', function () {
+                                if (!searchInput.value.trim()) {
+                                    currentQuery = '';
+                                    fetchProducts('', 1);
+                                    window.location.reload();
+                                }
+                            });
+                        
+                            // Close modal functionality
+                            closeModal.onclick = cancelButton.onclick = function () {
+                                modal.style.display = "none";
+                            };
+                        
+                            // Close modal when clicking outside of it
+                            window.onclick = function (event) {
+                                if (event.target === modal) {
+                                    modal.style.display = "none";
+                                }
+                            };
+                        
+                            // Fetch initial products on page load (retain server-rendered pagination and design)
+                            attachEditButtonListeners(); // Attach to initially rendered products
                         });
                         </script>
                         
@@ -245,7 +327,7 @@
                                 const productForm = document.getElementById("productForm");
                                 const methodField = document.getElementById("methodField");
                                 const modalTitle = document.getElementById("modalTitle");
-
+                        
                                 // Show the modal for adding a product
                                 addButton.onclick = function () {
                                     modalTitle.innerText = "Add Product"; // Set modal title
@@ -260,7 +342,7 @@
                                     editButton.addEventListener('click', function () {
                                         modalTitle.innerText = "Edit Product"; // Set modal title
                                         modal.style.display = "block"; // Show the modal
-
+                        
                                         // Populate form fields with product data
                                         document.getElementById("product_id").value = editButton.getAttribute("data-id");
                                         document.getElementById("barcode").value = editButton.getAttribute("data-barcode");
@@ -291,7 +373,7 @@
                                     }
                                 };
                             });
-                        </script>
+                        </script>                        
                         {{-- <form action="{{ route('products.clear') }}#sec1" method="POST">
                             {{ csrf_field() }}
                             <button type="submit" class="clear btn-danger" onclick="return confirm('Are you sure you want to clear all products?');"">Clear All</button>

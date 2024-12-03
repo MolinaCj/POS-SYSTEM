@@ -882,8 +882,30 @@ cont-3{
     text-decoration: none;
     cursor: pointer;
 }
+/*Edit product details button*/
+.edit-button {
+    background-color: #ffffff;
+    ; /* Green background */
+    color: #007bff; /* White text */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 8px 16px; /* Add some padding */
+    font-size: 14px; /* Adjust font size */
+    cursor: pointer; /* Add a pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
 
+/* Hover effect */
+.edit-button:hover {
+    background-color: #ffffff; /* Slightly darker green */
+    border: 1px solid blue  ;
+}
 
+/* Optional: Add focus styling */
+.edit-button:focus {
+    outline: none; /* Remove default outline */
+    box-shadow: 0 0 5px rgba(0, 128, 0, 0.6); /* Green focus glow */
+}
 
 /*MODAL CSS*/
 /* Modal styles */
