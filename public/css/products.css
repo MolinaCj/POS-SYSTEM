@@ -1875,11 +1875,19 @@ tr:hover td:nth-child(-n+6) {
 }
 .div-1{
     display: flex;
+    flex-direction: column;
     margin-left: 70px;
     margin-top: 30px;
     width: 1400px;
     height: 680px;
     background-color: white;
+}
+.div1-buttons{
+    display: flex;
+    margin-left: 70px;
+    margin-top: 30px;
+    width: 1400px;
+    height: 100px;
 }
 .salesperday-btn {
     margin-top: 20px;
@@ -2063,6 +2071,80 @@ tr:hover td:nth-child(-n+6) {
     text-align: center;
     font-size: 20px;
     color: #333;
+}
+
+/*TOtals CSS*/
+.product-section {
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+}
+
+.totals-section {
+    margin-top: 20px;
+}
+
+.totals-section h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #333;
+    text-align: center;
+}
+
+.totals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.totals-box {
+    background: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 200px;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.totals-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.totals-box p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.totals-box strong {
+    font-size: 20px;
+    color: #222;
+}
+
+.addCategory {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.addCategory:hover {
+    background-color: #0056b3;
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 

@@ -62,7 +62,7 @@ class ProductController extends Controller
         $products = Product::when($search, function ($query, $search) {
             return $query->where('item_name', 'LIKE', '%' . $search . '%')
                          ->orWhere('barcode', 'LIKE', '%' . $search . '%');
-        })->paginate(12); 
+        })->paginate(20); 
 
         $transactions = Transaction::all();
         $reference_no = DB::table('transactions')->latest('created_at')->value('reference_no');
@@ -86,6 +86,17 @@ class ProductController extends Controller
         // Retrieve the cash amount from the last transaction (or however you store it)
         $cash_amount = isset($firstTransaction) ? $firstTransaction->cash_amount : 0; // Assuming cash_amount is a field in your Transaction model
         $change = $cash_amount - $amount_payable;
+
+        // Fetch totals
+        $totalCashiers = User::count(); // Assuming your cashiers are stored in the users table
+        $totalProducts = Product::count();
+        $totalTransactionsToday = SalesHistory::whereDate('created_at', Carbon::today())->count();
+        $totalAmountSoldToday = SalesHistory::whereDate('created_at', Carbon::today())->sum('total_price');
+        $totalTransactionsThisMonth = SalesHistory::whereMonth('created_at', Carbon::now()->month)->count();
+        $totalAmountSoldThisMonth = SalesHistory::whereMonth('created_at', Carbon::now()->month)->sum('total_price');
+        $overallTotalTransactions = SalesHistory::count();
+        $overallTotalAmountSold = SalesHistory::sum('total_price');
+
          
         //Shows all the data in table form
         return view('products', compact(
@@ -101,7 +112,15 @@ class ProductController extends Controller
                'change',
                'categories',
                'taxRate',
-               'currentTaxRate'))->with('user', auth()->user());
+               'currentTaxRate',
+               'totalCashiers',
+                'totalProducts',
+                'totalTransactionsToday',
+                'totalAmountSoldToday',
+                'totalTransactionsThisMonth',
+                'totalAmountSoldThisMonth',
+                'overallTotalTransactions',
+                'overallTotalAmountSold'))->with('user', auth()->user());
     }
 
     //SHOWING ADD FOR FOR CREATE PRODUCT

@@ -139,158 +139,158 @@
                         </script>
                         
                     </form>
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function () {
-                            const searchInput = document.getElementById('searchInput');
-                            const searchButton = document.getElementById('searchButton');
-                            const productTableBody = document.querySelector('#productsTable tbody');
-                            const paginationContainer = document.getElementById('pagination');
-                            const modal = document.getElementById("productModal");
-                            const productForm = document.getElementById("productForm");
-                            const closeModal = document.getElementById("closeModal");
-                            const cancelButton = document.getElementById("cancelButton");
-                            let currentPage = 1;
-                            let currentQuery = '';
-                        
-                            // Fetch products for search or pagination
-                            function fetchProducts(query = '', page = 1) {
-                                fetch(`/search-products?searchProducts=${query}&page=${page}`)
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        // Update table rows
-                                        productTableBody.innerHTML = '';
-                                        if (data.products && data.products.data.length > 0) {
-                                            data.products.data.forEach(product => {
-                                                const row = document.createElement('tr');
-                                                row.innerHTML = `
-                                                    <td>${product.id}</td>
-                                                    <td>${product.barcode}</td>
-                                                    <td>${product.item_name}</td>
-                                                    <td>${product.stocks}</td>
-                                                    <td>
-                                                        <input class="quantity" type="number" name="quantity[${product.id}]" value="1" min="1" style="width: 50px;">
-                                                    </td>
-                                                    <td>${product.price}</td>
-                                                    <td style="display: flex; gap: 8px;">
-                                                        <form action="{{ route('addToTransac') }}" method="POST">
-                                                            {{ csrf_field() }}
-                                                            <input type="hidden" name="product_id" value="${product.id}">
-                                                            <input type="hidden" name="item_name" value="${product.item_name}">
-                                                            <input type="hidden" name="quantity" value="1">
-                                                            <input type="hidden" name="unit_price" value="${product.price}">
-                                                            <button class="insert-to-sales" type="submit">Add to Sales</button>
-                                                        </form>
-                                                        <button class="edit-button"
-                                                            data-id="${product.id}"
-                                                            data-barcode="${product.barcode}"
-                                                            data-name="${product.item_name}"
-                                                            data-stocks="${product.stocks}"
-                                                            data-price="${product.price}"
-                                                            data-category="${product.category}">
-                                                            Edit
-                                                        </button>
-                                                    </td>
-                                                `;
-                                                productTableBody.appendChild(row);
-                                            });
-                                        
-                                            // Attach edit button listeners
-                                            attachEditButtonListeners();
-                                        
-                                            // Update pagination without affecting design
-                                            updatePagination(data.products);
-                                        } else {
-                                            productTableBody.innerHTML = '<tr><td colspan="7">No products found</td></tr>';
-                                            paginationContainer.innerHTML = ''; // Clear pagination if no products
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error fetching products:', error);
-                                    });
-                            }
-                        
-                            // Attach click event listeners to dynamically added "Edit" buttons
-                            function attachEditButtonListeners() {
-                                document.querySelectorAll('.edit-button').forEach(button => {
-                                    button.addEventListener('click', handleEditButtonClick);
-                                });
-                            }
-                        
-                            // Handle "Edit" button click
-                            function handleEditButtonClick(event) {
-                                const button = event.target;
-                                const productId = button.getAttribute('data-id');
-                                const productBarcode = button.getAttribute('data-barcode');
-                                const productName = button.getAttribute('data-name');
-                                const productStocks = button.getAttribute('data-stocks');
-                                const productPrice = button.getAttribute('data-price');
-                                const productCategory = button.getAttribute('data-category');
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const searchInput = document.getElementById('searchInput');
+                                const searchButton = document.getElementById('searchButton');
+                                const productTableBody = document.querySelector('#productsTable tbody');
+                                const paginationContainer = document.getElementById('pagination');
+                                const modal = document.getElementById("productModal");
+                                const productForm = document.getElementById("productForm");
+                                const closeModal = document.getElementById("closeModal");
+                                const cancelButton = document.getElementById("cancelButton");
+                                let currentPage = 1;
+                                let currentQuery = '';
                             
-                                // Populate modal fields
-                                document.getElementById("barcode").value = productBarcode;
-                                document.getElementById("item_name").value = productName;
-                                document.getElementById("stocks").value = productStocks;
-                                document.getElementById("price").value = productPrice;
-                                document.getElementById("categoryFilter").value = productCategory;
-                                document.getElementById("methodField").value = "PUT";
-                                productForm.action = `/products/${productId}`;
-                            
-                                modal.style.display = "block"; // Show modal
-                            }
-                        
-                            // Update pagination without affecting existing design
-                            function updatePagination(data) {
-                                const { current_page, last_page, links } = data;
-                                paginationContainer.innerHTML = ''; // Clear old pagination
-                            
-                                links.forEach(link => {
-                                    const pageButton = document.createElement('button');
-                                    pageButton.innerHTML = link.label;
-                                    pageButton.classList.add('pagination-button');
-                                    if (link.active) pageButton.classList.add('active');
-                                    if (link.url) {
-                                        pageButton.addEventListener('click', (event) => {
-                                            event.preventDefault();
-                                            const urlParams = new URLSearchParams(link.url.split('?')[1]);
-                                            const newPage = urlParams.get('page');
-                                            fetchProducts(currentQuery, newPage);
+                                // Fetch products for search or pagination
+                                function fetchProducts(query = '', page = 1) {
+                                    fetch(`/search-products?searchProducts=${query}&page=${page}`)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            // Update table rows
+                                            productTableBody.innerHTML = '';
+                                            if (data.products && data.products.data.length > 0) {
+                                                data.products.data.forEach(product => {
+                                                    const row = document.createElement('tr');
+                                                    row.innerHTML = `
+                                                        <td>${product.id}</td>
+                                                        <td>${product.barcode}</td>
+                                                        <td>${product.item_name}</td>
+                                                        <td>${product.stocks}</td>
+                                                        <td>
+                                                            <input class="quantity" type="number" name="quantity[${product.id}]" value="1" min="1" style="width: 50px;">
+                                                        </td>
+                                                        <td>${product.price}</td>
+                                                        <td style="display: flex; gap: 8px;">
+                                                            <button class="edit-button"
+                                                                data-id="${product.id}"
+                                                                data-barcode="${product.barcode}"
+                                                                data-name="${product.item_name}"
+                                                                data-stocks="${product.stocks}"
+                                                                data-price="${product.price}"
+                                                                data-category="${product.category}">
+                                                                Edit
+                                                            </button>
+                                                            <form action="{{ route('addToTransac') }}" method="POST">
+                                                                {{ csrf_field() }}
+                                                                <input type="hidden" name="product_id" value="${product.id}">
+                                                                <input type="hidden" name="item_name" value="${product.item_name}">
+                                                                <input type="hidden" name="quantity" value="1">
+                                                                <input type="hidden" name="unit_price" value="${product.price}">
+                                                                <button class="insert-to-sales" type="submit">Add to Sales</button>
+                                                            </form>
+                                                        </td>
+                                                    `;
+                                                    productTableBody.appendChild(row);
+                                                });
+                                            
+                                                // Attach edit button listeners
+                                                attachEditButtonListeners();
+                                            
+                                                // Update pagination without affecting design
+                                                updatePagination(data.products);
+                                            } else {
+                                                productTableBody.innerHTML = '<tr><td colspan="7">No products found</td></tr>';
+                                                paginationContainer.innerHTML = ''; // Clear pagination if no products
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error('Error fetching products:', error);
                                         });
-                                    }
-                                    paginationContainer.appendChild(pageButton);
+                                }
+                            
+                                // Attach click event listeners to dynamically added "Edit" buttons
+                                function attachEditButtonListeners() {
+                                    document.querySelectorAll('.edit-button').forEach(button => {
+                                        button.addEventListener('click', handleEditButtonClick);
+                                    });
+                                }
+                            
+                                // Handle "Edit" button click
+                                function handleEditButtonClick(event) {
+                                    const button = event.target;
+                                    const productId = button.getAttribute('data-id');
+                                    const productBarcode = button.getAttribute('data-barcode');
+                                    const productName = button.getAttribute('data-name');
+                                    const productStocks = button.getAttribute('data-stocks');
+                                    const productPrice = button.getAttribute('data-price');
+                                    const productCategory = button.getAttribute('data-category');
+                                
+                                    // Populate modal fields
+                                    document.getElementById("barcode").value = productBarcode;
+                                    document.getElementById("item_name").value = productName;
+                                    document.getElementById("stocks").value = productStocks;
+                                    document.getElementById("price").value = productPrice;
+                                    document.getElementById("categoryFilter").value = productCategory;
+                                    document.getElementById("methodField").value = "PUT";
+                                    productForm.action = `/products/${productId}`;
+                                
+                                    modal.style.display = "block"; // Show modal
+                                }
+                            
+                                // Update pagination without affecting existing design
+                                function updatePagination(data) {
+                                    const { current_page, last_page, links } = data;
+                                    paginationContainer.innerHTML = ''; // Clear old pagination
+                                
+                                    links.forEach(link => {
+                                        const pageButton = document.createElement('button');
+                                        pageButton.innerHTML = link.label;
+                                        pageButton.classList.add('pagination-button');
+                                        if (link.active) pageButton.classList.add('active');
+                                        if (link.url) {
+                                            pageButton.addEventListener('click', (event) => {
+                                                event.preventDefault();
+                                                const urlParams = new URLSearchParams(link.url.split('?')[1]);
+                                                const newPage = urlParams.get('page');
+                                                fetchProducts(currentQuery, newPage);
+                                            });
+                                        }
+                                        paginationContainer.appendChild(pageButton);
+                                    });
+                                }
+                            
+                                // Search products
+                                searchButton.addEventListener('click', function (event) {
+                                    event.preventDefault();
+                                    currentQuery = searchInput.value.trim();
+                                    fetchProducts(currentQuery, 1);
                                 });
-                            }
-                        
-                            // Search products
-                            searchButton.addEventListener('click', function (event) {
-                                event.preventDefault();
-                                currentQuery = searchInput.value.trim();
-                                fetchProducts(currentQuery, 1);
-                            });
-                        
-                            // Fetch all products when search input is cleared
-                            searchInput.addEventListener('input', function () {
-                                if (!searchInput.value.trim()) {
-                                    currentQuery = '';
-                                    fetchProducts('', 1);
-                                    window.location.reload();
-                                }
-                            });
-                        
-                            // Close modal functionality
-                            closeModal.onclick = cancelButton.onclick = function () {
-                                modal.style.display = "none";
-                            };
-                        
-                            // Close modal when clicking outside of it
-                            window.onclick = function (event) {
-                                if (event.target === modal) {
+                            
+                                // Fetch all products when search input is cleared
+                                searchInput.addEventListener('input', function () {
+                                    if (!searchInput.value.trim()) {
+                                        currentQuery = '';
+                                        fetchProducts('', 1);
+                                        window.location.reload();
+                                    }
+                                });
+                            
+                                // Close modal functionality
+                                closeModal.onclick = cancelButton.onclick = function () {
                                     modal.style.display = "none";
-                                }
-                            };
-                        
-                            // Fetch initial products on page load (retain server-rendered pagination and design)
-                            attachEditButtonListeners(); // Attach to initially rendered products
-                        });
+                                };
+                            
+                                // Close modal when clicking outside of it
+                                window.onclick = function (event) {
+                                    if (event.target === modal) {
+                                        modal.style.display = "none";
+                                    }
+                                };
+                            
+                                // Fetch initial products on page load (retain server-rendered pagination and design)
+                                attachEditButtonListeners(); // Attach to initially rendered products
+                            });
                         </script>
                         
                       
@@ -380,9 +380,9 @@
                         </form> --}}
                     </div>
                     <div id="notification" class="notification" style="display: none;"></div>
-                    <div class="products-container">
+                    <div class="products-container" style="max-height: 550px; overflow-y: auto; display: block;">
                         <table id="productsTable">
-                            <thead>
+                            <thead style="position: sticky; top: 0; z-index: 1; background-color: rgb(184, 184, 184);">
                                 <tr>
                                     <th style="width: 40px;">No.</th>
                                     <th style="width: 100px;">Barcode</th>
@@ -1740,17 +1740,19 @@
             {{-- <p class="dash">SALE</p> --}}
             <div class="sec4-div">
                 <div class="div-1">
-                    <div class="salesperday-btn">
-                        <a href="/salesperday">Sales per Day</a>
-                    </div>
-                    <div class="salesperday-btn">
-                        <a href="/cashiersales">Sales per Cashier</a>
-                    </div>
-                    <div class="salesperday-btn">
-                        <a href="/stockstatus">Stocks Status</a>
-                    </div>
-                    <div class="salesperday-btn">
-                        <button class="addCategory">Add Category</button>
+                    <div class="div1-buttons">
+                        <div class="salesperday-btn">
+                            <a href="/salesperday">Sales per Day</a>
+                        </div>
+                        <div class="salesperday-btn">
+                            <a href="/cashiersales">Sales per Cashier</a>
+                        </div>
+                        <div class="salesperday-btn">
+                            <a href="/stockstatus">Stocks Status</a>
+                        </div>
+                        <div class="salesperday-btn">
+                            <button class="addCategory">Add Category</button>
+                        </div>
                     </div>
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
@@ -1843,6 +1845,44 @@
                         </div>
                     </div> --}}
 
+                    <!-- Display Totals Section -->
+                    <div class="totals-section">
+                        <h2>Statistics</h2>
+                        <div class="totals">
+                            <div class="totals-box">
+                                <p>Total Cashiers</p>
+                                <strong>{{ isset($totalCashiers) ? $totalCashiers : 0 }}</strong>
+                            </div>
+                            <div class="totals-box">
+                                <p>Total Products</p>
+                                <strong>{{ isset($totalProducts) ? $totalProducts : 0 }}</strong>
+                            </div>
+                            <div class="totals-box">
+                                <p>Total Transactions Today</p>
+                                <strong>{{ isset($totalTransactionsToday) ? $totalTransactionsToday : 0 }}</strong>
+                            </div>
+                            <div class="totals-box">
+                                <p>Total Amount Sold Today</p>
+                                <strong>₱{{ number_format(isset($totalAmountSoldToday) ? $totalAmountSoldToday : 0, 2) }}</strong>
+                            </div>
+                            <div class="totals-box">
+                                <p>Total Transactions This Month</p>
+                                <strong>{{ isset($totalTransactionsThisMonth) ? $totalTransactionsThisMonth : 0 }}</strong>
+                            </div>
+                            <div class="totals-box">
+                                <p>Total Amount Sold This Month</p>
+                                <strong>₱{{ number_format(isset($totalAmountSoldThisMonth) ? $totalAmountSoldThisMonth : 0, 2) }}</strong>
+                            </div>
+                            <div class="totals-box">
+                                <p>Overall Total Transactions</p>
+                                <strong>{{ isset($overallTotalTransactions) ? $overallTotalTransactions : 0 }}</strong>
+                            </div>
+                            <div class="totals-box">
+                                <p>Overall Total Amount Sold</p>
+                                <strong>₱{{ number_format(isset($overallTotalAmountSold) ? $overallTotalAmountSold : 0, 2) }}</strong>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
