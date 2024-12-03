@@ -114,22 +114,14 @@ class ProductController extends Controller
     //STORES THE CREARED PRODUCTS
     public function store(StoreProductRequest $request)
     {
-        //Proccess of adding a data to the database
-        // Manually validate the incoming request
+        // Extract and validate the request data
         $incoming = $request->only(['barcode', 'item_name', 'category', 'stocks', 'price']);
 
-
-        //retrieve the data from the request
-        $barcode = $request->input('barcode');
-        $itemName = $request->input('item_name');
-        $category = $request->input('category');
-        $stocks = $request->input('stocks');
-        $price = $request->input('price');
-        
-
+        // Save the product to the database
         Product::create($incoming);
 
-        return redirect()->route('products.store')->with('products.store', 'New product added successfully');
+        // Redirect to the products index page with a success message
+        return redirect()->route('products.index')->with('success', 'New product added successfully!');
     }
 
     //FOR SHOWING OF THE PRODUCTS INSIDE THE PRODUCTS TABLE
@@ -154,18 +146,17 @@ class ProductController extends Controller
     //UPDATES THE DATA IN THE TABLE BASED ON THE CHANGES IN EDIT FORM
     public function update(Request $request, $id)
     {
-        $product = Product::findOrFail($id); // Find the product by ID
+        $product = Product::findOrFail($id);
 
-        // Update the product with validated data
         $product->update([
             'barcode' => $request->input('barcode'),
             'item_name' => $request->input('item_name'),
-            'category' => $request->input('category'),
+            'category' => $request->input('category'), // Match the database column
             'stocks' => $request->input('stocks'),
             'price' => $request->input('price'),
         ]);
-
-        return redirect()->route('products.index')->with('success', 'Product updated successfully'); // Redirect with a success message
+    
+        return redirect()->route('products.index')->with('success', 'Product updated successfully');
     }
 
     public function destroy($id)
